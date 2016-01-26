@@ -22,7 +22,7 @@ from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-import simplejson as json
+import json
 
 class Stream2kResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]

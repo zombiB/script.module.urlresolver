@@ -17,17 +17,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+import json
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
 
-# Custom imports
-try:
-    from json import loads
-except ImportError:
-    from simplejson import loads
 
 class VideoTTResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -43,7 +39,7 @@ class VideoTTResolver(Plugin, UrlResolver, PluginSettings):
     def get_media_url(self, host, media_id):
         json_url = 'http://www.video.tt/player_control/settings.php?v=%s' % media_id
         json = self.net.http_GET(json_url).content
-        data = loads(json)
+        data = json.loads(json)
         vids = data['settings']['res']
         if not vids:
             raise UrlResolver.ResolverError('The requested video was not found.')

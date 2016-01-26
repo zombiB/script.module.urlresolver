@@ -9,10 +9,7 @@ from urlresolver.plugnplay import Plugin
 # Custom imports
 from base64 import b64decode
 from binascii import unhexlify
-try:
-    from json import loads
-except ImportError:
-    from simplejson import loads
+import json
 
 class VideobbResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -44,7 +41,7 @@ class VideobbResolver(Plugin, UrlResolver, PluginSettings):
             raise UrlResolver.ResolverError('videobb: stream url part1 not found')
 
         # Try to load the datas from json.
-        aData = loads(json)
+        aData = json.loads(json)
 
         # Decode the link from the json data settings
         spn_ik = unhexlify(self.__decrypt(aData["settings"]["login_status"]["spen"], aData["settings"]["login_status"]["salt"], 950569)).split(';')

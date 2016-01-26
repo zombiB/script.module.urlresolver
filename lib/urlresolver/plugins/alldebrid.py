@@ -16,19 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os, sys
-import random
+import os
+import sys
 import re
-import urllib, urllib2
-
+import urllib
+import json
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-import simplejson as json
-import xbmc,xbmcplugin,xbmcgui,xbmcaddon, datetime
-import cookielib
+import xbmcgui
 from t0mm0.common.net import Net
 
 #SET ERROR_LOGO# THANKS TO VOINAGE, BSTRDMKR, ELDORADO
