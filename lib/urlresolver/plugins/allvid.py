@@ -22,6 +22,7 @@ from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
+from lib import jsunpack
 import urllib
 import re
 
@@ -35,7 +36,7 @@ class AllVidResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://(allvid\.ch)/(?:embed-)(.+?)(?:-|/|\.|$)'
+        self.pattern = '//(?:www.)?(allvid\.ch)/(?:embed-)?([0-9a-zA-Z]+)'
         self.user_agent = common.IE_USER_AGENT
         self.net.set_user_agent(self.user_agent)
         self.headers = {'User-Agent': self.user_agent}
@@ -55,8 +56,15 @@ class AllVidResolver(Plugin, UrlResolver, PluginSettings):
         web_url = self.get_url(host, media_id)
         self.headers['Referer'] = web_url
         html = self.net.http_GET(web_url, headers=self.headers).content
-        r = re.search('sources\s*:\s*\[\s*\{\s*file\s*:\s*["\'](.+?)["\']', html)
-        if r:
-            return r.group(1)
+
+
+        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+            js_data = jsunpack.unpack(match.group(1))
+            js_data = js_data.replace('\\\'', '\'')
+
+            r = re.search('sources\s*:\s*\[\s*\{\s*file\s*:\s*["\'](.+?)["\']', js_data)
+
+            if r:
+                return r.group(1)
         else:
             raise UrlResolver.ResolverError('File not found')
