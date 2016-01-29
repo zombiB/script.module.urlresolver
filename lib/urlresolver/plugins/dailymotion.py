@@ -21,7 +21,7 @@ from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 import re
-import urllib2, urllib
+import urllib2, urllib, json
 from urlresolver import common
 
 class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
@@ -36,46 +36,39 @@ class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        link = self.net.http_GET(web_url).content
-        try:
-            if link.find('"error":') >= 0:
-                err_title = re.compile('"title":"(.+?)"').findall(link)[0]
-                if not err_title:
-                    err_title = 'Content not available.'
-                
-                err_message = re.compile('"message":"(.+?)"').findall(link)[0]
-                if not err_message:
-                    err_message = 'No such video or the video has been removed due to copyright infringement issues.'
-                
-                raise UrlResolver.ResolverError(err_message)
-        except:pass
-                
-        dm_live = re.compile('live_rtsp_url":"(.+?)"', re.DOTALL).findall(link)
-        dm_1080p = re.compile('"1080":.+?"url":"(.+?)"', re.DOTALL).findall(link)
-        dm_720p = re.compile('"720":.+?"url":"(.+?)"', re.DOTALL).findall(link)
-        dm_high = re.compile('"480":.+?"url":"(.+?)"', re.DOTALL).findall(link)
-        dm_low = re.compile('"380":.+?"url":"(.+?)"', re.DOTALL).findall(link)
-        dm_low2 = re.compile('"240":.+?"url":"(.+?)"', re.DOTALL).findall(link)
-                
+        html = self.net.http_GET(web_url).content
+
+        html = re.search('({"context".+?)\);\n',html, re.DOTALL)
+        if html:
+            html = json.loads(html.group(1))
+            if 'metadata' in html: html = html['metadata']
+            else: return
+
+        if 'error' in html:
+            err_title = html['error']
+            if 'title' in err_title:
+                err_title = err_title['title']
+            else:
+                err_title = 'Content not available.'
+            raise UrlResolver.ResolverError(err_title)
+
+        if 'qualities' in html:
+            html = html['qualities']
+
         videoUrl = []
-        
-        if dm_live:
-            liveVideoUrl = urllib.unquote_plus(dm_live[0]).replace("\\/", "/")
-            liveVideoUrl = liveVideoUrl.replace("protocol=rtsp", "protocol=rtmp")
-            liveVideoUrl = self.net.http_GET(liveVideoUrl).content
-            videoUrl.append(liveVideoUrl)
-        else:
-            if dm_1080p:
-                videoUrl.append(urllib.unquote_plus(dm_1080p[0]).replace("\\/", "/"))
-            if dm_720p:
-                videoUrl.append(urllib.unquote_plus(dm_720p[0]).replace("\\/", "/"))
-            if dm_high:
-                videoUrl.append(urllib.unquote_plus(dm_high[0]).replace("\\/", "/"))
-            if dm_low:
-                videoUrl.append(urllib.unquote_plus(dm_low[0]).replace("\\/", "/"))
-            if dm_low2:
-                videoUrl.append(urllib.unquote_plus(dm_low2[0]).replace("\\/", "/"))
-        
+        try: videoUrl.append(html['1080'][0]['url'])
+        except: pass
+        try: videoUrl.append(html['720'][0]['url'])
+        except: pass
+        try: videoUrl.append(html['480'][0]['url'])
+        except: pass
+        try: videoUrl.append(html['380'][0]['url'])
+        except: pass
+        try: videoUrl.append(html['240'][0]['url'])
+        except: pass
+        try: videoUrl.append(html['auto'][0]['url'])
+        except: pass
+
         vUrl = ''
         vUrlsCount = len(videoUrl)
         if vUrlsCount > 0:
@@ -89,35 +82,33 @@ class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
             elif q == '2':
                 # Lowest Quality
                 vUrl = videoUrl[vUrlsCount - 1]
-        
-        common.addon.log('url:' + vUrl)
+
         return vUrl
 
     def get_url(self, host, media_id):
         return 'http://www.dailymotion.com/embed/video/%s' % media_id
-        
+
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/embed/video/([0-9A-Za-z]+)', url)
-        if r:
-            return r.groups()
+        match = re.search('//(.+?)/', url)
+        if match:
+            host = match.group(1)
+
+        match = re.search('/swf/([\w]+)', url)
+        if match:
+            media_id = match.group(1)
+
+        match = re.search('/sequence/([\w]+)', url)
+        if match:
+            media_id = match.group(1)
+
+        match = re.search('/video/([\w]+)', url)
+        if match:
+            media_id = match.group(1)
+
+        if host and media_id:
+            return (host, media_id)
         else:
-            r = re.search('//(.+?)/swf/video/([0-9A-Za-z]+)', url)
-            if r:
-                return r.groups()
-            else:
-                r = re.search('//(.+?)/video/([0-9A-Za-z]+)', url)
-                if r:
-                    return r.groups()
-                else:
-                    r = re.search('//(.+?)/swf/([0-9A-Za-z]+)', url)
-                    if r:
-                        return r.groups()
-                    else:
-                        r = re.search('//(.+?)/sequence/([0-9A-Za-z]+)', url)
-                        if r:
-                            return r.groups()
-                        else:
-                            return False
+            return False
 
 
     def valid_url(self, url, host):

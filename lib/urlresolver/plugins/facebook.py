@@ -68,11 +68,11 @@ class FacebookResolver(Plugin, UrlResolver, PluginSettings):
         return 'https://www.facebook.com/video/embed?video_id=%s' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/video/embed?video_id=(\w+)', url)
+        r = re.search('//(.+?)/video/embed\?video_id=(\w+)', url)
         return r.groups()
 
     def valid_url(self, url, host):
-        return re.match('https?://(www\.)?facebook.com/video/embed?video_id=(\w+)', url) or \
+        return re.match('https?://(www\.)?facebook.com/video/embed\?video_id=(\w+)', url) or \
                self.name in host
 
     #PluginSettings methods

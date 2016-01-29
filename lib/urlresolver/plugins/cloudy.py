@@ -112,11 +112,11 @@ class CloudyResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.cloudy.ec/embed.php?id=%s' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('(https?://(?:www\.|embed\.)cloudy\.(?:ec|eu|sx|ch|com))/(?:video/|embed\.php\?id=)([0-9a-z]+)', url)        
+        r = re.search('(https?://(?:www\.|embed\.)cloudy\.(?:ec|eu|sx|ch|com))/(?:video/|v/|embed\.php\?id=)([0-9a-z]+)', url)        
         if r:
             return r.groups()
         else:
             return False
 
     def valid_url(self, url, host):
-        return re.match('https?://(?:www\.|embed\.)cloudy\.(?:ec|eu|sx|ch|com)/(?:video/|embed\.php\?id=)([0-9a-z]+)', url) or 'cloudy.' in host
+        return re.match('https?://(?:www\.|embed\.)cloudy\.(?:ec|eu|sx|ch|com)/(?:video/|v/|embed\.php\?id=)([0-9a-z]+)', url) or 'cloudy.' in host

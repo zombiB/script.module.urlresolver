@@ -22,7 +22,6 @@ from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from lib import unwise
 
 class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -37,25 +36,27 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
-        r = re.search('<param name="src" value="(.+?)"', html)
+
+        r = re.search('flashvars.filekey=(.+?);', html)
         if r:
-            stream_url = r.group(1)
-        else:
-            html = unwise.unwise_process(html)
-            filekey = unwise.resolve_var(html, "flashvars.filekey")
-            
-            player_url = 'http://www.cloudtime.to/api/player.api.php?user=undefined&key=' + filekey + '&pass=undefined&codes=1&file=' + media_id
-            html = self.net.http_GET(player_url).content
-            r = re.search('url=(.+?)&', html)
-            if r:
-                stream_url = r.group(1)
-            else:
-                raise UrlResolver.ResolverError('File Not Found or removed')
-            
+            r = r.group(1)
+            filekey = re.search('\s+%s="(.+?)"' % r, html)
+
+            if filekey:
+                filekey = filekey.group(1)
+                player_url = 'http://www.cloudtime.to/api/player.api.php?key=%s&file=%s' % (filekey, media_id)
+
+                html = self.net.http_GET(player_url).content
+                r = re.search('url=(.+?)&', html)
+                if r:
+                    stream_url = r.group(1)
+                else:
+                    raise UrlResolver.ResolverError('File Not Found or removed')
+
         return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://www.cloudtime.to/video/%s' % media_id
+        return 'http://embed.cloudtime.to/embed.php?v=%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search('//(.+?)/(?:video/([0-9a-z]+)|embed.php\?v=([^\?&]+))', url)
