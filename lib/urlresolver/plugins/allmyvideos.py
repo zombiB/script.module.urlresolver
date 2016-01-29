@@ -20,7 +20,7 @@ from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re, os, xbmc, json
+import re, os, xbmc, json, urlparse
 from urlresolver import common
 
 class AllmyvideosResolver(Plugin,UrlResolver,PluginSettings):
@@ -65,10 +65,12 @@ class AllmyvideosResolver(Plugin,UrlResolver,PluginSettings):
             max_label = 0
             stream_url = ''
             for source in sources:
-                if 'label' in source and int(source['label'])>max_label:
+                if 'label' in source and int(re.sub('[^0-9]', '', source['label']))>max_label:
                     stream_url = source['file']
-                    max_label = int(source['label'])
-            if stream_url: return stream_url+'|User-Agent=%s'%(common.IE_USER_AGENT)
+                    max_label = int(re.sub('[^0-9]', '', source['label']))
+            if stream_url:
+                stream_url = '%s?%s&direct=false&ua=false' % (stream_url.split('?')[0], urlparse.urlparse(stream_url).query)
+                return stream_url+'|User-Agent=%s'%(common.IE_USER_AGENT)
         
     def get_url(self,host,media_id):
         return 'http://allmyvideos.net/%s'%media_id 

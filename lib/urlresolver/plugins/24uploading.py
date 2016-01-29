@@ -21,7 +21,7 @@ from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from lib import captcha_lib
+from lib import jsunpack
 import re
 
 MAX_TRIES = 3
@@ -48,12 +48,18 @@ class TwentyFourUploadingResolver(Plugin, UrlResolver, PluginSettings):
                 key, value = match.groups()
                 data[key] = value
             data['method_free'] = 'Free Download'
-            data.update(captcha_lib.do_captcha(html))
             
             html = self.net.http_POST(web_url, form_data=data).content
-            match = re.search('class="btn_down.*?href="([^"]+)', html, re.DOTALL)
-            if match:
-                return match.group(1)
+
+            for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+                js_data = jsunpack.unpack(match.group(1))
+                js_data = js_data.replace('\\\'', '\'')
+
+                match2 = re.search("\"html5\".*?file\s*:\s*'([^']+)", js_data)
+                if match2:
+                    stream_url = match2.group(1)
+                    return stream_url
+
             tries += 1
 
         raise UrlResolver.ResolverError('Unable to resolve 24uploading link. Filelink not found.')
