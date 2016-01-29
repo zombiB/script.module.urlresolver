@@ -48,7 +48,6 @@ class AuEngineResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        common.addon.log(web_url)
         resp = self.net.http_GET(web_url)
         html = resp.content
         r = re.search("video_link\s=\s'(.+?)';", html)
