@@ -47,7 +47,7 @@ class AllmyvideosResolver(Plugin,UrlResolver,PluginSettings):
         headers={'User-Agent':common.IE_USER_AGENT,'Referer':url}
         html=self.net.http_GET(url,headers=headers).content
         
-        data={}; r=re.findall(r'type="hidden" name="(.+?)"\s* value="?(.+?)">',html)
+        data={}; r=re.findall(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"',html)
         for name,value in r: data[name]=value
         html=self.net.http_POST(url,data,headers=headers).content
         
