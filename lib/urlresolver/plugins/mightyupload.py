@@ -71,16 +71,11 @@ class MightyuploadResolver(Plugin, UrlResolver, PluginSettings):
             return 'http://www.mightyupload.com/embed-%s.html' % (media_id)
 
     def get_host_and_id(self, url):
-        r = re.search('http://(?:www.)?(.+?)/embed-([\w]+)-', url)
+        r = re.search('http://(?:www.)?(.+?)/(?:embed-)?([\w]+)', url)
         if r:
             return r.groups()
         else:
-            r = re.search('//(.+?)/([\w]+)', url)
-            if r:
-                return r.groups()
-            else:
-                return False
-
+            return False
 
     def valid_url(self, url, host):
-        return re.match('http://(www.)?mightyupload.com/[0-9A-Za-z]+', url) or 'mightyupload' in host
+        return 'mightyupload.com' in host

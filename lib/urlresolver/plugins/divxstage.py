@@ -21,12 +21,11 @@ from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "divxstage"
-    domains = ["divxstage.eu", "divxstage.net", "divxstage.to", "cloudtime.to"]
+    name = 'divxstage'
+    domains = ['divxstage.eu', 'divxstage.net', 'divxstage.to', 'cloudtime.to']
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -35,23 +34,26 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+
         html = self.net.http_GET(web_url).content
 
         r = re.search('flashvars.filekey=(.+?);', html)
         if r:
             r = r.group(1)
-            filekey = re.search('\s+%s="(.+?)"' % r, html)
 
-            if filekey:
-                filekey = filekey.group(1)
-                player_url = 'http://www.cloudtime.to/api/player.api.php?key=%s&file=%s' % (filekey, media_id)
+            try: filekey = re.compile('\s+%s="(.+?)"' % r).findall(html)[-1]
+            except: filekey = r
 
-                html = self.net.http_GET(player_url).content
-                r = re.search('url=(.+?)&', html)
-                if r:
-                    stream_url = r.group(1)
-                else:
-                    raise UrlResolver.ResolverError('File Not Found or removed')
+            player_url = 'http://www.cloudtime.to/api/player.api.php?key=%s&file=%s' % (filekey, media_id)
+
+            html = self.net.http_GET(player_url).content
+
+            r = re.search('url=(.+?)&', html)
+
+            if r:
+                stream_url = r.group(1)
+            else:
+                raise UrlResolver.ResolverError('File Not Found or removed')
 
         return stream_url
 
@@ -59,15 +61,14 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://embed.cloudtime.to/embed.php?v=%s' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/(?:video/([0-9a-z]+)|embed.php\?v=([^\?&]+))', url)
-        if r:
-            if 'embed' in r.group(1):
-                return r.group(1),r.group(3)
-            else:
-                return r.group(1),r.group(2)
-        else:
-            return False
+        try: host = re.findall('//(.+?)/', url)[0]
+        except: return False
+        media_id = re.findall('//.+?/.+?/([\w]+)', url)
+        media_id += re.findall('//.+?/.+?v=([\w]+)', url)
+        try: media_id = media_id[0]
+        except: return False
+        return host, media_id
 
     def valid_url(self, url, host):
-        #http://embed.divxstage.eu/embed.php?v=8da26363e05fd&width=746&height=388&c=000
-        return (re.match('http://(?:www.|embed.)?(?:divxstage\.(?:eu|net|to)|cloudtime\.to)/', url) or 'divxstage' in host)
+        if any(i in host for i in self.domains):
+            return True

@@ -45,11 +45,12 @@ class Mp4uploadResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.mp4upload.com/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/embed-(.+?)\.', url)
+        r = re.search('http://(?:www.)?(.+?)/(?:embed-)?([\w]+)', url)
         if r:
             return r.groups()
         else:
             return False
 
     def valid_url(self, url, host):
-        return 'mp4upload.com' in url or self.name in host
+        if any(i in host for i in self.domains):
+            return True

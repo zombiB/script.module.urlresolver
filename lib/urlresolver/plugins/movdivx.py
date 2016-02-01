@@ -35,8 +35,7 @@ class MovDivxResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        #e.g. http://movdivx.com/trrrw4r6bjqu/American_Dad__s_1_e_3_p1-1.flv.html
-        self.pattern = 'http://(?:www.)?(movdivx.com)/(.+?).html'
+        self.pattern = 'http://(?:www.)?(movdivx.com)/([\w]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

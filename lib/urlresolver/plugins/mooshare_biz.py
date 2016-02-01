@@ -57,6 +57,7 @@ class MooShareResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://mooshare.biz/%s' % media_id 
 
     def get_host_and_id(self, url):
+        url = url.replace('/iframe/', '/embed-')
         r = re.search('//(.+?)/(?:embed-)?([0-9a-zA-Z]+)',url)
         if r:
             return r.groups()
@@ -65,4 +66,5 @@ class MooShareResolver(Plugin, UrlResolver, PluginSettings):
         return('host', 'media_id')
 
     def valid_url(self, url, host):
-        return (re.match('http://(www.)?mooshare.biz/[0-9A-Za-z]+', url) or re.match('http://(www.)?mooshare.biz/embed-[0-9A-Za-z]+[\-]*\d*[x]*\d*.*[html]*', url) or 'mooshare' in host)
+        if any(i in host for i in self.domains):
+            return True

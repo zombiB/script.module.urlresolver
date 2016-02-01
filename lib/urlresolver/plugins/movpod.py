@@ -32,8 +32,7 @@ class MovpodResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        #e.g. http://movpod.com/vb80o1esx2eb
-        self.pattern = 'http://((?:www.)?movpod.(?:net|in))/([0-9a-zA-Z]+)'
+        self.pattern = 'http://((?:www.)?movpod.(?:net|in))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -53,7 +52,6 @@ class MovpodResolver(Plugin, UrlResolver, PluginSettings):
             raise UrlResolver.ResolverError('Unable to resolve Movpod Link')
 
     def get_url(self, host, media_id):
-        #return 'http://(movpod|movpod).(in|com)/%s' % (media_id)
         return 'http://movpod.in/%s' % (media_id)
 
     def get_host_and_id(self, url):
