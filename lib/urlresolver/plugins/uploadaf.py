@@ -44,7 +44,7 @@ class UploadAfResolver(Plugin, UrlResolver, PluginSettings):
         tries = 0
         while tries < MAX_TRIES:
             data = {}
-            for match in re.finditer('input type="hidden" name="([^"]+)" value="([^"]+)', html):
+            for match in re.finditer(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"', html):
                 key, value = match.groups()
                 data[key] = value
             data['method_free'] = 'Free Download >>'

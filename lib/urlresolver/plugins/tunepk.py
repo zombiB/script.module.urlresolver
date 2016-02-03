@@ -32,7 +32,7 @@ class TunePkResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '(.+tune.pk)/(?:player|video|play)/(?:[\w\.\?]+=)?(\d+)'
+        self.pattern = '//(.+?)/(?:player|video|play)/(?:[\w\.\?]+=)?(\d+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

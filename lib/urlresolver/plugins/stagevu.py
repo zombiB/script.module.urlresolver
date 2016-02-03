@@ -36,7 +36,7 @@ class StagevuResolver(Plugin, UrlResolver, PluginSettings):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         link = self.net.http_GET(web_url).content
-        p = re.compile('<embed type="video/divx" src="(.+?)"')
+        p = re.compile('type="video/.+?"\s+src="(.+?)"')
         match = p.findall(link)
         if match:
             return match[0]
@@ -47,13 +47,12 @@ class StagevuResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.stagevu.com/video/%s' % media_id 
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/video/([0-9a-zA-Z/]+)', url)
+        r = re.search('//(.+?)/(?:video/|embed.+?uid=)?([A-Za-z0-9]+)', url)
         if r:
             return r.groups()
         else:
             return False
 
     def valid_url(self, url, host):
-        return (re.match('http://(www.)?stagevu.com/video/' +
-                         '[0-9A-Za-z]+', url) or
-                         'stagevu' in host)
+        if any(i in host for i in self.domains):
+            return True

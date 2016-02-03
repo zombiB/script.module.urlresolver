@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -35,37 +36,24 @@ class SharedsxResolver(Plugin, UrlResolver, PluginSettings):
     
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        # get landing page
+
         html = self.net.http_GET(web_url, headers={'Referer': web_url}).content
         
-        # read POST variables into data
         data = {}
-        r = re.findall(r'type="hidden" name="(.+?)"\s* value="?(.+?)"', html)
+        r = re.findall(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"', html)
         if not r: raise UrlResolver.ResolverError('page structure changed')
         for name, value in r: data[name] = value
-        
-        # get delay from hoster; actually this is not needed, but we are polite
-        delay = 5
-        r = re.search(r'var RequestWaiting = (\d+);', html)
-        if r: delay = r.groups(1)[0]
-        
-        # run countdown and check whether it was canceld or not
-        cnt = common.addon.show_countdown(int(delay), title='shared.sx', text='Please wait for hoster...')
-        if not cnt: raise UrlResolver.ResolverError('countdown was canceld by user')
-        
-        # get video page using POST variables
+
         html = self.net.http_POST(web_url, data, headers=({'Referer': web_url, 'X-Requested-With': 'XMLHttpRequest'})).content
-        
-        # search for content tag
+
         r = re.search(r'class="stream-content" data-url', html)
         if not r: raise UrlResolver.ResolverError('page structure changed')
-        
-        # read the data-url
+
         r = re.findall(r'data-url="?(.+?)"', html)
-        if not r: raise UrlResolver.ResolverError('video not found')
-        
-        # return media URL
-        return r[0]
+
+        stream_url = r[0] + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
+
+        return stream_url
     
     def get_url(self, host, media_id):
         return 'http://shared.sx/%s' % media_id

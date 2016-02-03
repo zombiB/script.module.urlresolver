@@ -36,7 +36,7 @@ class UsersCloudResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'https://(userscloud\.com)/(?:embed-)*([a-zA-Z0-9]+)[/|-|$]*'
+        self.pattern = '//((?:www.)?userscloud.com)/(?:embed-)?([0-9a-zA-Z/]+)'
         self.user_agent = common.IE_USER_AGENT
         self.net.set_user_agent(self.user_agent)
         self.headers = {'User-Agent': self.user_agent}
@@ -59,11 +59,13 @@ class UsersCloudResolver(Plugin, UrlResolver, PluginSettings):
         html = self.net.http_GET(web_url, headers=self.headers).content
         r = re.search('>(eval\(function\(p,a,c,k,e,d\).+?)</script>', html, re.DOTALL)
         if r:
-            r = jsunpack.unpack(r.group(1))
-            r = re.search('param\sname\s*=\s*[\'"]src[\'"]\s*value\s*=\s*[\'"](.+?)[\'"]', r)
-            if r:
-                stream_url = r.group(1)
-        if stream_url:
-            return stream_url
-        else:
-            raise UrlResolver.ResolverError('File not found')
+            js_data = jsunpack.unpack(r.group(1))
+
+            stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', js_data)
+            stream_url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', js_data)
+            stream_url = [i for i in stream_url if not i.endswith('.srt')]
+
+            if stream_url:
+                return stream_url[0]
+
+        raise UrlResolver.ResolverError('File not found')

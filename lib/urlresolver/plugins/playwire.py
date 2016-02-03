@@ -36,12 +36,16 @@ class PlaywireResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        link = self.net.http_GET(web_url).content
+        html = self.net.http_GET(web_url).content
         if web_url.endswith('xml'):  # xml source
-            root = ET.fromstring(link)
+            root = ET.fromstring(html)
             stream = root.find('src')
             if stream is not None:
-                return stream.text
+                stream = stream.text
+                if stream.endswith('.f4m'):
+                    html = self.net.http_GET(stream).content
+                    try: return re.findall('<baseURL>(.+?)</baseURL>', html)[0] + '/' + re.findall('<media url="(.+?)"', html)[0]
+                    except: pass
             else:
                 accessdenied = root.find('Message')
                 if accessdenied is not None:
@@ -49,7 +53,7 @@ class PlaywireResolver(Plugin, UrlResolver, PluginSettings):
 
                 raise UrlResolver.ResolverError('No playable video found.')
         else:  # json source
-            r = re.search('"src":"(.+?)"', link)
+            r = re.search('"src":"(.+?)"', html)
             if r:
                 return r.group(1)
             else:

@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+import urllib
 import urllib2
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
@@ -55,7 +56,7 @@ class SharerepoResolver(Plugin, UrlResolver, PluginSettings):
         link = re.search("file\s*:\s*'([^']+)", html)
         if link:
             common.addon.log_debug('ShareRepo Link Found: %s' % link.group(1))
-            return link.group(1) + '|User-Agent=%s' % (common.IE_USER_AGENT)
+            return link.group(1) + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
         else:
             raise UrlResolver.ResolverError('Unable to resolve ShareRepo Link')
 

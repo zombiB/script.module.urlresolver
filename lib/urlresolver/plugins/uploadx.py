@@ -16,12 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
+import xbmc
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re
-import xbmc
 from urlresolver import common
 from lib import captcha_lib
 
@@ -44,7 +45,7 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
         tries = 0
         while tries < MAX_TRIES:
             data = {}
-            r = re.findall(r'type="hidden"\s*name="([^"]+)"\s*value="([^"]+)', html)
+            r = re.findall(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"', html)
             for name, value in r:
                 data[name] = value
             data['method_free'] = 'Free Download+>>'
@@ -60,8 +61,8 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
             if 'File Download Link Generated' in html:
                 r = re.search('href="([^"]+)[^>]+id="downloadbtn"', html)
                 if r:
-                    return r.group(1) + '|User-Agent=%s' % (common.IE_USER_AGENT)
-            
+                    return r.group(1) + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
+
             tries = tries + 1
             
         raise UrlResolver.ResolverError('Unable to locate link')

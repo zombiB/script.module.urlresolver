@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -25,14 +26,14 @@ from lib import jsunpack
 
 class UploadcResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "uploadc"
-    domains = ["uploadc.com"]
+    name = 'uploadc'
+    domains = ['uploadc.com', 'uploadc.ch']
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:www.)?uploadc.com)/([0-9a-zA-Z]+)'
+        self.pattern = '//((?:www.)?uploadc.(?:ch|com))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -46,7 +47,9 @@ class UploadcResolver(Plugin, UrlResolver, PluginSettings):
         
         match = re.search("'file'\s*,\s*'([^']+)", html)
         if match:
-            return match.group(1).replace(' ', '%20') + '|Referer=%s' % (web_url)
+            stream_url = match.group(1).replace(' ', '%20')
+            stream_url += '|' + urllib.urlencode({ 'Referer': web_url })
+            return stream_url
                 
         raise UrlResolver.ResolverError('File Not Found or removed')
 

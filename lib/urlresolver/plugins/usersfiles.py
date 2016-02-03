@@ -34,7 +34,7 @@ class UsersFilesResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http[s]*://((?:www\.)?usersfiles.com)/(.*)'
+        self.pattern = '//((?:www.)?usersfiles.com)/(?:embed-)?([0-9a-zA-Z/]+)'
         self.net.set_user_agent(common.IE_USER_AGENT)
         self.headers = {'User-Agent': common.IE_USER_AGENT}
 
@@ -55,9 +55,12 @@ class UsersFilesResolver(Plugin, UrlResolver, PluginSettings):
         match = re.search('<script[^>]*>(eval.*?)</script>', html, re.DOTALL)
         if match:
             js_data = jsunpack.unpack(match.group(1))
-            print js_data
-            match = re.search('<param\s+name="src"\s*value="([^"]+)', js_data)
-            if match:
-                return match.group(1)
-        
+
+            stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', js_data)
+            stream_url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', js_data)
+            stream_url = [i for i in stream_url if not i.endswith('.srt')]
+
+            if stream_url:
+                return stream_url[0]
+
         raise UrlResolver.ResolverError('Unable to find userfiles video')

@@ -39,9 +39,13 @@ class TusfilesResolver(Plugin, UrlResolver, PluginSettings):
             html = self.net.http_GET(web_url).content
             for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
                 js_data = jsunpack.unpack(match.group(1))
-                match2 = re.search('<param\s+name="src"\s*value="([^"]+)', js_data)
-                if match2:
-                    return match2.group(1)
+
+                stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', js_data)
+                stream_url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', js_data)
+                stream_url = [i for i in stream_url if not i.endswith('.srt')]
+
+                if stream_url:
+                    return stream_url[0]
 
         raise UrlResolver.ResolverError('Unable to locate link')
 
