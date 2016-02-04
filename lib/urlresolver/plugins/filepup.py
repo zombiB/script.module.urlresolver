@@ -17,11 +17,13 @@
 """
 
 import re
+import urllib2
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
+from lib import captcha_lib
 
 class FilePupResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -43,7 +45,7 @@ class FilePupResolver(Plugin, UrlResolver, PluginSettings):
             match = re.search('src\s*:\s*"([^"]+)', match.group(1))
             if match:
                 return match.group(1) + '|User-Agent=%s' % (common.SMU_USER_AGENT)
-
+ 
         raise UrlResolver.ResolverError('Unable to location download link')
 
     def get_url(self, host, media_id):
