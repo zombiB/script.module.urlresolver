@@ -48,7 +48,10 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
             response = self.net.http_GET(url).content
             if response:
                 common.addon.log_debug('Simply-Debrid: Resolved to %s' % (response))
-                return response
+                if response.startswith('http'):
+                    return response
+                else:
+                    raise UrlResolver.ResolverError('Unusable Response from SD')
             else:
                 raise UrlResolver.ResolverError('Null Response from SD')
         except Exception as e:
