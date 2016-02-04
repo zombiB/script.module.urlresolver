@@ -44,7 +44,7 @@ class AuEngineResolver(Plugin, UrlResolver, PluginSettings):
         else: return False
 
     def valid_url(self, url, host):
-        return re.searchearch(self.pattern, url) or self.name in host
+        return re.search(self.pattern, url) or self.name in host
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
