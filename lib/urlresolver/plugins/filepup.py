@@ -16,21 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re
-import urllib2
-import urllib
 from urlresolver import common
-
-class NoRedirection(urllib2.HTTPErrorProcessor):
-    def http_response(self, request, response):
-        return response
-
-    https_response = http_response
-
 
 class FilePupResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -41,28 +32,22 @@ class FilePupResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:www.)?filepup.(?:net))/(?:play|files)/([0-9a-zA-Z]+)'
+        self.pattern = '//((?:www.)?filepup.(?:net))/(?:play|files)/([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        headers = {
-                   'User-Agent': common.IE_USER_AGENT
-        }
+        headers = {'User-Agent': common.SMU_USER_AGENT}
         html = self.net.http_GET(web_url, headers=headers).content
-        match = re.search("document.location='([^']+).*?DOWNLOAD AS A FREE USER", html, re.I)
+        match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
         if match:
-            data = urllib.urlencode({'task': 'download'})
-            req = urllib2.Request(match.group(1))
-            req.add_header('User-Agent', common.IE_USER_AGENT)
-            opener = urllib2.build_opener(NoRedirection)
-            urllib2.install_opener(opener)
-            res = urllib2.urlopen(req, data=data)
-            return res.info().getheader('location') + '|Referer=%s' % (web_url)
-        else:
-            raise UrlResolver.ResolverError('Unable to location download link')
+            match = re.search('src\s*:\s*"([^"]+)', match.group(1))
+            if match:
+                return match.group(1) + '|User-Agent=%s' % (common.SMU_USER_AGENT)
+
+        raise UrlResolver.ResolverError('Unable to location download link')
 
     def get_url(self, host, media_id):
-        return 'http://www.filepup.net/files/%s' % (media_id)
+        return 'http://www.filepup.net/play/%s' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
