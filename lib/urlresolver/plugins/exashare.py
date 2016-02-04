@@ -66,4 +66,4 @@ class ExashareResolver(Plugin, UrlResolver, PluginSettings):
         else: return False
 
     def valid_url(self, url, host):
-        return re.match('http://(www.)?exashare.com/(embed-)?[A-Za-z0-9]+', url) or "exashare.com" in host
+        return re.search('http://(www.)?exashare.com/(embed-)?[A-Za-z0-9]+', url) or "exashare.com" in host

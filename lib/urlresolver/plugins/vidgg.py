@@ -26,9 +26,9 @@ import urllib
 
 class VidggResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "vid.gg"
-    domains = ["www.vid.gg", "vidgg.to"]
-    pattern = 'http://((?:www\.)?vid(?:\.gg|gg\.to))/(?:embed/\?id=|video/)([0-9a-z]+)'
+    name = 'vid.gg'
+    domains = ['vidgg.to']
+    pattern = 'http://(?:www\.)?(vid(?:\.gg|gg\.to))/(?:embed/\?id=|video/)([0-9a-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100

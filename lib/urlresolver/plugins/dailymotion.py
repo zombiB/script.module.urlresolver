@@ -112,10 +112,10 @@ class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
 
 
     def valid_url(self, url, host):
-        return re.match('http://(www.)?dailymotion.com/sequence/[0-9A-Za-z]+', url) or \
-                re.match('http://(www.)?dailymotion.com/video/[0-9A-Za-z]+', url) or \
-                re.match('http://(www.)?dailymotion.com/swf/[0-9A-Za-z]+', url) or \
-                re.match('http://(www.)?dailymotion.com/embed/[0-9A-Za-z]+', url) or \
+        return re.search('http://(www.)?dailymotion.com/sequence/[0-9A-Za-z]+', url) or \
+                re.search('http://(www.)?dailymotion.com/video/[0-9A-Za-z]+', url) or \
+                re.search('http://(www.)?dailymotion.com/swf/[0-9A-Za-z]+', url) or \
+                re.search('http://(www.)?dailymotion.com/embed/[0-9A-Za-z]+', url) or \
                 self.name in host
 
     #PluginSettings methods

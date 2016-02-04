@@ -95,6 +95,6 @@ class HugefilesResolver(Plugin, UrlResolver, PluginSettings):
         return('host', 'media_id')
 
     def valid_url(self, url, host):
-        return (re.match('http://(www.)?hugefiles.net/' +
+        return (re.search('http://(www.)?hugefiles.net/' +
                          '[0-9A-Za-z]+', url) or
                          'hugefiles' in host)

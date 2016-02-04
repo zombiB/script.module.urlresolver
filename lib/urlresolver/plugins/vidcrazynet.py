@@ -26,31 +26,30 @@ import re
 
 class VidCrazyResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "vidcrazy.net"
-    domains = ["vidcrazy.net"]
+    name = 'vidcrazy.net'
+    domains = ['vidcrazy.net', 'uploadcrazy.net']
     
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:video.)?vidcrazy.net)/(\D+.php\?file=[0-9a-zA-Z\-_]+)[&]*'
-    
+        self.pattern = '//((?:www.)?(?:video.)?(?:vidcrazy.net|uploadcrazy.net))/\D+.php\?file=([0-9a-zA-Z\-_]+)'
+ 
     def get_url(self, host, media_id):
-        return 'http://video.vidcrazy.net/%s' % (media_id)
-    
+        return 'http://vidcrazy.net/embed.php?file=%s' % (media_id)
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r: return r.groups()
         else: return False
     
     def valid_url(self, url, host):
-        return re.match(self.pattern, url) or self.name in host
+        if any(i in host for i in self.domains):
+            return True
     
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        common.addon.log(web_url)
-        resp = self.net.http_GET(web_url)
-        html = resp.content
+        html = self.net.http_GET(web_url).content
         r = re.search("'file'\s*:\s*'(.+?)'", html)
         if r:
             stream_url = urllib.unquote_plus(r.group(1))

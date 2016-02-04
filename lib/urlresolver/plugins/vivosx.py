@@ -21,7 +21,6 @@ from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from time import sleep
 import re
 import os
 
@@ -78,6 +77,6 @@ class VivosxResolver(Plugin, UrlResolver, PluginSettings):
         return('host', 'media_id')
     
     def valid_url(self, url, host):
-        return (re.match('http://(www.)?vivo.sx/' +
+        return (re.search('http://(www.)?vivo.sx/' +
                          '[0-9A-Za-z]+', url) or
                          'vivo.sx' in host)

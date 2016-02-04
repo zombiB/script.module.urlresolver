@@ -80,7 +80,7 @@ class VeeHDResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return (re.match('http://(www.)?veehd.com/' +
+        return (re.search('http://(www.)?veehd.com/' +
                          '[0-9A-Za-z]+', url) or
                          'veehd' in host)
        

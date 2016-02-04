@@ -47,7 +47,7 @@ class GoogleResolver(Plugin, UrlResolver, PluginSettings):
         else: return False
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url)
+        return re.search(self.pattern, url)
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

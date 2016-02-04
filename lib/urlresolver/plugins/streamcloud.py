@@ -63,4 +63,4 @@ class StreamcloudResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match('http://(www.)?streamcloud.eu/[0-9A-Za-z]+', url) or 'streamcloud' in host
+        return re.search('http://(www.)?streamcloud.eu/[0-9A-Za-z]+', url) or 'streamcloud' in host

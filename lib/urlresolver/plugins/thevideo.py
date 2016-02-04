@@ -61,6 +61,6 @@ class TheVideoResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return (re.match('http://(www\.|embed-)?thevideo.me/' +
+        return (re.search('http://(www\.|embed-)?thevideo.me/' +
                          '[0-9A-Za-z]+', url) or
                          'thevideo' in host)

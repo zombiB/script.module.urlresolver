@@ -54,7 +54,7 @@ class YoutubeResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match('http[s]*://(((www.|m.)?youtube.+?(v|embed)(=|/))|' +
+        return re.search('http[s]*://(((www.|m.)?youtube.+?(v|embed)(=|/))|' +
                         'youtu.be/)[0-9A-Za-z_\-]+', 
                         url) or 'youtube' in host or 'youtu.be' in host
 

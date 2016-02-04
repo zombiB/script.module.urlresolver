@@ -85,4 +85,4 @@ class CastampResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url)
+        return re.searchearch(self.pattern, url)

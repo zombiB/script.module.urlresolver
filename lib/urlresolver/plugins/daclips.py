@@ -64,4 +64,4 @@ class DaclipsResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url) or self.name in host
+        return re.search(self.pattern, url) or self.name in host

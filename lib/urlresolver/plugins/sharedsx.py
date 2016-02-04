@@ -67,6 +67,6 @@ class SharedsxResolver(Plugin, UrlResolver, PluginSettings):
         return('host', 'media_id')
     
     def valid_url(self, url, host):
-        return (re.match('http://(www.)?shared.sx/' +
+        return (re.search('http://(www.)?shared.sx/' +
                          '[0-9A-Za-z]+', url) or
                          'shared.sx' in host)

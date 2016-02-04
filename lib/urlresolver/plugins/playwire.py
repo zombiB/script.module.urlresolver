@@ -72,8 +72,8 @@ class PlaywireResolver(Plugin, UrlResolver, PluginSettings):
         return r.groups()
 
     def valid_url(self, url, host):
-        return re.match('http://(www\.)?cdn.playwire.com/\d+/embed/\d+\.html', url) or \
-               re.match('http://(www\.)?cdn.playwire.com/v2/\d+/config/\d+\.json', url) or \
+        return re.search('http://(www\.)?cdn.playwire.com/\d+/embed/\d+\.html', url) or \
+               re.search('http://(www\.)?cdn.playwire.com/v2/\d+/config/\d+\.json', url) or \
                self.name in host
 
     #PluginSettings methods

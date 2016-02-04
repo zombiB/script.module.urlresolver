@@ -75,6 +75,6 @@ class PrimeshareResolver(Plugin, UrlResolver, PluginSettings):
                 return False
 
     def valid_url(self, url, host):
-        return re.match('http://(www.)?primeshare.tv/download/[0-9A-Za-z]+', url) or 'primeshare' in host
+        return re.search('http://(www.)?primeshare.tv/download/[0-9A-Za-z]+', url) or 'primeshare' in host
 
 

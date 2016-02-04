@@ -54,11 +54,11 @@ class CrunchyRollResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.crunchyroll.com/android_rpc/?req=RpcApiAndroid_GetVideoWithAcl&media_id=%s' % media_id
         
     def get_host_and_id(self, url):
-        r = re.match(r'http://www.(crunchyroll).+?/.+?/.+?([^a-zA-Z-+]{6})', url)
+        r = re.search(r'http://www.(crunchyroll).+?/.+?/.+?([^a-zA-Z-+]{6})', url)
         if r:
             return r.groups()
         else:
             return False
 
     def valid_url(self, url, host):
-        return (re.match(r'http://www.(crunchyroll).+?/.+?/.+?([^a-zA-Z-+]{6})', url) or 'crunchyroll' in host)
+        return (re.search(r'http://www.(crunchyroll).+?/.+?/.+?([^a-zA-Z-+]{6})', url) or 'crunchyroll' in host)

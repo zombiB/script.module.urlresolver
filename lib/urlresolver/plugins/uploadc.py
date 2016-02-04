@@ -27,13 +27,13 @@ from lib import jsunpack
 class UploadcResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'uploadc'
-    domains = ['uploadc.com', 'uploadc.ch']
+    domains = ['uploadc.com', 'uploadc.ch', 'zalaa.com']
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?uploadc.(?:ch|com))/(?:embed-)?([0-9a-zA-Z]+)'
+        self.pattern = '//((?:www.)?(?:uploadc.com|uploadc.ch|zalaa.com))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -42,7 +42,8 @@ class UploadcResolver(Plugin, UrlResolver, PluginSettings):
             js_data = jsunpack.unpack(match.group(1))
             r = re.search('src="([^"]+)', js_data)
             if r:
-                stream_url = r.group(1) + '|referer=' + web_url
+                stream_url = r.group(1).replace(' ', '%20')
+                stream_url += '|' + urllib.urlencode({ 'Referer': web_url })
                 return stream_url
         
         match = re.search("'file'\s*,\s*'([^']+)", html)
@@ -54,7 +55,7 @@ class UploadcResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return 'http://www.uploadc.com/embed-%s.html' % (media_id)
+        return 'http://uploadc.com/embed-%s.html' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -64,4 +65,5 @@ class UploadcResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url) or self.name in host
+        if any(i in host for i in self.domains):
+            return True

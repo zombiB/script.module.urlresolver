@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import json
+import urlparse
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -38,13 +39,12 @@ class VideoTTResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         json_url = 'http://www.video.tt/player_control/settings.php?v=%s' % media_id
-        json = self.net.http_GET(json_url).content
-        data = json.loads(json)
-        vids = data['settings']['res']
-        if not vids:
-            raise UrlResolver.ResolverError('The requested video was not found.')
+        data = self.net.http_GET(json_url).content
+        data = json.loads(data)
 
-        else:
+        vids = data['settings']['res']
+
+        if vids:
             vUrlsCount = len(vids)
 
             if (vUrlsCount > 0):
@@ -62,6 +62,18 @@ class VideoTTResolver(Plugin, UrlResolver, PluginSettings):
                 vUrl = vids[li]['u'].decode('base-64')
                 return vUrl
 
+        else:
+            vUrl = data['settings']['config']
+
+            vUrl = [i[1].decode('base-64') for i in vUrl.items() if i[0].startswith('token')]
+            vUrl = [(urlparse.parse_qsl(urlparse.urlparse(i).query), i) for i in vUrl]
+            vUrl = [([x[1] for x in i[0] if x[0] == 'r'], i[1]) for i in vUrl]
+            vUrl = [(i[0][0], i[1]) for i in vUrl if i[0]]
+            vUrl = vUrl[0][1]
+            return vUrl
+
+        raise UrlResolver.ResolverError('The requested video was not found.')
+
     def get_url(self, host, media_id):
         return 'http://www.video.tt/watch_video.php?v=%s' % media_id
 
@@ -70,7 +82,7 @@ class VideoTTResolver(Plugin, UrlResolver, PluginSettings):
         return r.groups()
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url) or self.name in host
+        return re.search(self.pattern, url) or self.name in host
 
     #PluginSettings methods
     def get_settings_xml(self):

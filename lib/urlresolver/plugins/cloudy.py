@@ -119,4 +119,4 @@ class CloudyResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match('https?://(?:www\.|embed\.)cloudy\.(?:ec|eu|sx|ch|com)/(?:video/|v/|embed\.php\?id=)([0-9a-z]+)', url) or 'cloudy.' in host
+        return re.search('https?://(?:www\.|embed\.)cloudy\.(?:ec|eu|sx|ch|com)/(?:video/|v/|embed\.php\?id=)([0-9a-z]+)', url) or 'cloudy.' in host

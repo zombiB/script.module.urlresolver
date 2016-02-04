@@ -74,7 +74,7 @@ class TunePkResolver(Plugin, UrlResolver, PluginSettings):
         return r.groups()
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url) or self.name in host
+        return re.search(self.pattern, url) or self.name in host
 
     #PluginSettings methods
     def get_settings_xml(self):

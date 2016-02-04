@@ -72,7 +72,7 @@ class FacebookResolver(Plugin, UrlResolver, PluginSettings):
         return r.groups()
 
     def valid_url(self, url, host):
-        return re.match('https?://(www\.)?facebook.com/video/embed\?video_id=(\w+)', url) or \
+        return re.search('https?://(www\.)?facebook.com/video/embed\?video_id=(\w+)', url) or \
                self.name in host
 
     #PluginSettings methods

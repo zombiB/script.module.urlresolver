@@ -50,7 +50,7 @@ class AllVidResolver(Plugin, UrlResolver, PluginSettings):
         else: return False
 
     def valid_url(self, url, host):
-        return re.match(self.pattern, url) or host in self.domains
+        return re.searchearch(self.pattern, url) or host in self.domains
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

@@ -81,4 +81,4 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
                 return False
 
     def valid_url(self, url, host):
-        return re.match('http://(www.)?cloudyvideos.com/[0-9A-Za-z]+', url) or 'cloudyvideos' in host
+        return re.search('http://(www.)?cloudyvideos.com/[0-9A-Za-z]+', url) or 'cloudyvideos' in host

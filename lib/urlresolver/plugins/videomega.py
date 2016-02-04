@@ -20,6 +20,8 @@
 """
 
 import re
+import urllib
+import urllib2
 from lib import jsunpack
 from t0mm0.common.net import Net
 from urlresolver import common
@@ -49,8 +51,18 @@ class VideoMegaResolver(Plugin, UrlResolver, PluginSettings):
         if jsunpack.detect(html):
             js_data = jsunpack.unpack(html)
             match = re.search('"src"\s*,\s*"([^"]+)', js_data)
-            if match:
-                return match.group(1) + '|User-Agent=%s' % (common.IOS_USER_AGENT)
+
+        try:
+            stream_url = match.group(1)
+
+            r = urllib2.Request(stream_url, headers=headers)
+            r = int(urllib2.urlopen(r, timeout=15).headers['Content-Length'])
+
+            if r > 1048576:
+                stream_url += '|' + urllib.urlencode(headers)
+                return stream_url
+        except:
+            UrlResolver.ResolverError("File Not Playable")
 
         raise UrlResolver.ResolverError('No playable video found.')
 

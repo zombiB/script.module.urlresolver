@@ -75,4 +75,4 @@ class ClickNUploadResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.match('http://((?:www.)?clicknupload.(?:com|me))/(?:f/)?([0-9A-Za-z]+)', url) or 'clicknupload' in host
+        return re.search('http://((?:www.)?clicknupload.(?:com|me))/(?:f/)?([0-9A-Za-z]+)', url) or 'clicknupload' in host

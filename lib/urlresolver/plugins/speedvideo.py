@@ -35,7 +35,7 @@ class SpeedVideoResolver(Plugin, UrlResolver, PluginSettings):
         self.net = Net()
 
     def valid_url(self, url, host):
-        return re.match('http://(?:www.)?%s/(?:embed\-)?[0-9A-Za-z_]+(?:\-[0-9]+x[0-9]+.html)?' % self.domain, url) or 'speedvideo' in host
+        return re.search('http://(?:www.)?%s/(?:embed\-)?[0-9A-Za-z_]+(?:\-[0-9]+x[0-9]+.html)?' % self.domain, url) or 'speedvideo' in host
 
     def get_url(self, host, media_id):
         return 'http://speedvideo.net/embed-%s.html' % media_id

@@ -62,4 +62,4 @@ class LetwatchResolver(Plugin, UrlResolver, PluginSettings):
         return r.groups()
 
     def valid_url(self, url, host):
-        return re.match('http://letwatch.us/(?:embed-)?\w+', url) or self.name in host
+        return re.search('http://letwatch.us/(?:embed-)?\w+', url) or self.name in host
