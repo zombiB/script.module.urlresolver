@@ -35,7 +35,7 @@ class NoRedirection(urllib2.HTTPErrorProcessor):
 class Up2StreamResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "up2stream"
-    domains = ["www.up2stream.com"]
+    domains = ["up2stream.com"]
     pattern = '//((?:www\.)?up2stream.com)/view\.php.+?ref=([0-9a-zA-Z]+)'
 
     def __init__(self):

@@ -30,7 +30,7 @@ from urlresolver.plugnplay import Plugin
 class MailRuResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "mail.ru"
-    domains = ["mail.ru"]
+    domains = ['mail.ru', 'my.mail.ru', 'videoapi.my.mail.ru', 'api.video.mail.ru']
 
     def __init__(self):
         p = self.get_setting('priority') or 100

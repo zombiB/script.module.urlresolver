@@ -30,7 +30,7 @@ import xbmcgui
 class OKResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "ok.ru"
-    domains = ["ok.ru", "www.ok.ru"]
+    domains = ['ok.ru', 'odnoklassniki.ru']
     header = {"User-Agent": common.OPERA_USER_AGENT}
     qual_map = {'full': '1080', 'hd': '720', 'sd': '480', 'low': '360', 'lowest': '240', 'mobile': '144'}
 
@@ -38,7 +38,7 @@ class OKResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www\.)?ok\.ru)/(?:videoembed|video)/(.+)'
+        self.pattern = '//((?:www\.)?(?:ok.ru|odnoklassniki.ru))/(?:videoembed|video)/(.+)'
 
     def get_media_url(self, host, media_id):
         vids = self.__get_Metadata(media_id)

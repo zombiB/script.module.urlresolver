@@ -70,10 +70,10 @@ class EcostreamResolver(Plugin, UrlResolver, PluginSettings):
         if not r:
             raise UrlResolver.ResolverError('Unable to resolve Ecostream link. Filelink not found.')
         stream_url = 'http://www.ecostream.tv' + r.group(1)
+        stream_url = urllib2.unquote(stream_url)
         stream_url = urllib2.urlopen(urllib2.Request(stream_url, headers=headers)).geturl()
-        print stream_url
 
-        return urllib2.unquote(stream_url)
+        return stream_url
 
     def get_url(self, host, media_id):
             return 'http://www.ecostream.tv/stream/%s.html' % (media_id)
