@@ -17,12 +17,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
-import xbmc
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
+import xbmc
 
 class MooShareResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]

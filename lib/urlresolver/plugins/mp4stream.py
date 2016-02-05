@@ -18,8 +18,8 @@
 
 
 import re
+import urllib
 from t0mm0.common.net import Net
-from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
@@ -36,7 +36,10 @@ class Mp4streamResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
+
+        response = self.net.http_GET(web_url)
+        html = response.content
+        headers = dict(response._response.info().items())
 
         r = re.search('sources\s*:\s*(\[.*?\])',html, re.DOTALL)
 
@@ -44,7 +47,7 @@ class Mp4streamResolver(Plugin, UrlResolver, PluginSettings):
             html = r.group(1)
             r = re.search("'file'\s*:\s*'(.+?)'",html)
             if r:
-                return r.group(1)
+                return r.group(1) + '|' + urllib.urlencode({ 'Cookie': headers['set-cookie'] })
             else:
                 raise UrlResolver.ResolverError('File Not Found or removed')
 

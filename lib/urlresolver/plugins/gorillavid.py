@@ -16,12 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import urllib2, re, os
-from urlresolver import common
 
 class GorillavidResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -32,8 +31,7 @@ class GorillavidResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        #e.g. http://gorillavid.com/vb80o1esx2eb
-        self.pattern = 'http://((?:www.)?gorillavid.(?:in|com))/(?:embed-)?([0-9a-zA-Z]+)'
+        self.pattern = '//((?:www.)?gorillavid.(?:in|com))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

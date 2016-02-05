@@ -17,12 +17,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+import xml.etree.ElementTree as ET
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
-import xml.etree.ElementTree as ET
 
 class PlaywireResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]

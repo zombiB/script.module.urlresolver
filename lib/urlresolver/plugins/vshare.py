@@ -21,7 +21,6 @@ from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class VshareResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -32,7 +31,7 @@ class VshareResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:www.)?vshare.io)/\w?/(\w+)(?:\/width-\d+/height-\d+/)?'
+        self.pattern = '//((?:www.)?vshare.io)/\w?/(\w+)(?:\/width-\d+/height-\d+/)?'
 
     def get_url(self, host, media_id):
         return 'http://vshare.io/v/%s/width-620/height-280/' % (media_id)

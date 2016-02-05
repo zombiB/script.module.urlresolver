@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
 from t0mm0.common.net import Net
+from lib import jsunpack
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 import xbmc
-from urlresolver import common
-from lib import jsunpack
-import re
 
 class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -62,7 +62,7 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
                     stream_url = match2.group(1)
             
         if stream_url:
-            return stream_url + '|User-Agent=%s&Referer=%s' % (common.IE_USER_AGENT, web_url)
+            return stream_url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT, 'Referer': web_url })
 
         raise UrlResolver.ResolverError('Unable to resolve cloudyvideos link. Filelink not found.')
 

@@ -17,8 +17,8 @@
 """
 
 import re
-import urllib
 import base64
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -33,7 +33,7 @@ class TrollVidResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:sv\d*\.)?trollvid\.net)/embed\.php.file=([0-9a-zA-Z]+)'
+        self.pattern = '//((?:sv\d*\.)?trollvid\.net)/embed\.php.file=([0-9a-zA-Z]+)'
     
     def get_url(self, host, media_id):
             return 'http://trollvid.net/embed.php?file=%s' % media_id

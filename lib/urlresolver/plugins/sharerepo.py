@@ -20,10 +20,10 @@ import re
 import urllib
 import urllib2
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class SharerepoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -46,8 +46,6 @@ class SharerepoResolver(Plugin, UrlResolver, PluginSettings):
             html = self.net.http_GET(web_url, headers=headers).content
         except urllib2.HTTPError as e:
             if e.code == 404:
-                # sharerepo supports two different styles of links/media_ids
-                # if the first fails, try the second kind
                 web_url = 'http://sharerepo.com/%s' % media_id
                 html = self.net.http_GET(web_url, headers=headers).content
             else:

@@ -21,16 +21,13 @@ import sys
 import re
 import urllib
 import json
+from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 import xbmcgui
-from t0mm0.common.net import Net
-
-#SET ERROR_LOGO# THANKS TO VOINAGE, BSTRDMKR, ELDORADO
-error_logo = os.path.join(common.addon_path, 'resources', 'images', 'redx.png')
 
 class AllDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     implements = [UrlResolver, SiteAuth, PluginSettings]
@@ -97,7 +94,6 @@ class AllDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
             return finallink
         #false/errors
         elif 'Invalid link' in source :
-            common.addon.show_small_popup(title='[B][COLOR white]ALLDEBRID[/COLOR][/B]', msg='[COLOR red]INVALID LINK[/COLOR]', delay=15000, image=error_logo)
             return self.unresolvable(1,'Invalid link')
         else :
             return self.unresolvable(0,'No generated_link')

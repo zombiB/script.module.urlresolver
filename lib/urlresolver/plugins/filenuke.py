@@ -16,13 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
+import urllib
+import urllib2
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re
-import urllib2
-from urlresolver import common
 
 class FilenukeResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -51,7 +52,9 @@ class FilenukeResolver(Plugin, UrlResolver, PluginSettings):
         
         r = re.search("var\s+lnk\d+\s*=\s*'(.*?)'", html)
         if r:
-            stream_url = r.group(1) + '|User-Agent=%s' % (common.IE_USER_AGENT)
+            stream_url = r.group(1)
+            stream_url = urllib2.urlopen(urllib2.Request(stream_url, headers=headers)).geturl()
+            stream_url = stream_url + '|' + urllib.urlencode(headers)
             return stream_url
         else:
             raise UrlResolver.ResolverError('Unable to locate link')

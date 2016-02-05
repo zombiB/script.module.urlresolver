@@ -16,12 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
+import json
+import urllib
+import urlparse
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re, os, xbmc, json, urlparse
-from urlresolver import common
+import xbmc
 
 class AllmyvideosResolver(Plugin,UrlResolver,PluginSettings):
     implements=[UrlResolver,PluginSettings]
@@ -70,7 +74,7 @@ class AllmyvideosResolver(Plugin,UrlResolver,PluginSettings):
                     max_label = int(re.sub('[^0-9]', '', source['label']))
             if stream_url:
                 stream_url = '%s?%s&direct=false&ua=false' % (stream_url.split('?')[0], urlparse.urlparse(stream_url).query)
-                return stream_url+'|User-Agent=%s'%(common.IE_USER_AGENT)
+                return stream_url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
         
     def get_url(self,host,media_id):
         return 'http://allmyvideos.net/%s'%media_id 

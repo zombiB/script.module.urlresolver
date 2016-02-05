@@ -16,13 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
+import urllib
 from t0mm0.common.net import Net
+from lib import jsunpack
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re
-from lib import jsunpack
-from urlresolver import common
 
 class VidziResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -43,7 +43,7 @@ class VidziResolver(Plugin, UrlResolver, PluginSettings):
 
         r = re.search('file\s*:\s*"([^"]+)', html)
         if r:
-            return r.group(1) + '|Referer=http://vidzi.tv/nplayer/jwplayer.flash.swf'
+            return r.group(1) + '|' + urllib.urlencode({ 'Referer': 'http://vidzi.tv/nplayer/jwplayer.flash.swf' })
         else:
             for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
                 js_data = jsunpack.unpack(match.group(1))

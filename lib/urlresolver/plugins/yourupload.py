@@ -16,13 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
+import urllib2
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import urllib, urllib2
-from urlresolver import common
-import re
 
 class YourUploadResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -48,14 +48,19 @@ class YourUploadResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        resp = self.net.http_GET(web_url)
-        html = resp.content
-        r = re.search('<meta property="og:video" content="(.+?)"', html)
-        if not r:
-            r = re.search('<source src="(.+?)"', html)
-            if not r:
-                r = re.search("'file'\s*:\s*'(.+?)'", html)
+
+        headers = {
+            'User-Agent': common.IE_USER_AGENT,
+            'Referer': web_url
+        }
+
+        html = self.net.http_GET(web_url, headers=headers).content
+
+        r = re.search("file\s*:\s*'(.+?)'", html)
         if r:
-            return r.group(1)
+            stream_url = r.group(1)
+            stream_url = urllib2.urlopen(urllib2.Request(stream_url, headers=headers)).geturl()
+
+            return stream_url 
         else:
             raise UrlResolver.ResolverError('no file located')

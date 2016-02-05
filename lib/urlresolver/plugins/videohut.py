@@ -32,7 +32,7 @@ class VideoHutResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://www.(videohut.to)/(?:v\/|embed.php\?id=)([0-9a-z]+)'
+        self.pattern = '//(?:www.)?(videohut.to)/(?:v\/|embed.php\?id=)([0-9a-z]+)'
     
     def get_url(self, host, media_id):
             return 'http://www.videohut.to/embed.php?id=%s' % (media_id)

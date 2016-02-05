@@ -22,8 +22,8 @@
 import re
 import urllib
 import urllib2
-from lib import jsunpack
 from t0mm0.common.net import Net
+from lib import jsunpack
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings

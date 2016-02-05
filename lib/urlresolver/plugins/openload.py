@@ -16,16 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
+import json
+import urllib
 from t0mm0.common.net import Net
+from lib import captcha_lib
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-import json
-import re
 import xbmc
-import urllib
-from lib import captcha_lib
 
 class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]

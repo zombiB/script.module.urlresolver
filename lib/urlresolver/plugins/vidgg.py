@@ -16,19 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
-import re
-import urllib
 
 class VidggResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'vid.gg'
     domains = ['vidgg.to']
-    pattern = 'http://(?:www\.)?(vid(?:\.gg|gg\.to))/(?:embed/\?id=|video/)([0-9a-z]+)'
+    pattern = '//(?:www\.)?(vid(?:\.gg|gg\.to))/(?:embed/\?id=|video/)([0-9a-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100

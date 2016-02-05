@@ -19,10 +19,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib2
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class PrimeshareResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -52,7 +52,7 @@ class PrimeshareResolver(Plugin, UrlResolver, PluginSettings):
             stream_url = r.group(1)
 
         r = urllib2.Request(stream_url, headers=headers)
-        r = urllib2.urlopen(r, timeout=30)
+        r = urllib2.urlopen(r, timeout=15)
         r = int(r.headers['Content-Length'])
 
         if r < 1024:

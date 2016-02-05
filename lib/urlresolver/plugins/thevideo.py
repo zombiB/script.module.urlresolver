@@ -16,13 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re, urllib
-from urlresolver import common
-from lib import jsunpack
 
 MAX_TRIES=3
 
@@ -61,6 +59,6 @@ class TheVideoResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return (re.search('http://(www\.|embed-)?thevideo.me/' +
+        return (re.search('//(www\.|embed-)?thevideo.me/' +
                          '[0-9A-Za-z]+', url) or
                          'thevideo' in host)

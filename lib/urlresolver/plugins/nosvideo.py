@@ -18,11 +18,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import base64
+import urllib
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class NosvideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -63,7 +64,7 @@ class NosvideoResolver(Plugin, UrlResolver, PluginSettings):
         try: stream_url = base64.b64decode(stream_url)
         except: pass
 
-        stream_url += '|User-Agent=%s' % (common.IE_USER_AGENT)
+        stream_url += '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
 
         return stream_url
  

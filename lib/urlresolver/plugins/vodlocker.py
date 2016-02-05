@@ -21,7 +21,6 @@ from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class VodlockerResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -32,7 +31,7 @@ class VodlockerResolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:www.)?vodlocker.com)/(?:embed-)?([0-9a-zA-Z]+)(?:-\d+x\d+.html)?'
+        self.pattern = '//((?:www.)?vodlocker.com)/(?:embed-)?([0-9a-zA-Z]+)(?:-\d+x\d+.html)?'
 
     def get_url(self, host, media_id):
         return 'http://vodlocker.com/embed-%s-640x400.html' % (media_id)

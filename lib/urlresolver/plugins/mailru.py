@@ -21,8 +21,8 @@
 
 import re
 import json
+import urllib
 from t0mm0.common.net import Net
-from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
@@ -56,7 +56,7 @@ class MailRuResolver(Plugin, UrlResolver, PluginSettings):
                     best_quality = int(video['key'][:-1])
 
                 if 'set-cookie' in headers:
-                    stream_url += '|Cookie=%s' % (headers['set-cookie'])
+                    stream_url += '|' + urllib.urlencode({ 'Cookie': headers['set-cookie'] })
 
             if stream_url:
                 return stream_url

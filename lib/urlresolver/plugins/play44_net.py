@@ -16,13 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import re
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import urllib
-from urlresolver import common
-import re
 
 class Play44Resolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -33,9 +32,7 @@ class Play44Resolver(Plugin, UrlResolver, PluginSettings):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        # http://play44.net/embed.php?w=718&h=438&vid=og/saint_seiya_omega_-_69.mp4
         self.pattern = 'http://((?:www.)?play44.net)/embed\.php?.*?vid=([0-9a-zA-Z_\-\./]+)[\?&]*'
-        #self.pattern = 'http://((?:www.)?videofun.me)/embed/(.+?)'
     
     def get_url(self, host, media_id):
             return 'http://play44.net/embed.php?&vid=%s' % (media_id)

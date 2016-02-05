@@ -17,11 +17,11 @@
 """
 import re
 from t0mm0.common.net import Net
+from lib import jsunpack
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from lib import jsunpack
 
 class TusfilesResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]

@@ -19,12 +19,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 import json
-import xbmcgui
+import urllib
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
+import xbmcgui
 
 class OKResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -49,7 +50,7 @@ class OKResolver(Plugin, UrlResolver, PluginSettings):
         for entry in vids['urls']:
             quality = self.__replaceQuality(entry['name'])
             lines.append(quality)
-            purged_jsonvars[quality] = entry['url'] + "|User-Agent=" + common.OPERA_USER_AGENT
+            purged_jsonvars[quality] = entry['url'] + '|' + urllib.urlencode(self.header)
             if int(quality) > int(best): best = quality
 
         if len(lines) == 1:

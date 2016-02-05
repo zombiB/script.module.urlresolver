@@ -16,13 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
+import urllib
+import urllib2
 from t0mm0.common.net import Net
+from lib import captcha_lib
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
-import urllib, urllib2, re
-from lib import captcha_lib
 
 class HugefilesResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -95,6 +97,6 @@ class HugefilesResolver(Plugin, UrlResolver, PluginSettings):
         return('host', 'media_id')
 
     def valid_url(self, url, host):
-        return (re.search('http://(www.)?hugefiles.net/' +
+        return (re.search('//(www.)?hugefiles.net/' +
                          '[0-9A-Za-z]+', url) or
                          'hugefiles' in host)

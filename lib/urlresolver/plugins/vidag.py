@@ -16,13 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
 from t0mm0.common.net import Net
+from lib import jsunpack
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re
-from urlresolver import common
-from lib import jsunpack
 
 class VidAgResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]

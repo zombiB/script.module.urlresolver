@@ -17,11 +17,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+import urllib
+import urlparse
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
 
 class VidSpotResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
@@ -52,7 +54,8 @@ class VidSpotResolver(Plugin, UrlResolver, PluginSettings):
                 stream_url = match.group(1)
             
             if stream_url:
-                return stream_url
+                stream_url = '%s?%s&direct=false' % (stream_url.split('?')[0], urlparse.urlparse(stream_url).query)
+                return stream_url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
             else:
                 raise UrlResolver.ResolverError('could not find file')
         else:
@@ -69,4 +72,4 @@ class VidSpotResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return (re.search('http://(www.)?vidspot.net/[0-9A-Za-z]+', url) or re.search('http://(www.)?vidspot.net/embed-[0-9A-Za-z]+[\-]*\d*[x]*\d*.*[html]*', url) or 'vidspot' in host)
+        return (re.search('//(www.)?vidspot.net/[0-9A-Za-z]+', url) or re.search('//(www.)?vidspot.net/embed-[0-9A-Za-z]+[\-]*\d*[x]*\d*.*[html]*', url) or 'vidspot' in host)
