@@ -30,7 +30,8 @@ from urlresolver.plugnplay import Plugin
 class TeramixerResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "teramixer"
-    domains = [ 'teramixer.com' ]  
+    domains = [ 'teramixer.com' ]
+    pattern ='(?://|\.)(teramixer\.com)/(?:embed/|)?([0-9A-Za-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -60,17 +61,11 @@ class TeramixerResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.teramixer.com/%s' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(www.)?(.+?).com/(embed/)?(.+)', url)
-        if r :
-            ls = r.groups()
-            ls = (ls[1], ls[3])
-            return ls
-        else :
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search('//(www.)?teramixer.com/(embed/)?[0-9A-Za-z]+', url) or 'teramixer.com' in host
-
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        return xml
+        return re.search(self.pattern, url) or self.name in host

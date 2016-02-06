@@ -27,6 +27,7 @@ class TusfilesResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "tusfiles"
     domains = ['tusfiles.net']
+    pattern = '(?://|\.)(tusfiles\.net)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -53,11 +54,11 @@ class TusfilesResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://%s/embed-%s.html' % (host, media_id)
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/(?:embed-)?([0-9a-z]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search('//(?:www.)?tusfiles.net/(embed-)?[0-9a-z]+', url) or 'tusfiles' in host
+        return re.search(self.pattern, url) or self.name in host

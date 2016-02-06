@@ -27,12 +27,12 @@ class VideoweedResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'videoweed.es'
     domains = ['bitvid.sx', 'videoweed.es', 'videoweed.com']
+    pattern = '(?://|\.)(bitvid.sx|videoweed.es|videoweed.com)/(?:mobile/video\.php\?id=|video/|embed/\?v=|embed\.php\?v=|file/)([0-9a-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//(?:www\.|embed\.)?((?:bitvid.sx|videoweed.es|videoweed.com))/(?:mobile/video\.php\?id=|video/|embed/\?v=|embed\.php\?v=|file/)([0-9a-z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -70,5 +70,4 @@ class VideoweedResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

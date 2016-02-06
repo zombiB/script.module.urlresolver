@@ -27,12 +27,12 @@ class IsharedResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'ishared.eu'
     domains = [ 'ishared.eu' ]
+    pattern = '(?://|\.)(ishared\.eu)/(?:video|embed)/(.*?)(?:/|$)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?ishared.eu)/(?:video|embed)/(.*?)(?:/|$)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -65,6 +65,6 @@ class IsharedResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

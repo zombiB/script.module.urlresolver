@@ -27,12 +27,12 @@ class UploadcResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'uploadc'
     domains = ['uploadc.com', 'uploadc.ch', 'zalaa.com']
+    pattern = '(?://|\.)(uploadc.com|uploadc.ch|zalaa.com)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?(?:uploadc.com|uploadc.ch|zalaa.com))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -62,7 +62,6 @@ class UploadcResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

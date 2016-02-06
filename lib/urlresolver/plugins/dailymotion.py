@@ -28,6 +28,7 @@ class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "dailymotion"
     domains = [ "dailymotion.com" ]
+    pattern = '(?://|\.)(dailymotion\.com)/(?:video|embed|sequence|swf)/([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -90,36 +91,15 @@ class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.dailymotion.com/embed/video/%s' % media_id
 
     def get_host_and_id(self, url):
-        match = re.search('//(.+?)/', url)
-        if match:
-            host = match.group(1)
-
-        match = re.search('/swf/([\w]+)', url)
-        if match:
-            media_id = match.group(1)
-
-        match = re.search('/sequence/([\w]+)', url)
-        if match:
-            media_id = match.group(1)
-
-        match = re.search('/video/([\w]+)', url)
-        if match:
-            media_id = match.group(1)
-
-        if host and media_id:
-            return (host, media_id)
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
         else:
             return False
-
-
+    
     def valid_url(self, url, host):
-        return re.search('http://(www.)?dailymotion.com/sequence/[0-9A-Za-z]+', url) or \
-                re.search('http://(www.)?dailymotion.com/video/[0-9A-Za-z]+', url) or \
-                re.search('http://(www.)?dailymotion.com/swf/[0-9A-Za-z]+', url) or \
-                re.search('http://(www.)?dailymotion.com/embed/[0-9A-Za-z]+', url) or \
-                self.name in host
+        return re.search(self.pattern, url) or self.name in host
 
-    #PluginSettings methods
     def get_settings_xml(self):
         xml = PluginSettings.get_settings_xml(self)
         xml += '<setting label="Video Quality" id="%s_quality" ' % self.__class__.__name__

@@ -29,12 +29,12 @@ class VidlockersResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "vidlockers"
     domains = ["vidlockers.ag"]
+    pattern = '(?://|\.)(vidlockers\.ag)/([A-Za-z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://(?:www.)?(vidlockers.ag)/([A-Za-z0-9]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -67,7 +67,7 @@ class VidlockersResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('Unable to resolve vidlockers link. Filelink not found.')
 
     def get_url(self, host, media_id):
-            return 'http://vidlockers.ag/%s' % (media_id)
+            return 'http://vidlockers.ag/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -77,4 +77,4 @@ class VidlockersResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or 'vidlockers' in host
+        return re.search(self.pattern, url) or self.name in host

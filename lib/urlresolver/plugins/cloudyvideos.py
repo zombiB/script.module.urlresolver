@@ -29,6 +29,7 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "cloudyvideos"
     domains = ["cloudyvideos.com"]
+    pattern = '(?://|\.)(cloudyvideos\.com)/([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -70,15 +71,11 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
             return 'http://cloudyvideos.com/%s' % (media_id)
 
     def get_host_and_id(self, url):
-        r = re.search('http://(?:www.)?(.+?)/(?:embed-)?([\w]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
-            r = re.search('//(.+?)/([\w]+)', url)
-            if r:
-                return r.groups()
-            else:
-                return False
-
+            return False
+    
     def valid_url(self, url, host):
-        return re.search('http://(www.)?cloudyvideos.com/[0-9A-Za-z]+', url) or 'cloudyvideos' in host
+        return re.search(self.pattern, url) or self.name in host

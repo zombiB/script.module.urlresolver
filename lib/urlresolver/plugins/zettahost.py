@@ -29,12 +29,12 @@ class ZettahostResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'zettahost.tv'
     domains = [ 'zettahost.tv' ]
+    pattern = '(?://|\.)(zettahost\.tv)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?zettahost.tv)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

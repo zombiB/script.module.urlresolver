@@ -27,6 +27,7 @@ class PlaywireResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "playwire"
     domains = ["playwire.com"]
+    pattern = '(?://|\.)(cdn\.playwire\.com.+?\d+)/(?:config|embed)/(\d+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -65,17 +66,11 @@ class PlaywireResolver(Plugin, UrlResolver, PluginSettings):
             return 'http://%s/config/%s.json' % (host, media_id)
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?/\d+)/embed/(\d+)\.html', url)
-        if not r:
-            r = re.search('//(.+?/\d+)/config/(\d+)\.json', url)
-        return r.groups()
-
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
     def valid_url(self, url, host):
-        return re.search('http://(www\.)?cdn.playwire.com/\d+/embed/\d+\.html', url) or \
-               re.search('http://(www\.)?cdn.playwire.com/v2/\d+/config/\d+\.json', url) or \
-               self.name in host
-
-    #PluginSettings methods
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        return xml
+        return re.search(self.pattern, url) or self.name in host

@@ -28,6 +28,7 @@ class PrimeshareResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "primeshare"
     domains = ["primeshare.tv"]
+    pattern = '(?://|\.)(primeshare\.tv)/download/([0-9a-zA-Z-_]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -64,17 +65,13 @@ class PrimeshareResolver(Plugin, UrlResolver, PluginSettings):
             return 'http://primeshare.tv/download/%s' % (media_id)
 
     def get_host_and_id(self, url):
-        r = re.search('http://(?:www.)(.+?)/download/([0-9A-Za-z]+)', url)
+        r = re.search(self.pattern, url)
         if r:
-            return r.groups()       
+            return r.groups()
         else:
-            r = re.search('//(.+?)/download/([0-9A-Za-z]+)', url)
-            if r:
-                return r.groups()
-            else:
-                return False
-
+            return False
+    
     def valid_url(self, url, host):
-        return re.search('http://(www.)?primeshare.tv/download/[0-9A-Za-z]+', url) or 'primeshare' in host
+        return re.search(self.pattern, url) or self.name in host
 
 

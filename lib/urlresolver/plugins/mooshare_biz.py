@@ -27,6 +27,7 @@ class MooShareResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "mooshare"
     domains = [ "mooshare.biz" ]
+    pattern = '(?://|\.)(mooshare\.biz)/(?:embed-|iframe/)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -56,14 +57,11 @@ class MooShareResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://mooshare.biz/%s' % media_id 
 
     def get_host_and_id(self, url):
-        url = url.replace('/iframe/', '/embed-')
-        r = re.search('//(.+?)/(?:embed-)?([0-9a-zA-Z]+)',url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-        return('host', 'media_id')
-
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

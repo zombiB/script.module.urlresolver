@@ -27,24 +27,13 @@ class Play44Resolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "play44.net"
     domains = ["play44.net"]
-    
+    pattern = '(?://|\.)(play44\.net)/embed\.php?.*?vid=([0-9a-zA-Z_\-\./]+)[\?&]*'
+
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http://((?:www.)?play44.net)/embed\.php?.*?vid=([0-9a-zA-Z_\-\./]+)[\?&]*'
-    
-    def get_url(self, host, media_id):
-            return 'http://play44.net/embed.php?&vid=%s' % (media_id)
-    
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r: return r.groups()
-        else: return False
-    
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
-    
+
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         resp = self.net.http_GET(web_url)
@@ -55,3 +44,16 @@ class Play44Resolver(Plugin, UrlResolver, PluginSettings):
         else:
             raise UrlResolver.ResolverError('no file located')
         return stream_url
+
+    def get_url(self, host, media_id):
+        return 'http://play44.net/embed.php?&vid=%s' % (media_id)
+    
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
+    def valid_url(self, url, host):
+        return re.search(self.pattern, url) or self.name in host

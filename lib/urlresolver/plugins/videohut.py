@@ -27,23 +27,12 @@ class VideoHutResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "videohut.to"
     domains = [ "videohut.to" ]
-    
+    pattern = '(?://|\.)(videohut\.to)/(?:v\/|embed.php\?id=)([0-9a-z]+)'
+
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//(?:www.)?(videohut.to)/(?:v\/|embed.php\?id=)([0-9a-z]+)'
-    
-    def get_url(self, host, media_id):
-            return 'http://www.videohut.to/embed.php?id=%s' % (media_id)
-    
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r: return r.groups()
-        else: return False
-    
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -70,3 +59,16 @@ class VideoHutResolver(Plugin, UrlResolver, PluginSettings):
                 pass
 
         raise UrlResolver.ResolverError('File Not Found or removed')
+
+    def get_url(self, host, media_id):
+            return 'http://www.videohut.to/embed.php?id=%s' % media_id
+    
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+
+    def valid_url(self, url, host):
+        return re.search(self.pattern, url) or self.name in host

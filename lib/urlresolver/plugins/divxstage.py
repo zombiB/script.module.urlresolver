@@ -26,6 +26,7 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'divxstage'
     domains = ['divxstage.eu', 'divxstage.net', 'divxstage.to', 'cloudtime.to']
+    pattern = '(?://|\.)(divxstage.eu|divxstage.net|divxstage.to|cloudtime.to)/(?:video/|embed/\?v=)([A-Za-z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -61,14 +62,11 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://embed.cloudtime.to/embed.php?v=%s' % media_id
 
     def get_host_and_id(self, url):
-        try: host = re.findall('//(.+?)/', url)[0]
-        except: return False
-        media_id = re.findall('//.+?/.+?/([\w]+)', url)
-        media_id += re.findall('//.+?/.+?v=([\w]+)', url)
-        try: media_id = media_id[0]
-        except: return False
-        return host, media_id
-
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

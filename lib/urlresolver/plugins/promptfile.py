@@ -26,12 +26,12 @@ class PromptfileResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "promptfile"
     domains = ["promptfile.com"]
+    pattern = '(?://|\.)(promptfile\.com)/(?:l|e)/([0-9A-Za-z\-]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?promptfile.com)/(?:l|e)/([0-9A-Za-z\-]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -57,6 +57,6 @@ class PromptfileResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or 'promptfile' in host
+        return re.search(self.pattern, url) or self.name in host

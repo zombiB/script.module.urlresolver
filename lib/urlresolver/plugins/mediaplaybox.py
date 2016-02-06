@@ -28,25 +28,14 @@ class MediaPlayBoxResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver]
     name = "MediaPlayBox"
     domains = ["mediaplaybox.com"]
+    pattern = '(?://|\.)(mediaplaybox\.com)/video/(.*)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http[s]*://((?:www\.)?mediaplaybox.com)/video/(.*)'
         self.net.set_user_agent(common.IE_USER_AGENT)
         self.headers = {'User-Agent': common.IE_USER_AGENT}
-
-    def get_url(self, host, media_id):
-        return 'http://mediaplaybox.com/video/%s' % media_id
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r: return r.groups()
-        else: return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or host in self.domains
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -66,3 +55,16 @@ class MediaPlayBoxResolver(Plugin, UrlResolver, PluginSettings):
                     return result.text
         
         raise UrlResolver.ResolverError('Unable to find mediaplaybox video')
+
+    def get_url(self, host, media_id):
+        return 'http://mediaplaybox.com/video/%s' % media_id
+
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
+    def valid_url(self, url, host):
+        return re.search(self.pattern, url) or self.name in host

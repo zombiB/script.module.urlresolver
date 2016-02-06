@@ -33,7 +33,7 @@ class VideoMegaResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "videomega"
     domains = ["videomega.tv"]
-    pattern = '//((?:www.)?videomega.tv)/(?:(?:iframe|cdn|validatehash|view)\.php)?\?(?:ref|hashkey)=([a-zA-Z0-9]+)'
+    pattern = '(?://|\.)(videomega\.tv)/(?:(?:iframe|cdn|validatehash|view)\.php)?\?(?:ref|hashkey)=([a-zA-Z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -67,7 +67,7 @@ class VideoMegaResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
-        return 'http://videomega.tv/cdn.php?ref=%s' % (media_id)
+        return 'http://videomega.tv/cdn.php?ref=%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -77,4 +77,4 @@ class VideoMegaResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or 'videomega' in host
+        return re.search(self.pattern, url) or self.name in host

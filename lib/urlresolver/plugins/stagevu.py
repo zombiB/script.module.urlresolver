@@ -26,6 +26,7 @@ class StagevuResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "stagevu"
     domains = [ "stagevu.com" ]
+    pattern = '(?://|\.)(stagevu\.com)/(?:video/|embed.+?uid=)?([A-Za-z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -46,12 +47,11 @@ class StagevuResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.stagevu.com/video/%s' % media_id 
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/(?:video/|embed.+?uid=)?([A-Za-z0-9]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

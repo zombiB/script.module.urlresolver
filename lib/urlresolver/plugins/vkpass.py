@@ -27,12 +27,12 @@ class VKPassResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "VKPass.com"
     domains = ["vkpass.com"]
+    pattern = '(?://|\.)(vkpass\.com)/token/(.+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?vkpass.com)/token/(.+)'
 
     def get_media_url(self, host, media_id):
         base_url = self.get_url(host, media_id)
@@ -111,7 +111,7 @@ class VKPassResolver(Plugin, UrlResolver, PluginSettings):
         return data
 
     def get_url(self, host, media_id):
-        return 'http://%s/token/%s' % (host, media_id)
+        return 'http://vkpass.com/token/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -121,9 +121,7 @@ class VKPassResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        if self.get_setting('enabled') == 'false':
-            return False
-        return re.search(self.pattern, url) or 'vkpass' in host
+        return re.search(self.pattern, url) or self.name in host
 
     def get_settings_xml(self):
         xml = PluginSettings.get_settings_xml(self)

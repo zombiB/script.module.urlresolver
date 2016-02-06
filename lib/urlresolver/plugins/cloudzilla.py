@@ -26,7 +26,7 @@ class CloudZillaResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "cloudzilla"
     domains = ['cloudzilla.to', 'neodrive.co']
-    pattern = '//(?:www.)?(cloudzilla.to|neodrive.co)/(?:share/file|embed)/([A-Za-z0-9]+)'
+    pattern = '(?://|\.)(cloudzilla.to|neodrive.co)/(?:share/file|embed)/([A-Za-z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -51,6 +51,6 @@ class CloudZillaResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or 'cloudzilla' in host or 'neodrive' in host
+        return re.search(self.pattern, url) or self.name in host

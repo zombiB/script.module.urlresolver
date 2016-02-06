@@ -26,7 +26,7 @@ class VidMeResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "vid.me"
     domains = ["vid.me"]
-    pattern = '//((?:www\.)?vid\.me)/(?:e/)?([0-9A-Za-z]+)'
+    pattern = '(?://|\.)(vid\.me)/(?:e/)?([0-9A-Za-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -44,7 +44,7 @@ class VidMeResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return 'http://%s/e/%s' % (host, media_id)
+        return 'http://vid.me/e/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -54,4 +54,4 @@ class VidMeResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return (re.search(self.pattern, url) or 'vid.me' in host)
+        return re.search(self.pattern, url) or self.name in host

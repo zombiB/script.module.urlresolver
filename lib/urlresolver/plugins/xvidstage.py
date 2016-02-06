@@ -27,12 +27,12 @@ class XvidstageResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "xvidstage"
     domains = ["xvidstage.com"]
+    pattern ='(?://|\.)(xvidstage\.com)/(?:embed-|)?([0-9A-Za-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern ='//(?:www.)?(xvidstage.com)/(?:embed-|)?([0-9A-Za-z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -53,7 +53,7 @@ class XvidstageResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-            return 'http://www.xvidstage.com/embed-%s.html' % (media_id)
+            return 'http://www.xvidstage.com/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

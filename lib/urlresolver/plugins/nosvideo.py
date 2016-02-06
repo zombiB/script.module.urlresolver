@@ -29,6 +29,7 @@ class NosvideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "nosvideo"
     domains = ["nosvideo.com", "noslocker.com"]
+    pattern = '(?://|\.)(nosvideo.com|noslocker.com)/(?:\?v\=|embed/|.+?\u=)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -72,13 +73,11 @@ class NosvideoResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://nosvideo.com/%s' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/(?:\?v\=|embed/|.+?\u=)?([0-9a-zA-Z]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-        return('host', 'media_id')
-
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

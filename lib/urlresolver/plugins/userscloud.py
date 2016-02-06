@@ -28,26 +28,15 @@ class UsersCloudResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "userscloud"
     domains = ["userscloud.com"]
+    pattern = '(?://|\.)(userscloud\.com)/(?:embed-)?([0-9a-zA-Z/]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?userscloud.com)/(?:embed-)?([0-9a-zA-Z/]+)'
         self.user_agent = common.IE_USER_AGENT
         self.net.set_user_agent(self.user_agent)
         self.headers = {'User-Agent': self.user_agent}
-
-    def get_url(self, host, media_id):
-        return 'https://%s/%s' % (host, media_id)
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r: return r.groups()
-        else: return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or host in self.domains
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -66,3 +55,16 @@ class UsersCloudResolver(Plugin, UrlResolver, PluginSettings):
                 return stream_url[0]
 
         raise UrlResolver.ResolverError('File not found')
+
+    def get_url(self, host, media_id):
+        return 'https://%s/%s' % (host, media_id)
+
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+
+    def valid_url(self, url, host):
+        return re.search(self.pattern, url) or self.name in host

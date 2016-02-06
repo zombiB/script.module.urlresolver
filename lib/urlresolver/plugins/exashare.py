@@ -27,7 +27,8 @@ class ExashareResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "exashare"
     domains = [ "exashare.com" ]
-    
+    pattern = '(?://|\.)(exashare\.com)/(?:embed-)?([0-9a-zA-Z]+)'
+
     def __init__(self):
         p=self.get_setting('priority') or 100
         self.priority=int(p)
@@ -61,10 +62,12 @@ class ExashareResolver(Plugin, UrlResolver, PluginSettings):
     def get_url(self,host,media_id):
         return 'http://%s/embed-%s.html' % (host,media_id)
 
-    def get_host_and_id(self,url):
-        r=re.search('//(?:www.)?(exashare.com)/(?:embed-)?([0-9a-zA-Z]+)',url)
-        if r: return r.groups()
-        else: return False
-
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
     def valid_url(self, url, host):
-        return re.search('http://(www.)?exashare.com/(embed-)?[A-Za-z0-9]+', url) or "exashare.com" in host
+        return re.search(self.pattern, url) or self.name in host

@@ -27,7 +27,7 @@ class VidbullResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "vidbull"
     domains = ["vidbull.com"]
-    pattern = '//((?:www.)?vidbull.com)/(?:embed-)?([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(vidbull\.com)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -51,12 +51,11 @@ class VidbullResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.vidbull.com/%s' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search(self.pattern,url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-        return('host', 'media_id')
 
     def valid_url(self, url, host):
-        return (re.search(self.pattern, url) or 'vidbull' in host)
+        return re.search(self.pattern, url) or self.name in host

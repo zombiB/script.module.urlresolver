@@ -27,12 +27,12 @@ class RapidVideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "rapidvideo.ws"
     domains = ["rapidvideo.ws"]
+    pattern ='(?://|\.)(rapidvideo\.ws)/(?:embed-|)?([0-9A-Za-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern ='//(?:www.)?(rapidvideo.ws)/(?:embed-|)?([0-9A-Za-z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -53,7 +53,7 @@ class RapidVideoResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-            return 'http://rapidvideo.ws/embed-%s.html' % (media_id)
+            return 'http://rapidvideo.ws/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -61,6 +61,6 @@ class RapidVideoResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

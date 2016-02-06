@@ -31,6 +31,7 @@ class MailRuResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "mail.ru"
     domains = ['mail.ru', 'my.mail.ru', 'videoapi.my.mail.ru', 'api.video.mail.ru']
+    pattern = '(?://|\.)(mail\.ru)/.+?/mail/(.+?)/.+?/(\d*)\.html'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -68,13 +69,11 @@ class MailRuResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://videoapi.my.mail.ru/videos/mail/%s/_myvideo/%s.json?ver=0.2.60' % (user, media_id)
 
     def get_host_and_id(self, url):
-        try: host = re.findall('//(.+?)/', url)[0]
-        except: return False
-        try: user = re.findall('/mail/(.+?)/', url)[0]
-        except: return False
-        try: media_id = re.findall('(\d*)[.]html', url)[0]
-        except: return False
-        return host, '%s|%s' % (user, media_id)
+        r = re.search(self.pattern, url)
+        if r:
+            return (r.groups()[0], '%s|%s' % (r.groups()[1], r.groups()[2]))
+        else:
+            return False
 
     def valid_url(self, url, host):
-        return 'mail.ru' in host
+        return re.search(self.pattern, url) or self.name in host

@@ -27,6 +27,7 @@ class BestreamsResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "bestreams"
     domains = ["bestreams.net"]
+    pattern = '(?://|\.)(bestreams\.net)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -51,11 +52,11 @@ class BestreamsResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://bestreams.net/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/(?:embed-)?([A-Za-z0-9]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.searchearch('http://(www.)?bestreams.net/(embed-)?[A-Za-z0-9]+', url) or "bestreams.net" in host
+        return re.search(self.pattern, url) or self.name in host

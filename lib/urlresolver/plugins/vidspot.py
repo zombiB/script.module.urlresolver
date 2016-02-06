@@ -29,6 +29,7 @@ class VidSpotResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "vidspot"
     domains = ["vidspot.net"]
+    pattern = '(?://|\.)(vidspot\.net)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -65,11 +66,11 @@ class VidSpotResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://vidspot.net/%s' % media_id 
 
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/(?:embed-)?([0-9a-zA-Z]+)',url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
 
     def valid_url(self, url, host):
-        return (re.search('//(www.)?vidspot.net/[0-9A-Za-z]+', url) or re.search('//(www.)?vidspot.net/embed-[0-9A-Za-z]+[\-]*\d*[x]*\d*.*[html]*', url) or 'vidspot' in host)
+        return re.search(self.pattern, url) or self.name in host

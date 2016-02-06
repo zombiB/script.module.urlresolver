@@ -30,12 +30,12 @@ class YouWatchResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "youwatch.org"
     domains = ["youwatch.org"]
+    pattern = '(?://|\.)(youwatch\.org)/(?:embed-)?([A-Za-z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?youwatch.org)/(?:embed-)?([A-Za-z0-9]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

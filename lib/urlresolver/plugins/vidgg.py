@@ -27,7 +27,7 @@ class VidggResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'vid.gg'
     domains = ['vidgg.to']
-    pattern = '//(?:www\.)?(vid(?:\.gg|gg\.to))/(?:embed/\?id=|video/)([0-9a-z]+)'
+    pattern = '(?://|\.)(vid.gg|vidgg.to)/(?:embed/\?id=|video/)([0-9a-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -68,4 +68,4 @@ class VidggResolver(Plugin, UrlResolver, PluginSettings):
             return False
 
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or 'vid.gg' in host
+        return re.search(self.pattern, url) or self.name in host

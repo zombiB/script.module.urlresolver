@@ -29,12 +29,12 @@ class EcostreamResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "ecostream"
     domains = [ "ecostream.tv" ]
+    pattern = '(?://|\.)(ecostream.tv)/(?:stream|embed)?/([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?ecostream.tv)/(?:stream|embed)?/([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -79,11 +79,11 @@ class EcostreamResolver(Plugin, UrlResolver, PluginSettings):
             return 'http://www.ecostream.tv/stream/%s.html' % (media_id)
 
     def get_host_and_id(self, url):
-        r = re.search(self.pattern, url.replace('embed','stream'))
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

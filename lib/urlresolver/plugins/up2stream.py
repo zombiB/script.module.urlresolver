@@ -36,7 +36,7 @@ class Up2StreamResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "up2stream"
     domains = ["up2stream.com"]
-    pattern = '//((?:www\.)?up2stream.com)/view\.php.+?ref=([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(up2stream\.com)/view\.php.+?ref=([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -80,6 +80,6 @@ class Up2StreamResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or 'up2stream' in host
+        return re.search(self.pattern, url) or self.name in host

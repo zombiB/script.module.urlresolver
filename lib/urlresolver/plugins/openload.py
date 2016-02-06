@@ -31,12 +31,12 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "openload"
     domains = ["openload.io", "openload.co"]
+    pattern = '(?://|\.)(openload\.(?:io|co))/(?:embed|f)/([0-9a-zA-Z-_]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?openload\.(?:io|co))/(?:embed|f)/([0-9a-zA-Z-_]+)'
 
     def get_media_url(self, host, media_id):
         try:
@@ -72,6 +72,6 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name  in host
+        return re.search(self.pattern, url) or self.name in host

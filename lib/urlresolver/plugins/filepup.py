@@ -18,24 +18,23 @@
 
 import re
 import urllib
-import xbmcgui
 from t0mm0.common.net import Net
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-
+import xbmcgui
 
 class FilePupResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "filepup"
     domains = ["filepup.net"]
+    pattern = '(?://|\.)(filepup.(?:net))/(?:play|files)/([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?filepup.(?:net))/(?:play|files)/([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -100,7 +99,7 @@ class FilePupResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 

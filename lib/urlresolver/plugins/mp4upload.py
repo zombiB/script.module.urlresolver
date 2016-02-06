@@ -27,6 +27,7 @@ class Mp4uploadResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "mp4upload"
     domains = ["mp4upload.com"]
+    pattern = '(?://|\.)(mp4upload\.com)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -44,12 +45,11 @@ class Mp4uploadResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.mp4upload.com/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('http://(?:www.)?(.+?)/(?:embed-)?([\w]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

@@ -28,24 +28,12 @@ class SpeedVideoResolver(Plugin, UrlResolver, PluginSettings):
     name = "speedvideo"
     domains = ["speedvideo.net"]
     domain = "speedvideo.net"
+    pattern = '(?://|\.)(speedvideo\.net)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-
-    def valid_url(self, url, host):
-        return re.search('http://(?:www.)?%s/(?:embed\-)?[0-9A-Za-z_]+(?:\-[0-9]+x[0-9]+.html)?' % self.domain, url) or 'speedvideo' in host
-
-    def get_url(self, host, media_id):
-        return 'http://speedvideo.net/embed-%s.html' % media_id
-
-    def get_host_and_id(self, url):
-        r = re.search('http://(?:www\.)?(%s)\.net/(?:embed-)?([0-9A-Za-z_]+)(?:-\d+x\d+.html)?' % self.name, url)
-        if r:
-            return r.groups()
-        else:
-            return False
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -60,3 +48,16 @@ class SpeedVideoResolver(Plugin, UrlResolver, PluginSettings):
         stream_url = base64.b64decode(stream_url)
 
         return stream_url
+
+    def get_url(self, host, media_id):
+        return 'http://speedvideo.net/embed-%s.html' % media_id
+
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
+    def valid_url(self, url, host):
+        return re.search(self.pattern, url) or self.name in host

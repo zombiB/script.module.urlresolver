@@ -26,6 +26,7 @@ class NowvideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "nowvideo"
     domains = ['nowvideo.eu', 'nowvideo.ch', 'nowvideo.sx', 'nowvideo.co', 'nowvideo.li']
+    pattern = '(?://|\.)(nowvideo\.(?:eu|ch|sx|co|li))/(?:video/|embed\.php\?v=)([A-Za-z0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -61,14 +62,11 @@ class NowvideoResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://embed.nowvideo.sx/embed.php?v=%s' % media_id
 
     def get_host_and_id(self, url):
-        try: host = re.findall('//(.+?)/', url)[0]
-        except: return False
-        media_id = re.findall('//.+?/.+?/([\w]+)', url)
-        media_id += re.findall('//.+?/.+?v=([\w]+)', url)
-        try: media_id = media_id[0]
-        except: return False
-        return host, media_id
-
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
     def valid_url(self, url, host):
-        if any(i in host for i in self.domains):
-            return True
+        return re.search(self.pattern, url) or self.name in host

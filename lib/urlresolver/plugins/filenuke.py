@@ -29,6 +29,7 @@ class FilenukeResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "filenuke"
     domains = ["filenuke.com"]
+    pattern = '(?://|\.)(filenuke\.com)/(?:f/)?([0-9A-Za-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -60,14 +61,14 @@ class FilenukeResolver(Plugin, UrlResolver, PluginSettings):
             raise UrlResolver.ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
-        return 'http://%s/%s' % (host, media_id)
+        return 'http://filenuke.com/%s' % media_id
         
     def get_host_and_id(self, url):
-        r = re.search('//(.+?)/([0-9a-zA-Z/]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return re.search('http://((?:www.)?filenuke.com)/(?:f/)?([0-9A-Za-z]+)', url) or 'filenuke' in host
+        return re.search(self.pattern, url) or self.name in host

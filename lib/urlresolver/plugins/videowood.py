@@ -27,7 +27,7 @@ class VideowoodResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "videowood"
     domains = ['videowood.tv']
-    pattern = '//((?:www.)?videowood.tv)/(?:embed/|video/)([0-9a-z]+)'
+    pattern = '(?://|\.)(videowood\.tv)/(?:embed/|video/)([0-9a-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -57,7 +57,7 @@ class VideowoodResolver(Plugin, UrlResolver, PluginSettings):
             raise UrlResolver.ResolverError('File not found')
 
     def get_url(self, host, media_id):
-        return 'http://%s/embed/%s' % (host, media_id)
+        return 'http://videowood.tv/embed/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

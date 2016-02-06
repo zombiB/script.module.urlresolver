@@ -28,29 +28,15 @@ class UpToBoxResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "uptobox"
     domains = ["uptobox.com", "uptostream.com"]
+    pattern = '(?://|\.)(uptobox.com|uptostream.com)/(?:iframe/)?([0-9A-Za-z_]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = 'http[s]*://(upto(?:box|stream)\.com)/(?:iframe/)?([0-9A-Za-z_]+)'
         self.user_agent = common.IE_USER_AGENT
         self.net.set_user_agent(self.user_agent)
         self.headers = {'User-Agent': self.user_agent}
-
-    def get_url(self, host, media_id):
-        return 'http://uptobox.com/%s' % media_id
-
-    def get_stream_url(self, host, media_id):
-        return 'http://uptostream.com/%s' % media_id
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r: return r.groups()
-        else: return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or host in self.domains
 
     def get_media_url(self, host, media_id):
 
@@ -119,3 +105,19 @@ class UpToBoxResolver(Plugin, UrlResolver, PluginSettings):
             pass
 
         raise UrlResolver.ResolverError('File not found')
+
+    def get_url(self, host, media_id):
+        return 'http://uptobox.com/%s' % media_id
+
+    def get_stream_url(self, host, media_id):
+        return 'http://uptostream.com/%s' % media_id
+
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
+    def valid_url(self, url, host):
+        return re.search(self.pattern, url) or self.name in host

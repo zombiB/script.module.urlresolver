@@ -29,6 +29,7 @@ class MightyuploadResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "mightyupload"
     domains = ["mightyupload.com"]
+    pattern = '(?://|\.)(mightyupload\.com)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -72,11 +73,11 @@ class MightyuploadResolver(Plugin, UrlResolver, PluginSettings):
             return 'http://www.mightyupload.com/embed-%s.html' % (media_id)
 
     def get_host_and_id(self, url):
-        r = re.search('http://(?:www.)?(.+?)/(?:embed-)?([\w]+)', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return 'mightyupload.com' in host
+        return re.search(self.pattern, url) or self.name in host

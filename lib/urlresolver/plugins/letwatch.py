@@ -25,6 +25,7 @@ class LetwatchResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "letwatch.us"
     domains = ["letwatch.us"]
+    pattern = '(?://|\.)(letwatch\.us)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -58,8 +59,11 @@ class LetwatchResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://letwatch.us/embed-%s-640x400.html' % media_id
 
     def get_host_and_id(self, url):
-        r = re.search('//(letwatch.us)/(?:embed-)?(\w+)', url)
-        return r.groups()
-
+        r = re.search(self.pattern, url)
+        if r:
+            return r.groups()
+        else:
+            return False
+    
     def valid_url(self, url, host):
-        return re.search('http://letwatch.us/(?:embed-)?\w+', url) or self.name in host
+        return re.search(self.pattern, url) or self.name in host

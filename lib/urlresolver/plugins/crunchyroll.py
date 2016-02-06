@@ -26,6 +26,7 @@ class CrunchyRollResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "crunchyroll"
     domains = [ "crunchyroll.com" ]
+    pattern = '(?://|\.)(crunchyroll\.com)/.+?/.+?([^a-zA-Z-+]{6})'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -48,11 +49,11 @@ class CrunchyRollResolver(Plugin, UrlResolver, PluginSettings):
         return 'http://www.crunchyroll.com/android_rpc/?req=RpcApiAndroid_GetVideoWithAcl&media_id=%s' % media_id
         
     def get_host_and_id(self, url):
-        r = re.search(r'http://www.(crunchyroll).+?/.+?/.+?([^a-zA-Z-+]{6})', url)
+        r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        return (re.search(r'http://www.(crunchyroll).+?/.+?/.+?([^a-zA-Z-+]{6})', url) or 'crunchyroll' in host)
+        return re.search(self.pattern, url) or self.name in host
