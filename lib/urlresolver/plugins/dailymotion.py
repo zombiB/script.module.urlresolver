@@ -28,7 +28,7 @@ class DailymotionResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "dailymotion"
     domains = [ "dailymotion.com" ]
-    pattern = '(?://|\.)(dailymotion\.com)/(?:video|embed|sequence|swf)/([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(dailymotion\.com)/(?:video|embed|sequence|swf)(?:/video)?/([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
