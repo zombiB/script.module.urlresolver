@@ -24,11 +24,7 @@ from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
 from t0mm0.common.net import Net
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 class RPnetResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     implements = [UrlResolver, PluginSettings]

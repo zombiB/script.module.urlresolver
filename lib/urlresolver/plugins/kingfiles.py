@@ -31,12 +31,12 @@ class KingFilesResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "KingFiles"
     domains = ["kingfiles.net"]
+    pattern = '(?://|\.)(kingfiles\.net)/([0-9a-zA-Z/]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?kingfiles\.net)/([0-9a-zA-Z/]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -77,6 +77,6 @@ class KingFilesResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

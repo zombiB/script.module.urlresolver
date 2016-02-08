@@ -16,14 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import re
+import urllib
 from t0mm0.common.net import Net
+from lib import captcha_lib
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-import re
-import xbmc
 from urlresolver import common
-from lib import captcha_lib
+import xbmc
 
 MAX_TRIES = 3
 
@@ -31,12 +32,12 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "uploadx"
     domains = ["uploadx.org"]
+    pattern = '(?://|\.)(uploadx\.org)/([0-9a-zA-Z/]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www.)?uploadx.org)/([0-9a-zA-Z/]+)'
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -44,7 +45,7 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
         tries = 0
         while tries < MAX_TRIES:
             data = {}
-            r = re.findall(r'type="hidden"\s*name="([^"]+)"\s*value="([^"]+)', html)
+            r = re.findall(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"', html)
             for name, value in r:
                 data[name] = value
             data['method_free'] = 'Free Download+>>'
@@ -60,14 +61,14 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
             if 'File Download Link Generated' in html:
                 r = re.search('href="([^"]+)[^>]+id="downloadbtn"', html)
                 if r:
-                    return r.group(1) + '|User-Agent=%s' % (common.IE_USER_AGENT)
-            
+                    return r.group(1) + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
+
             tries = tries + 1
             
         raise UrlResolver.ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
-        return 'http://%s/%s' % (host, media_id)
+        return 'http://uploadx.org/%s' % media_id
         
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -75,6 +76,6 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -25,10 +25,7 @@ from t0mm0.common.net import Net
 
 import re
 import urllib
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 class PremiumizeMeResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     implements = [UrlResolver, PluginSettings]

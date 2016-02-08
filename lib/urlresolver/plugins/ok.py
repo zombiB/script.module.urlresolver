@@ -19,34 +19,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 import json
-import os
-import time
-import xbmcgui
+import urllib
 from t0mm0.common.net import Net
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
-from urlresolver import common
+import xbmcgui
 
 class OKResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "ok.ru"
-    domains = ["ok.ru", "www.ok.ru"]
-    profile_path = common.profile_path
-    cookie_file = os.path.join(profile_path, '%s.cookies' % name)
-    id_file = os.path.join(profile_path, '%s.id' % name)
-    useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
-    header = {"User-Agent":useragent}
+    domains = ['ok.ru', 'odnoklassniki.ru']
+    pattern = '(?://|\.)(ok.ru|odnoklassniki.ru)/(?:videoembed|video)/(.+)'
+    header = {"User-Agent": common.OPERA_USER_AGENT}
+    qual_map = {'full': '1080', 'hd': '720', 'sd': '480', 'low': '360', 'lowest': '240', 'mobile': '144'}
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
-        self.pattern = '//((?:www\.)?ok\.ru)/(?:videoembed|video)/(.+)'
-        try:
-            os.makedirs(os.path.dirname(self.cookie_file))
-        except OSError:
-            pass
 
     def get_media_url(self, host, media_id):
         vids = self.__get_Metadata(media_id)
@@ -58,15 +50,8 @@ class OKResolver(Plugin, UrlResolver, PluginSettings):
         for entry in vids['urls']:
             quality = self.__replaceQuality(entry['name'])
             lines.append(quality)
-            if vids['vdtkn'] is not None:
-                purged_jsonvars[quality] = entry['url'] + "&vdsig=" + vids['vtkn'] + "|User-Agent=" + self.useragent + "&Cookie=vdtkn%3D" + vids['vdtkn']
-            else:
-                purged_jsonvars[quality] = entry['url'] + "&vdsig=" + vids['vtkn'] + "|User-Agent=" + self.useragent
+            purged_jsonvars[quality] = entry['url'] + '|' + urllib.urlencode(self.header)
             if int(quality) > int(best): best = quality
-
-        if vids['vdtkn'] is not None:
-            if vids['vdtkn'][0] == '^':
-                vids['vdtkn'] = vids['vdtkn'][1:]
 
         if len(lines) == 1:
             return purged_jsonvars[lines[0]].encode('utf-8')
@@ -84,76 +69,17 @@ class OKResolver(Plugin, UrlResolver, PluginSettings):
         raise UrlResolver.ResolverError('No video found')
 
     def __replaceQuality(self, qual):
-        if qual == "full":
-            return "1080"
-        if qual == "hd":
-            return "720"
-        if qual == "sd":
-            return "480"
-        if qual == "low":
-            return "360"
-        if qual == "lowest":
-            return "240"
-        if qual == "mobile":
-            return "144"
-        common.addon.log_debug('Unknown quality: %s' % (qual))
-        return "000"
+        return self.qual_map.get(qual.lower(), '000')
 
     def __get_Metadata(self, media_id):
         url = "http://www.ok.ru/dk?cmd=videoPlayerMetadata&mid=" + media_id
         html = self.net.http_GET(url, headers=self.header).content
         json_data = json.loads(html)
-        info = self.__get_vdsig(json_data['security']['url'])
+        info = dict()
         info['urls'] = []
         for entry in json_data['videos']:
             info['urls'].append(entry)
         return info
-
-    def __get_vdsig(self, url):
-        info = dict()
-
-        vdsig = self.__loadSig()
-
-        if vdsig is not None:
-            info['vtkn'] = vdsig
-            info['vdtkn'] = None
-        else:
-            params = dict()
-            params[''] = ""
-            response = self.net.http_POST(url, params, headers=self.header)
-            cookies = self.net.get_cookies()
-            html = response.content
-            json_data = json.loads(html)
-            self.__saveSig(json_data['vtkn'], cookies['.mycdn.me']['/']['vdtkn'].expires)
-            info['vtkn'] = json_data['vtkn']
-            info['vdtkn'] = cookies['.mycdn.me']['/']['vdtkn'].value
-
-        return info
-
-    def __loadSig(self):
-        try:
-            f = open(self.id_file, 'r')
-            data = f.read()
-            f.close()
-
-            info = data.split(";")
-
-            if (float(info[1]) <= time.time()):
-                return
-            else:
-                return info[0]
-        except:
-            return
-
-    def __saveSig(self, vdsig, expires):
-        try:
-            data = vdsig + ";" + str(expires)
-            f = open(self.id_file, 'w')
-            f.write(data)
-            f.close()
-            return True
-        except:
-            return False
 
     def get_url(self, host, media_id):
         return 'http://%s/videoembed/%s' % (host, media_id)
@@ -164,11 +90,9 @@ class OKResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
-        if self.get_setting('enabled') == 'false':
-            return False
-        return re.search(self.pattern, url)
+        return re.search(self.pattern, url) or self.name in host
 
     def get_settings_xml(self):
         xml = PluginSettings.get_settings_xml(self)
