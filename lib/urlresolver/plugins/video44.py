@@ -33,7 +33,6 @@ class Video44Resolver(Plugin, UrlResolver, PluginSettings):
     pattern = 'http://((?:www.)?(?:video44.net|easyvideo.me))/gogo/.*?file=([%0-9a-zA-Z\-_\.]+).*?'
     
     def __init__(self):
-        self.set_setting('enabled', 'true')
         p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
