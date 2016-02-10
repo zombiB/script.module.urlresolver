@@ -27,8 +27,8 @@ from urlresolver.plugnplay import Plugin
 class YourUploadResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "yourupload.com"
-    domains = [ "yourupload.com" ]
-    pattern = '(?://|\.)(yourupload\.com)/(?:watch|embed)/?([0-9A-Za-z]+)'
+    domains = [ "yourupload.com", "yucache.net" ]
+    pattern = '(?://|\.)(yourupload\.com|yucache\.net)/(?:watch|embed)?/?([0-9A-Za-z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
