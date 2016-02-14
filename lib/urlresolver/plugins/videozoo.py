@@ -36,7 +36,7 @@ class VideoZooResolver(Plugin, UrlResolver, PluginSettings):
     pattern = 'http://((?:www\.)*(?:play44|playbb|video44|byzoo|playpanda|videozoo|videowing|easyvideo)\.(?:me|org|net|eu)/(?:embed[/0-9a-zA-Z]*?|gplus|picasa|gogo/)(?:\.php)*)\?.*?((?:vid|video|id|file)=[%0-9a-zA-Z_\-\./]+|.*)[\?&]*.*'
     
     def __init__(self):
-        p = self.get_setting('priority') or 99
+        p = self.get_setting('priority') or 100
         self.priority = int(p)
         self.net = Net()
 
