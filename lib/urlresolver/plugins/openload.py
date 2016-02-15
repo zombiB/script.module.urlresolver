@@ -40,11 +40,13 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         try:
+            info_url = 'https://api.openload.io/1/file/info?file=%s' % (media_id)
+            js_result = self.__get_json(info_url)
+            if 'result' in js_result and media_id in js_result['result']:
+                if js_result['result'][media_id]['status'] != 200:
+                    raise UrlResolver.ResolverError('File Not Available')
             ticket_url = 'https://api.openload.io/1/file/dlticket?file=%s' % (media_id)
-            result = self.net.http_GET(ticket_url).content
-            js_result = json.loads(result)
-            if js_result['status'] != 200:
-                raise UrlResolver.ResolverError(js_result['msg'])
+            js_result = self.__get_json(ticket_url)
             video_url = 'https://api.openload.io/1/file/dl?file=%s&ticket=%s' % (media_id, js_result['result']['ticket'])
             captcha_url = js_result['result'].get('captcha_url', None)
             if captcha_url:
@@ -52,17 +54,23 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
                 if captcha_response:
                     video_url += '&captcha_response=%s' % urllib.quote(captcha_response)
             xbmc.sleep(js_result['result']['wait_time'] * 1000)
-            result = self.net.http_GET(video_url).content
-            js_result = json.loads(result)
-            if js_result['status'] != 200:
-                raise UrlResolver.ResolverError(js_result['msg'])
-            
+            js_result = self.__get_json(video_url)
             return js_result['result']['url'] + '?mime=true'
+        except UrlResolver.ResolverError:
+            raise
         except Exception as e:
             raise UrlResolver.ResolverError('Exception in openload: %s' % (e))
         
         raise UrlResolver.ResolverError('Unable to resolve openload.io link. Filelink not found.')
 
+    def __get_json(self, url):
+        result = self.net.http_GET(url).content
+        js_result = json.loads(result)
+        common.addon.log_debug(js_result)
+        if js_result['status'] != 200:
+            raise UrlResolver.ResolverError(js_result['msg'])
+        return js_result
+    
     def get_url(self, host, media_id):
             return 'http://openload.io/embed/%s' % (media_id)
 
