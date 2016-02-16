@@ -18,9 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from t0mm0.common.net import Net
+from urlresolver import common
+from urlresolver.plugnplay import Plugin
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+
 
 MAX_TRIES=3
 
@@ -28,7 +30,7 @@ class TheVideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = "thevideo"
     domains = ["thevideo.me"]
-    pattern = '(?://|\.)(thevideo\.me)/(?:embed-)?([0-9a-zA-Z]+)'
+    pattern = '(?://|\.)(thevideo\.me)/(?:embed-|download/)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -37,17 +39,25 @@ class TheVideoResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
+        headers = {
+            'User-Agent': common.IE_USER_AGENT,
+            'Referer': web_url
+        }
+        html = self.net.http_GET(web_url, headers=headers).content
         r = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
         if not r:
             raise UrlResolver.ResolverError('Unable to locate link')
         else:
             max_quality = 0
+            best_stream_url = None
             for quality, stream_url in r:
                 if int(quality) >= max_quality:
                     best_stream_url = stream_url
                     max_quality = int(quality)
-            return best_stream_url
+            if best_stream_url:
+                return best_stream_url
+            else:
+                raise UrlResolver.ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
