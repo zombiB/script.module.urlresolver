@@ -90,9 +90,8 @@ class UpToBoxResolver(Plugin, UrlResolver, PluginSettings):
             if r:
                 raise Exception()
             '''
-            r = re.search('<video\sid.+?>(.+?)</video>', html, re.DOTALL).group(1)
 
-            sources = re.compile('<source.+?src\s*=\s*[\'"](.+?)[\'"].+?data-res\s*=\s*[\'"](.+?)[\'"].*?/>').findall(r)
+            sources = re.compile('<source.+?src\s*=\s*[\'"](.+?)[\'"].+?data-res\s*=\s*[\'"](.+?)[\'"].*?/>').findall(html)
             sources = [(i[0], int(re.sub('[^0-9]', '', i[1]))) for i in sources]
             sources = sorted(sources, key=lambda k: k[1])
 
