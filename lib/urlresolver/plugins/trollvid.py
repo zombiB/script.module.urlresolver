@@ -19,7 +19,7 @@
 import re
 import base64
 import urllib
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin

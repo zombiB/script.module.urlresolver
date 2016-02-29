@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib
 import urllib2
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from lib import captcha_lib
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
@@ -40,7 +40,7 @@ class HugefilesResolver(Plugin, UrlResolver, PluginSettings):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
 
-        common.addon.log_debug('HugeFiles: get_link: %s' % (web_url))
+        common.log_utils.log_debug('HugeFiles: get_link: %s' % (web_url))
         html = self.net.http_GET(web_url).content
 
         r = re.findall('File Not Found', html)
@@ -60,7 +60,7 @@ class HugefilesResolver(Plugin, UrlResolver, PluginSettings):
         data['method_free'] = 'Free Download'
         data.update(captcha_lib.do_captcha(html))
 
-        common.addon.log_debug('HugeFiles - Requesting POST URL: %s with data: %s' % (web_url, data))
+        common.log_utils.log_debug('HugeFiles - Requesting POST URL: %s with data: %s' % (web_url, data))
         html = self.net.http_POST(web_url, data).content
 
         # Re-grab data values
@@ -77,13 +77,13 @@ class HugefilesResolver(Plugin, UrlResolver, PluginSettings):
 
         headers = { 'User-Agent': common.IE_USER_AGENT }
 
-        common.addon.log_debug('HugeFiles - Requesting POST URL: %s with data: %s' % (web_url, data))
+        common.log_utils.log_debug('HugeFiles - Requesting POST URL: %s with data: %s' % (web_url, data))
         request = urllib2.Request(web_url, data=urllib.urlencode(data), headers=headers)
 
         try: stream_url = urllib2.urlopen(request).geturl()
         except: return
 
-        common.addon.log_debug('Hugefiles stream Found: %s' % stream_url)
+        common.log_utils.log_debug('Hugefiles stream Found: %s' % stream_url)
         return stream_url
  
     def get_url(self, host, media_id):

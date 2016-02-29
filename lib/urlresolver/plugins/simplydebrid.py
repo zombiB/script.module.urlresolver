@@ -21,7 +21,7 @@ from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 import urlparse
 import urllib
 import time
@@ -47,7 +47,7 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         try:
             response = self.net.http_GET(url).content
             if response:
-                common.addon.log_debug('Simply-Debrid: Resolved to %s' % (response))
+                common.log_utils.log_debug('Simply-Debrid: Resolved to %s' % (response))
                 if response.startswith('http'):
                     return response
                 else:
@@ -68,10 +68,10 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
             if not response.startswith('02'):
                 raise UrlResolver.ResolverError('Simply-Debrid Login Failed: %s' % (response))
             else:
-                common.addon.log_debug('SD Login - Success: %s' % (now))
+                common.log_utils.log_debug('SD Login - Success: %s' % (now))
                 self.set_setting('last_login', str(int(now)))
         else:
-            common.addon.log_debug('Skipping Login - logged in age: %ds' % (now - last_login))
+            common.log_utils.log_debug('Skipping Login - logged in age: %ds' % (now - last_login))
     
     def get_url(self, host, media_id):
         return media_id
@@ -86,9 +86,9 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
                 url = self.base_url + query
                 response = self.net.http_GET(url).content
                 self.hosts = [host for host in response.split(';') if host]
-                common.addon.log_debug('SD Hosts: %s' % (self.hosts))
+                common.log_utils.log_debug('SD Hosts: %s' % (self.hosts))
         except Exception as e:
-            common.addon.log_error('Error getting Simply-Debrid hosts: %s' % (e))
+            common.log_utils.log_error('Error getting Simply-Debrid hosts: %s' % (e))
 
     def valid_url(self, url, host):
         if self.get_setting('login') == 'false': return False

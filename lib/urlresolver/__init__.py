@@ -38,7 +38,7 @@ from plugnplay.interfaces import SiteAuth
 import xbmcgui
 
 #load all available plugins
-common.addon.log('Initializing URLResolver version: %s' % common.addon_version)
+common.log_utils.log('Initializing URLResolver version: %s' % common.addon_version)
 plugnplay.set_plugin_dirs(common.plugins_path)
 
 MAX_SETTINGS = 75
@@ -151,7 +151,7 @@ def choose_source(sources):
     
     #no playable sources available
     else:
-        common.addon.log_error('no playable streams found')
+        common.log_utils.log_error('no playable streams found')
         return False
     
         
@@ -234,13 +234,13 @@ def _update_settings_xml():
         old_xml = ''
         
     if old_xml != new_xml:
-        common.addon.log_debug('Updating Settings XML')
+        common.log_utils.log_debug('Updating Settings XML')
         try:
             with open(common.settings_file, 'w') as f:
                 f.write(new_xml)
         except:
             raise
     else:
-        common.addon.log_notice('No Settings Update Needed')
+        common.log_utils.log_notice('No Settings Update Needed')
             
 _update_settings_xml()

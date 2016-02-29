@@ -23,7 +23,7 @@ from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 import json
 
 class RPnetResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
@@ -67,7 +67,7 @@ class RPnetResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
             url = 'http://premium.rpnet.biz/hoster.json'
             response = self.net.http_GET(url).content
             hosters = json.loads(response)
-            common.addon.log_debug('rpnet patterns: %s' % hosters)
+            common.log_utils.log_debug('rpnet patterns: %s' % hosters)
             self.patterns = [re.compile(pattern) for pattern in hosters['supported']]
         return self.patterns
 
@@ -75,7 +75,7 @@ class RPnetResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         if self.hosts is None:
             url = 'http://premium.rpnet.biz/hoster2.json'
             response = self.net.http_GET(url).content
-            common.addon.log_debug('rpnet hosts: %s' % response)
+            common.log_utils.log_debug('rpnet hosts: %s' % response)
             self.hosts = json.loads(response)['supported']
     
     def valid_url(self, url, host):

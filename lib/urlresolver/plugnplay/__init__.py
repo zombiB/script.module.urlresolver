@@ -17,9 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import sys
+import re
 from glob import glob
 from os.path import join, basename
-import sys, re
 from urlresolver import common
 from manager import *
 from types import FunctionType, ClassType
@@ -66,7 +67,7 @@ def method_name_and_load(method_name):
             load_plugin(impl)
             method = getattr(impl._ref, method_name)
             if (method == orig_method):
-                common.addon.log_error('Unusable module %s in %s.py' % (impl.name, impl.fname))
+                common.log_utils.log_error('Unusable module %s in %s.py' % (impl.name, impl.fname))
             return method(*args, **kwargs)
 
     return _auto_caller_template
@@ -160,16 +161,16 @@ AutoloadPlugin = AutoloadMeta('AutoloadPlugin', (object, ), {})
 ''' More functions '''
 def set_plugin_dirs(*dirs):
   for d in dirs:
-    common.addon.log_debug('adding plugin dir: %s' % d)
+    common.log_utils.log_debug('adding plugin dir: %s' % d)
     plugin_dirs.append(d)  
 
 def load_plugin(mod):
-    common.addon.log_debug('loading plugin: %s from %s' % (mod.name, mod.fname))
+    common.log_utils.log_debug('loading plugin: %s from %s' % (mod.name, mod.fname))
     try:
         imported_module = __import__(mod.fname, globals(), locals())
         sys.modules[mod.fname] = imported_module
     except Exception as e:
-        common.addon.log_error('Unable to load plugin %s from %s.py: %s' % (mod.name, mod.fname, e))
+        common.log_utils.log_error('Unable to load plugin %s from %s.py: %s' % (mod.name, mod.fname, e))
 
 def load_plugins():
     for d in plugin_dirs:
@@ -183,7 +184,7 @@ def load_plugins():
                 imported_module = __import__(mod_name, globals(), locals())
                 sys.modules[mod_name] = imported_module
             except Exception as e:
-                common.addon.log_error('Unable to load plugin %s: %s' % (mod_name, e))
+                common.log_utils.log_error('Unable to load plugin %s: %s' % (mod_name, e))
 
 def scan_plugins(wrappercls):
     re_class = re.compile('class\s+(\w+).*Plugin')
@@ -203,14 +204,14 @@ def scan_plugins(wrappercls):
                 else:
                     found_plugin.proc_plugin_line(line)
                     if found_plugin.plugin_ready():
-                        _enabled = common.addon.get_setting('%s_enabled' % found_plugin.class_name)
+                        _enabled = common.get_setting('%s_enabled' % found_plugin.class_name)
                         if _enabled != "true": break
-                        _priority = common.addon.get_setting('%s_priority' % found_plugin.class_name)
+                        _priority = common.get_setting('%s_priority' % found_plugin.class_name)
                         try:
                             found_plugin.priority = int(_priority)
                         except ValueError:
                             found_plugin.priority = 100
                         for cls in found_plugin.implements:
-                            common.addon.log_debug("module %s supports %s in class %s" % (mod_name, cls, found_plugin.class_name))
+                            common.log_utils.log_debug("module %s supports %s in class %s" % (mod_name, cls, found_plugin.class_name))
                             man.add_implementor(cls, found_plugin)
                         break # Next file

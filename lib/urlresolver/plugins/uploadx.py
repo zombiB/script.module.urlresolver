@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import urllib
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from lib import captcha_lib
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -53,7 +53,7 @@ class UploadXResolver(Plugin, UrlResolver, PluginSettings):
             headers = {
                 'Referer': web_url
             }
-            common.addon.log_debug(data)
+            common.log_utils.log_debug(data)
             html = self.net.http_POST(web_url, data, headers=headers).content
             if tries > 0:
                 xbmc.sleep(6000)

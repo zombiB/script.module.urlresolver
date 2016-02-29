@@ -84,7 +84,7 @@ class HostedMediaFile:
             self._domain = self.__top_domain(self._host)
 
         self.__resolvers = self.__find_resolvers(
-            common.addon.get_setting('allow_universal') == "true")
+            common.get_setting('allow_universal') == "true")
 
         if not url:
             for resolver in self.__resolvers:  # Find a valid URL
@@ -151,10 +151,10 @@ class HostedMediaFile:
         '''
         for resolver in self.__resolvers:
             try:
-                common.addon.log_debug('resolving using %s plugin' % resolver.name)
+                common.log_utils.log_debug('resolving using %s plugin' % resolver.name)
                 if resolver.valid_url(self._url, self._host):
                     if SiteAuth in resolver.implements:
-                        common.addon.log_debug('logging in')
+                        common.log_utils.log_debug('logging in')
                         resolver.login()
                     self._host, self._media_id = resolver.get_host_and_id(self._url)
                     try:
@@ -164,23 +164,23 @@ class HostedMediaFile:
                             self._valid_url = True
                             return stream_url
                     except UrlResolver.ResolverError as e:
-                        common.addon.log_error('Resolver Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
+                        common.log_utils.log_error('Resolver Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
                         if resolver == self.__resolvers[-1]:
-                            common.addon.log_debug(traceback.format_exc())
+                            common.log_utils.log_debug(traceback.format_exc())
                             return UrlResolver.unresolvable(code=0, msg=e)
                     except urllib2.HTTPError as e:
-                        common.addon.log_error('HTTP Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
+                        common.log_utils.log_error('HTTP Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
                         if resolver == self.__resolvers[-1]:
-                            common.addon.log_debug(traceback.format_exc())
+                            common.log_utils.log_debug(traceback.format_exc())
                             return UrlResolver.unresolvable(code=3, msg=e)
                     except Exception as e:
-                        common.addon.log_error('Unknown Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
+                        common.log_utils.log_error('Unknown Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
                         if resolver == self.__resolvers[-1]:
-                            common.addon.log_error(traceback.format_exc())
+                            common.log_utils.log_error(traceback.format_exc())
                             return UrlResolver.unresolvable(code=0, msg=e)
             except Exception as e:
-                common.addon.log_notice("Resolver '%s' crashed: %s. Ignoring" % (resolver.name, e))
-                common.addon.log_debug(traceback.format_exc())
+                common.log_utils.log_notice("Resolver '%s' crashed: %s. Ignoring" % (resolver.name, e))
+                common.log_utils.log_debug(traceback.format_exc())
                 continue
         self.__resolvers = []  # No resolvers.
         return False
@@ -225,7 +225,7 @@ class HostedMediaFile:
         except: headers = {}
         for header in headers:
             headers[header] = urllib.unquote(headers[header])
-        common.addon.log_debug('Setting Headers on UrlOpen: %s' % (headers))
+        common.log_utils.log_debug('Setting Headers on UrlOpen: %s' % (headers))
     
         request = urllib2.Request(stream_url.split('|')[0], headers=headers)
 
@@ -244,7 +244,7 @@ class HostedMediaFile:
     
         # added this log line for now so that we can catch any logs on streams that are rejected due to test_stream failures
         # we can remove it once we are sure this works reliably
-        if int(http_code)>=400: common.addon.log('Stream UrlOpen Failed: Url: %s HTTP Code: %s' % (stream_url, http_code))
+        if int(http_code)>=400: common.log_utils.log('Stream UrlOpen Failed: Url: %s HTTP Code: %s' % (stream_url, http_code))
 
         return int(http_code) < 400
 
@@ -260,8 +260,8 @@ class HostedMediaFile:
             elif (universal and ('*' in resolver.domains)):
                 resolvers.append(resolver)
 
-        if not found: common.addon.log_debug('no resolver found for: %s' % (self._domain))
-        else: common.addon.log_debug('resolvers for %s are %s' % (self._domain, [r.name for r in resolvers]))
+        if not found: common.log_utils.log_debug('no resolver found for: %s' % (self._domain))
+        else: common.log_utils.log_debug('resolvers for %s are %s' % (self._domain, [r.name for r in resolvers]))
 
         return resolvers
 

@@ -22,7 +22,7 @@ from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 
 class VeeHDResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     implements = [UrlResolver, SiteAuth, PluginSettings]

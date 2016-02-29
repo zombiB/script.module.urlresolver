@@ -18,7 +18,7 @@
     reusable captcha methods
 """
 from urlresolver import common
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 import re
 import xbmcgui
 import xbmc
@@ -72,7 +72,7 @@ def do_captcha(html):
             return {}
 
 def do_solvemedia_captcha(captcha_url):
-    common.addon.log_debug('SolveMedia Captcha: %s' % (captcha_url))
+    common.log_utils.log_debug('SolveMedia Captcha: %s' % (captcha_url))
     if captcha_url.startswith('//'): captcha_url = 'http:' + captcha_url
     html = net.http_GET(captcha_url).content
     data = {
@@ -102,7 +102,7 @@ def do_solvemedia_captcha(captcha_url):
     return {'adcopy_challenge': data['adcopy_challenge'], 'adcopy_response': 'manual_challenge'}
 
 def do_recaptcha(captcha_url):
-    common.addon.log_debug('Google ReCaptcha: %s' % (captcha_url))
+    common.log_utils.log_debug('Google ReCaptcha: %s' % (captcha_url))
     if captcha_url.startswith('//'): captcha_url = 'http:' + captcha_url
     personal_nid = common.addon.get_setting('personal_nid')
     if personal_nid:
@@ -122,7 +122,7 @@ def do_recaptcha_v2(sitekey):
 
     return {}
 def do_xfilecaptcha(captcha_url):
-    common.addon.log_debug('XFileLoad ReCaptcha: %s' % (captcha_url))
+    common.log_utils.log_debug('XFileLoad ReCaptcha: %s' % (captcha_url))
     if captcha_url.startswith('//'): captcha_url = 'http:' + captcha_url
     solution = get_response(captcha_url)
     return {'code': solution}

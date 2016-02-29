@@ -14,7 +14,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from lib import jsunpack
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
@@ -50,7 +50,7 @@ class WatchVideoResolver(Plugin, UrlResolver, PluginSettings):
 
         link = re.search('(?:m3u8").*?"(.*?)"', js)
         if link:
-            common.addon.log_debug('watchvideo.us Link Found: %s' % link.group(1))
+            common.log_utils.log_debug('watchvideo.us Link Found: %s' % link.group(1))
             return link.group(1)
 
         raise UrlResolver.ResolverError('Unable to find watchvideo.us video')

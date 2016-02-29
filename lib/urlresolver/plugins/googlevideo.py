@@ -17,7 +17,7 @@
 """
 
 
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver import common
 from urlresolver.plugnplay import Plugin
 from urlresolver.plugnplay.interfaces import UrlResolver

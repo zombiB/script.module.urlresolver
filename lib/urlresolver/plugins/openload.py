@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import json
 import urllib
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from lib import captcha_lib
 from lib.aa_decoder import AADecoder
 from urlresolver.plugnplay.interfaces import UrlResolver
@@ -44,14 +44,14 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
             web_url = self.get_url(host, media_id)
             headers = {'User-Agent': common.FF_USER_AGENT}
             html = self.net.http_GET(web_url, headers=headers).content.encode('utf-8')
-            common.addon.log(html)
+            common.log_utils.log(html)
             aaencoded = re.search('id="videooverlay".*?<script[^>]*>(.*)</script>', html, re.DOTALL)
             dtext = AADecoder(aaencoded.group(1)).decode()
             stream_url = re.search('[\'"](http.*?)[\'"]', dtext)
             if stream_url:
                 return stream_url.group(1) + '|User-Agent=%s' % (common.FF_USER_AGENT)
         except Exception as e:
-            common.addon.log_debug('Exception during openload resolve parse: %s' % (e))
+            common.log_utils.log_debug('Exception during openload resolve parse: %s' % (e))
         
         try:
             info_url = 'https://api.openload.io/1/file/info?file=%s' % (media_id)
@@ -80,7 +80,7 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
     def __get_json(self, url):
         result = self.net.http_GET(url).content
         js_result = json.loads(result)
-        common.addon.log_debug(js_result)
+        common.log_utils.log_debug(js_result)
         if js_result['status'] != 200:
             raise UrlResolver.ResolverError(js_result['msg'])
         return js_result
