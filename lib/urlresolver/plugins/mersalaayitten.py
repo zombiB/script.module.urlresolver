@@ -17,40 +17,51 @@
 """
 
 import re
+import urllib
 from t0mm0.common.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 
-class YoutubeResolver(Plugin, UrlResolver, PluginSettings):
+class MersalaResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "youtube"
-    domains = [ 'youtube.com', 'youtu.be' ]
-    pattern = '(?://|\.)(youtube.com|youtu.be)/(?:embed/|.+?\?v=|.+?\&v=)([0-9A-Za-z_\-]+)'
+    name = "mersalaayitten.com"
+    domains = ["mersalaayitten.com"]
+    pattern = '(?://|\.)(mersalaayitten\.com)/embed/([0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
         self.priority = int(p)
+        self.net = Net()
 
     def get_media_url(self, host, media_id):
-        plugin = 'plugin://plugin.video.youtube/play/?video_id=' + media_id
-        return plugin
+        web_url = self.get_url(host, media_id)
+        resp = self.net.http_GET(web_url)
+        html = resp.content
+        headers = dict(resp._response.info().items())
+        r = re.search("config: '(.*?)'", html)
+        if r:
+            stream_xml = r.group(1)
+            referer = {'Referer': 'http://mersalaayitten.com/media/nuevo/player.swf'}
+            response = self.net.http_GET(stream_xml, headers=referer)
+            xmlhtml = response.content
+            r2 = re.search('<file>(.*?)</file>', xmlhtml)
+            stream_url = r2.group(1) + '|Cookie=' + headers['set-cookie']
+            
+        else:
+            raise UrlResolver.ResolverError('no file located')
+        
+        return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://youtube.com/watch?v=%s' % media_id
-
+        return 'http://mersalaayitten.com/embed/%s' % (media_id)
+    
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
-
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting label="This plugin calls the youtube addon - '
-        xml += 'change settings there." type="lsep" />\n'
-        return xml

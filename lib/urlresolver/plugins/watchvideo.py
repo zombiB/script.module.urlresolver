@@ -1,7 +1,4 @@
-"""
-vid.gg urlresolver plugin
-Copyright (C) 2015 steev
-
+'''
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -14,20 +11,21 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-"""
+'''
 
 import re
-import urllib
 from t0mm0.common.net import Net
+from lib import jsunpack
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 
-class VidggResolver(Plugin, UrlResolver, PluginSettings):
+class WatchVideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = 'vid.gg'
-    domains = ['vidgg.to', 'www.vid.gg']
-    pattern = '(?://|\.)(vid.gg|vidgg.to)/(?:embed/\?id=|video/)([0-9a-z]+)'
+    name = "watchvideo.us"
+    domains = ["watchvideo.us", "watchvideo4.us"]
+    pattern = '(?://|\.)(watchvideo[0-9]?\.us)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -36,36 +34,36 @@ class VidggResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
         html = self.net.http_GET(web_url).content
-        r = re.search('flashvars\.filekey="(.+?)"', html)
-        if r:
-            filekey = r.group(1)
-        else:
-            raise UrlResolver.ResolverError("File Not Found or removed")
 
-        api_call = "http://www.vidgg.to/api/player.api.php?{0}&file={1}&key={2}".format(
-            "numOfErrors=0&cid=1&cid2=undefined&cid3=undefined&pass=undefined&user=undefined",
-            media_id,
-            urllib.quote_plus(filekey).replace(".", "%2E")
-        )
-
-        api_html = self.net.http_GET(api_call).content
-        rapi = re.search("url=(.+?)&title=", api_html)
-        if rapi:
-            return rapi.group(1)
+        if html.find('404 Not Found') >= 0:
+            raise UrlResolver.ResolverError('File Removed')
         
-        raise UrlResolver.ResolverError("File Not Found or removed")
+        if html.find('Video is processing') >= 0:
+            raise UrlResolver.ResolverError('File still being processed')
+
+        packed = re.search('(eval\(function.*?)\s*</script>', html, re.DOTALL)
+        if packed:
+            js = jsunpack.unpack(packed.group(1))
+        else:
+            js = html
+
+        link = re.search('(?:m3u8").*?"(.*?)"', js)
+        if link:
+            common.addon.log_debug('watchvideo.us Link Found: %s' % link.group(1))
+            return link.group(1)
+
+        raise UrlResolver.ResolverError('Unable to find watchvideo.us video')
 
     def get_url(self, host, media_id):
-        return 'http://www.vidgg.to/video/%s' % media_id
-    
+        return 'http://%s/%s.html' % (host,media_id)
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
