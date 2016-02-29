@@ -59,7 +59,7 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
         return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://embed.cloudtime.to/embed.php?v=%s' % media_id
+        return 'http://www.cloudtime.to/embed/?v=%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
