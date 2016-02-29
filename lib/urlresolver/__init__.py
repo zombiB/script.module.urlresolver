@@ -171,7 +171,7 @@ def display_settings():
     lazy_plugin_scan()
     plugnplay.load_plugins()
     _update_settings_xml()
-    common.addon.show_settings()
+    common.addon.openSettings()
 
 def _update_settings_xml():
     '''

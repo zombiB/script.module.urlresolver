@@ -104,7 +104,7 @@ def do_solvemedia_captcha(captcha_url):
 def do_recaptcha(captcha_url):
     common.log_utils.log_debug('Google ReCaptcha: %s' % (captcha_url))
     if captcha_url.startswith('//'): captcha_url = 'http:' + captcha_url
-    personal_nid = common.addon.get_setting('personal_nid')
+    personal_nid = common.get_setting('personal_nid')
     if personal_nid:
         headers = {'Cookie': 'NID=' + personal_nid}
     else:

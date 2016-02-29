@@ -29,7 +29,7 @@ from urlresolver import common
 from urlresolver.net import Net
 
 CLIENT_ID = 'MUQMIQX6YWDSU'
-USER_AGENT = 'URLResolver for Kodi/%s' % (common.addon.get_version())
+USER_AGENT = 'URLResolver for Kodi/%s' % (common.addon_version)
 INTERVALS = 5
 
 class RealDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):

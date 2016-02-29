@@ -29,6 +29,7 @@ profile_path = xbmc.translatePath(addon.getAddonInfo('profile'))
 settings_file = os.path.join(addon_path, 'resources', 'settings.xml')
 addon_version = addon.getAddonInfo('version')
 get_setting = addon.getSetting
+set_setting = addon.setSetting
 
 IE_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko'
 FF_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'

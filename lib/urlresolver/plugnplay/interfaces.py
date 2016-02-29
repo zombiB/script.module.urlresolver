@@ -35,11 +35,9 @@ should be defined as follows::
 '''
 
 from urlresolver.plugnplay import Interface, AutoloadPlugin
+from urlresolver import common
 import sys
 import re
-import xbmcaddon
-
-addon = xbmcaddon.Addon('script.module.urlresolver')
 
 def _function_id(obj, nFramesUp):
     '''Create a string naming the function n frames up on the stack.'''
@@ -312,7 +310,7 @@ class PluginSettings(Interface):
         return xml
 
     def set_setting(self, key, value):
-        addon.setSetting('%s_%s' % (self.__class__.__name__, key), str(value))
+        common.set_setting('%s_%s' % (self.__class__.__name__, key), str(value))
 
     def get_setting(self, key):
         '''
@@ -339,7 +337,7 @@ class PluginSettings(Interface):
         Returns:
             A string containing the value stored for the requested setting.
         '''
-        return addon.getSetting('%s_%s' % (self.__class__.__name__, key))
+        return common.get_setting('%s_%s' % (self.__class__.__name__, key))
 
 ''' Dummy class for uninitialized plugins
     All bounded methods should be declared as "non_implemented"
