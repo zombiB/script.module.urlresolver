@@ -44,7 +44,8 @@ class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
             web_url = self.get_url(host, media_id)
             headers = {'User-Agent': common.FF_USER_AGENT}
             html = self.net.http_GET(web_url, headers=headers).content.encode('utf-8')
-            aaencoded = re.search('id="videooverlay"[^>]+>(.*)</script', html, re.DOTALL)
+            common.addon.log(html)
+            aaencoded = re.search('id="videooverlay".*?<script[^>]*>(.*)</script>', html, re.DOTALL)
             dtext = AADecoder(aaencoded.group(1)).decode()
             stream_url = re.search('[\'"](http.*?)[\'"]', dtext)
             if stream_url:
