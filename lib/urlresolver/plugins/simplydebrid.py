@@ -24,13 +24,13 @@ from urlresolver import common
 from urlresolver.net import Net
 import urlparse
 import urllib
-import time
+import json
 
 class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     implements = [UrlResolver, SiteAuth, PluginSettings]
     name = "Simply-Debrid"
     domains = ["*"]
-    base_url = 'https://simply-debrid.com/api.php?'
+    base_url = 'https://simply-debrid.com/kapi.php?'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -40,38 +40,38 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         self.net = Net()
         self.username = self.get_setting('username')
         self.password = self.get_setting('password')
+        self.token = None
 
     def get_media_url(self, host, media_id):
-        query = urllib.urlencode({'dl': media_id})
-        url = self.base_url + query
-        try:
-            response = self.net.http_GET(url).content
-            if response:
-                common.log_utils.log_debug('Simply-Debrid: Resolved to %s' % (response))
-                if response.startswith('http'):
-                    return response
-                else:
-                    raise UrlResolver.ResolverError('Unusable Response from SD')
-            else:
-                raise UrlResolver.ResolverError('Null Response from SD')
-        except Exception as e:
-            raise UrlResolver.ResolverError('Link Not Found: Exception: %s' % (e))
+        if self.token is not None:
+            try:
+                query = urllib.urlencode({'action': 'generate', 'u': media_id, 'token': self.token})
+                url = self.base_url + query
+                response = self.net.http_GET(url).content
+                if response:
+                    js_result = json.loads(response)
+                    common.log_utils.log_debug('SD: Result: %s' % (js_result))
+                    if js_result['error']:
+                        msg = js_result.get('message', 'Unknown Error')
+                        raise UrlResolver.ResolverError('SD Resolve Failed: %s' % (msg))
+                    else:
+                        return js_result['link']
+            except Exception as e:
+                raise UrlResolver.ResolverError('SD Resolve: Exception: %s' % (e))
 
     def login(self):
-        try: last_login = int(self.get_setting('last_login'))
-        except: last_login = 0
-        now = time.time()
-        if last_login < (now - (24 * 60 * 60)):
-            query = urllib.urlencode({'login': 1, 'u': self.username, 'p': self.password})
+        try:
+            query = urllib.urlencode({'action': 'login', 'u': self.username, 'p': self.password})
             url = self.base_url + query
             response = self.net.http_GET(url).content
-            if not response.startswith('02'):
-                raise UrlResolver.ResolverError('Simply-Debrid Login Failed: %s' % (response))
+            js_result = json.loads(response)
+            if js_result['error']:
+                msg = js_result.get('message', 'Unknown Error')
+                raise UrlResolver.ResolverError('SD Login Failed: %s' % (msg))
             else:
-                common.log_utils.log_debug('SD Login - Success: %s' % (now))
-                self.set_setting('last_login', str(int(now)))
-        else:
-            common.log_utils.log_debug('Skipping Login - logged in age: %ds' % (now - last_login))
+                self.token = js_result['token']
+        except Exception as e:
+            raise UrlResolver.ResolverError('SD Login Exception: %s' % (e))
     
     def get_url(self, host, media_id):
         return media_id
@@ -82,11 +82,11 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     def get_all_hosters(self):
         try:
             if not self.hosts:
-                query = urllib.urlencode({'list': 1})
+                query = urllib.urlencode({'action': 'filehosting'})
                 url = self.base_url + query
                 response = self.net.http_GET(url).content
-                self.hosts = [host for host in response.split(';') if host]
-                common.log_utils.log_debug('SD Hosts: %s' % (self.hosts))
+                self.hosts = [i['domain'] for i in json.loads(response)]
+            common.log_utils.log_debug('SD Hosts: %s' % (self.hosts))
         except Exception as e:
             common.log_utils.log_error('Error getting Simply-Debrid hosts: %s' % (e))
 
@@ -104,7 +104,6 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
 
     def get_settings_xml(self):
         xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="%s_last_login" type="number" visible="false" default="0"/>\n' % (self.__class__.__name__)
         xml += '<setting id="%s_login" type="bool" label="login" default="false"/>\n' % (self.__class__.__name__)
         xml += '<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>\n' % (self.__class__.__name__)
         xml += '<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>\n' % (self.__class__.__name__)
