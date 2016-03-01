@@ -17,22 +17,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 import xbmcgui
-from urlresolver.net import Net
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
 from urlresolver import common
+from urlresolver.resolver import UrlResolver
 
-class VKPassResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class VKPassResolver(UrlResolver):
     name = "VKPass.com"
     domains = ["vkpass.com"]
     pattern = '(?://|\.)(vkpass\.com)/token/(.+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         base_url = self.get_url(host, media_id)
@@ -123,7 +117,8 @@ class VKPassResolver(Plugin, UrlResolver, PluginSettings):
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (self.__class__.__name__)
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
         return xml

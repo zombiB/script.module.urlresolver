@@ -21,15 +21,10 @@ import os
 import re
 import urllib
 import json
-from urlresolver.net import Net
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import SiteAuth
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
 from urlresolver import common
+from urlresolver.resolver import UrlResolver
 
-class PurevidResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
-    implements = [UrlResolver, SiteAuth, PluginSettings]
+class PureVidResolver(UrlResolver):
     name = "purevid"
     domains = ["purevid.com"]
     pattern = '(?://|\.)(purevid\.com)/v/([0-9A-Za-z]+)'
@@ -38,13 +33,9 @@ class PurevidResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     pv_cookie_file = os.path.join(profile_path, '%s.cookies' % name)
 
     def __init__(self):
-        p = self.get_setting('priority') or 1
-        self.priority = int(p)
-        self.net = Net()
-        try:
-            os.makedirs(os.path.dirname(self.pv_cookie_file))
-        except OSError:
-            pass
+        self.net = common.Net()
+        try: os.makedirs(os.path.dirname(self.pv_cookie_file))
+        except OSError: pass
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -107,16 +98,12 @@ class PurevidResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         else :
             return True
 
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="PurevidResolver_login" '        
-        xml += 'type="bool" label="Login" default="false"/>\n'
-        xml += '<setting id="PurevidResolver_username" enable="eq(-1,true)" '
-        xml += 'type="text" label="     username" default=""/>\n'
-        xml += '<setting id="PurevidResolver_password" enable="eq(-2,true)" '
-        xml += 'type="text" label="     password" option="hidden" default=""/>\n'
-        xml += '<setting label="Video quality" id="PurevidResolver_quality" '
-        xml += 'type="labelenum" values="FLV|Maximum" default="Maximum" />\n'
-        xml += '<setting label="This plugin calls the Purevid urlresolver - '
-        xml += 'change settings there." type="lsep" />\n'
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_login" type="bool" label="login" default="false"/>' % (cls.__name__))
+        xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
+        xml.append('<setting label="Video quality" id="%s_quality" type="labelenum" values="FLV|Maximum" default="Maximum" />' % (cls.__name__))
+        xml.append('<setting label="This plugin calls the Purevid urlresolver - change settings there." type="lsep" />')
         return xml

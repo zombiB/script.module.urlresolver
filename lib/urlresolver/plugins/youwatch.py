@@ -17,25 +17,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 import urllib
-from urlresolver.net import Net
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver
 
 MAX_TRIES = 5
     
-class YouWatchResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class YouWatchResolver(UrlResolver):
     name = "youwatch.org"
     domains = ["youwatch.org"]
     pattern = '(?://|\.)(youwatch\.org)/(?:embed-)?([A-Za-z0-9]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

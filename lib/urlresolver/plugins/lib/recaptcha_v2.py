@@ -162,7 +162,7 @@ class UnCaptchaReCaptcha:
             html = get_url("http://www.google.com/recaptcha/api/fallback?k=%s" % (key), data=data, headers=headers)
         return token
 
-# TODO: Replace with Net() when urlencode is fixed in _fetch
+# TODO: Replace with common.Net() when urlencode is fixed in _fetch
 def get_url(url, data=None, timeout=20, headers=None):
     if headers is None: headers = {}
     if data is None: data = {}

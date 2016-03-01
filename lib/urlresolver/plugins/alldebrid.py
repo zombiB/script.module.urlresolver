@@ -21,16 +21,11 @@ import sys
 import re
 import urllib
 import json
-from urlresolver.net import Net
-from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import SiteAuth
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
 import xbmcgui
+from urlresolver import common
+from urlresolver.resolver import UrlResolver
 
-class AllDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
-    implements = [UrlResolver, SiteAuth, PluginSettings]
+class AllDebridResolver(UrlResolver):
     name = "AllDebrid"
     domains = ['*']
     profile_path = common.profile_path
@@ -39,9 +34,7 @@ class AllDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     allHosters = None
 
     def __init__(self):
-        p = self.get_setting('priority') or 1
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
         try:
             os.makedirs(os.path.dirname(self.cookie_file))
         except OSError:
@@ -162,17 +155,14 @@ class AllDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         else:
             return True
 
-    #PluginSettings methods
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="AllDebridResolver_login" '
-        xml += 'type="bool" label="login" default="false"/>\n'
-        xml += '<setting id="AllDebridResolver_username" enable="eq(-1,true)" '
-        xml += 'type="text" label="username" default=""/>\n'
-        xml += '<setting id="AllDebridResolver_password" enable="eq(-2,true)" '
-        xml += 'type="text" label="password" option="hidden" default=""/>\n'
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_login" type="bool" label="login" default="false"/>' % (cls.__name__))
+        xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
         return xml
 
-    #to indicate if this is a universal resolver
+    @classmethod
     def isUniversal(self):
         return True

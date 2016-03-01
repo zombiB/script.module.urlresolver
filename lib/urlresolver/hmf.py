@@ -13,23 +13,20 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import urlresolver
 import urllib2
 from urlparse import urlparse
+import urlresolver
 from urlresolver import common
-from plugnplay.interfaces import UrlResolver
-from plugnplay.interfaces import SiteAuth
+from resolver import UrlResolver
 import re
-import sys
 import urllib
 import traceback
 
 class HostedMediaFile:
     '''
-    This class represents a piece of media (file or stream) that is hosted 
+    This class represents a piece of media (file or stream) that is hosted
     somewhere on the internet. It may be instantiated with EITHER the url to the
-    web page associated with the media file, OR the host name and a unique 
+    web page associated with the media file, OR the host name and a unique
     ``media_id`` used by the host to point to the media.
     
     For example::
@@ -45,8 +42,8 @@ class HostedMediaFile:
     
     .. note::
     
-        If there is no resolver plugin to handle the arguments passed, 
-        the resulting object will evaluate to ``False``. Otherwise it will 
+        If there is no resolver plugin to handle the arguments passed,
+        the resulting object will evaluate to ``False``. Otherwise it will
         evaluate to ``True``. This is a handy way of checking whether
         a resolver exists::
             
@@ -58,34 +55,31 @@ class HostedMediaFile:
     
     .. warning::
         
-        If you pass ``url`` you must not pass ``host`` or ``media_id``. You 
+        If you pass ``url`` you must not pass ``host`` or ``media_id``. You
         must pass either ``url`` or ``host`` AND ``media_id``.
     '''
     def __init__(self, url='', host='', media_id='', title=''):
         '''
         Args:
             url (str): a URL to a web page that represents a piece of media.
-            
             host (str): the host of the media to be represented.
-            
             media_id (str): the unique ID given to the media by the host.
         '''
         if not url and not (host and media_id) or (url and (host or media_id)):
-            raise ValueError('Set either url, or host AND media_id. ' +
-                             'No other combinations are valid.')
+            raise ValueError('Set either url, or host AND media_id. No other combinations are valid.')
         self._url = url
         self._host = host
         self._media_id = media_id
         self._valid_url = None
+        self.title = title if title else self._host
 
         if self._url:
             self._domain = self.__top_domain(self._url)
         else:
             self._domain = self.__top_domain(self._host)
 
-        self.__resolvers = self.__find_resolvers(
-            common.get_setting('allow_universal') == "true")
-
+        self.__klasses = urlresolver.relevant_resolvers(self._domain, include_universal=common.get_setting('allow_universal') == "true", order_matters=True)
+        self. __resolvers = [klass() for klass in self.__klasses]
         if not url:
             for resolver in self.__resolvers:  # Find a valid URL
                 try:
@@ -95,11 +89,6 @@ class HostedMediaFile:
                 except:
                     # Shity resolver. Ignore
                     continue
-
-        if title:
-            self.title = title
-        else:
-            self.title = self._host
 
     def __top_domain(self, url):
         regex = "(\w{2,}\.\w{2,3}\.\w{2}|\w{2,}\.\w{2,3})$"
@@ -115,7 +104,7 @@ class HostedMediaFile:
         '''
         Returns the URL of this :class:`HostedMediaFile`.
         '''
-        return self._url    
+        return self._url
     
     def get_host(self):
         '''
@@ -151,11 +140,9 @@ class HostedMediaFile:
         '''
         for resolver in self.__resolvers:
             try:
-                common.log_utils.log_debug('resolving using %s plugin' % resolver.name)
                 if resolver.valid_url(self._url, self._host):
-                    if SiteAuth in resolver.implements:
-                        common.log_utils.log_debug('logging in')
-                        resolver.login()
+                    common.log_utils.log_debug('Resolving using %s plugin' % (resolver.name))
+                    resolver.login()
                     self._host, self._media_id = resolver.get_host_and_id(self._url)
                     try:
                         stream_url = resolver.get_media_url(self._host, self._media_id)
@@ -167,17 +154,17 @@ class HostedMediaFile:
                         common.log_utils.log_error('Resolver Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
                         if resolver == self.__resolvers[-1]:
                             common.log_utils.log_debug(traceback.format_exc())
-                            return UrlResolver.unresolvable(code=0, msg=e)
+                            return resolver.unresolvable(code=0, msg=e)
                     except urllib2.HTTPError as e:
                         common.log_utils.log_error('HTTP Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
                         if resolver == self.__resolvers[-1]:
                             common.log_utils.log_debug(traceback.format_exc())
-                            return UrlResolver.unresolvable(code=3, msg=e)
+                            return resolver.unresolvable(code=3, msg=e)
                     except Exception as e:
                         common.log_utils.log_error('Unknown Error - From: %s Link: %s: %s' % (resolver.name, self._url, e))
                         if resolver == self.__resolvers[-1]:
                             common.log_utils.log_error(traceback.format_exc())
-                            return UrlResolver.unresolvable(code=0, msg=e)
+                            return resolver.unresolvable(code=0, msg=e)
             except Exception as e:
                 common.log_utils.log_notice("Resolver '%s' crashed: %s. Ignoring" % (resolver.name, e))
                 common.log_utils.log_debug(traceback.format_exc())
@@ -244,34 +231,16 @@ class HostedMediaFile:
     
         # added this log line for now so that we can catch any logs on streams that are rejected due to test_stream failures
         # we can remove it once we are sure this works reliably
-        if int(http_code)>=400: common.log_utils.log('Stream UrlOpen Failed: Url: %s HTTP Code: %s' % (stream_url, http_code))
+        if int(http_code) >= 400: common.log_utils.log('Stream UrlOpen Failed: Url: %s HTTP Code: %s' % (stream_url, http_code))
 
         return int(http_code) < 400
-
-    def __find_resolvers(self, universal=False):
-        urlresolver.lazy_plugin_scan()
-        resolvers = []
-        found = False
-        for resolver in UrlResolver.implementors():
-            if resolver.get_setting('enabled') != 'true': continue
-            if (self._domain in resolver.domains) or any(self._domain in domain for domain in resolver.domains):
-                found = True
-                resolvers.append(resolver)
-            elif (universal and ('*' in resolver.domains)):
-                resolvers.append(resolver)
-
-        if not found: common.log_utils.log_debug('no resolver found for: %s' % (self._domain))
-        else: common.log_utils.log_debug('resolvers for %s are %s' % (self._domain, [r.name for r in resolvers]))
-
-        return resolvers
 
     def __nonzero__(self):
         if self._valid_url is None: return self.valid_url()
         return self._valid_url
 
     def __str__(self):
-        return '{\'url\': \'%s\', \'host\': \'%s\', \'media_id\': \'%s\'}' % (
-                    self._url, self._host, self._media_id)
+        return "{url: |%s| host: |%s| media_id: |%s}" % (self._url, self._host, self._media_id)
 
     def __repr__(self):
         return self.__str__()

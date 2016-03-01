@@ -18,23 +18,17 @@
 
 import re
 import urllib
-from urlresolver.net import Net
 from lib import unwise
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver
 
-class CloudyResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class CloudyResolver(UrlResolver):
     name = "cloudy.ec"
     domains = [ "cloudy.ec", "cloudy.eu", "cloudy.sx", "cloudy.ch", "cloudy.com" ]
     pattern = '(?://|\.)(cloudy\.(?:ec|eu|sx|ch|com))/(?:video/|v/|embed\.php\?id=)([0-9A-Za-z]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def __get_stream_url(self, media_id, filekey, error_num=0, error_url=None):
         '''

@@ -19,25 +19,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import json
 import urllib
-from urlresolver.net import Net
 from lib import captcha_lib
 from lib.aa_decoder import AADecoder
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
 from urlresolver import common
+from urlresolver.resolver import UrlResolver
 import xbmc
 
-class OpenLoadResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class OpenLoadResolver(UrlResolver):
     name = "openload"
     domains = ["openload.io", "openload.co"]
     pattern = '(?://|\.)(openload\.(?:io|co))/(?:embed|f)/([0-9a-zA-Z-_]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         try:

@@ -21,26 +21,19 @@ import urllib2
 import json
 import xbmcgui
 import xbmc
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import SiteAuth
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from urlresolver.net import Net
+from urlresolver.resolver import UrlResolver
 
 CLIENT_ID = 'MUQMIQX6YWDSU'
 USER_AGENT = 'URLResolver for Kodi/%s' % (common.addon_version)
 INTERVALS = 5
 
-class RealDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
-    implements = [UrlResolver, SiteAuth, PluginSettings]
+class RealDebridResolver(UrlResolver):
     name = "Real-Debrid"
     domains = ["*"]
 
     def __init__(self):
-        p = self.get_setting('priority') or 1
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
         self.hosters = None
         self.hosts = None
         self.headers = {'User-Agent': USER_AGENT}
@@ -208,18 +201,18 @@ class RealDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
                 return True
         return False
 
-    # PluginSettings methods
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="%s_authorize" type="bool" label="I have a Real Debrid Account" default="false"/>\n' % (self.__class__.__name__)
-        xml += '<setting type="lsep" label="***RD Authorization will be performed when you select the first RD link***"/>\n'
-        xml += '<setting id="%s_autopick" type="bool" label="Choose Primary Link Automatically" default="false"/>\n' % (self.__class__.__name__)
-        xml += '<setting id="%s_token" visible="false" type="text" default=""/>\n' % (self.__class__.__name__)
-        xml += '<setting id="%s_refresh" visible="false" type="text" default=""/>\n' % (self.__class__.__name__)
-        xml += '<setting id="%s_client_id" visible="false" type="text" default=""/>\n' % (self.__class__.__name__)
-        xml += '<setting id="%s_client_secret" visible="false" type="text" default=""/>\n' % (self.__class__.__name__)
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_authorize" type="bool" label="I have a Real Debrid Account" default="false"/>' % (cls.__name__))
+        xml.append('<setting type="lsep" label="***RD Authorization will be performed when you select the first RD link***"/>')
+        xml.append('<setting id="%s_autopick" type="bool" label="Choose Primary Link Automatically" default="false"/>' % (cls.__name__))
+        xml.append('<setting id="%s_token" visible="false" type="text" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_refresh" visible="false" type="text" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_client_id" visible="false" type="text" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_client_secret" visible="false" type="text" default=""/>' % (cls.__name__))
         return xml
 
-    # to indicate if this is a universal resolver
+    @classmethod
     def isUniversal(self):
         return True

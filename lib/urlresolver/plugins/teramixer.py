@@ -21,22 +21,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import base64
 import urllib
-from urlresolver.net import Net
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver
 
-class TeramixerResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class TeramixerResolver(UrlResolver):
     name = "teramixer"
     domains = [ 'teramixer.com' ]
     pattern ='(?://|\.)(teramixer\.com)/(?:embed/|)?([0-9A-Za-z]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         try:

@@ -19,22 +19,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib
 import urlparse
-from urlresolver.net import Net
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver
 
-class VidSpotResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class VidSpotResolver(UrlResolver):
     name = "vidspot"
     domains = ["vidspot.net"]
     pattern = '(?://|\.)(vidspot\.net)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         url = self.get_url(host, media_id)

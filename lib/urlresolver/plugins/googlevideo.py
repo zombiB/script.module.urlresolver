@@ -17,26 +17,19 @@
 """
 
 
-from urlresolver.net import Net
 from urlresolver import common
-from urlresolver.plugnplay import Plugin
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
+from urlresolver.resolver import UrlResolver
 import re
 import urllib2
 import xbmcgui
 
-
-class GoogleResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class GoogleResolver(UrlResolver):
     name = "googlevideo"
     domains = ["googlevideo.com", "picasaweb.google.com", "googleusercontent.com", "plus.google.com", "googledrive.com"]
     pattern = 'http[s]*://(.*?(?:\.googlevideo|(?:picasaweb|plus)\.google|google(?:usercontent|drive))\.com)/(.*?(?:videoplayback\?|\?authkey|host/)*.+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -109,7 +102,8 @@ class GoogleResolver(Plugin, UrlResolver, PluginSettings):
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (self.__class__.__name__)
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
         return xml

@@ -18,22 +18,16 @@
 
 import re
 import xml.etree.ElementTree as ET
-from urlresolver.net import Net
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver
 
-class MediaPlayBoxResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver]
+class MediaPlayBoxResolver(UrlResolver):
     name = "MediaPlayBox"
     domains = ["mediaplaybox.com"]
     pattern = '(?://|\.)(mediaplaybox\.com)/video/(.*)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
         self.net.set_user_agent(common.IE_USER_AGENT)
         self.headers = {'User-Agent': common.IE_USER_AGENT}
 

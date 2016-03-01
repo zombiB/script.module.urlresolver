@@ -19,12 +19,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib
 import urllib2
-from urlresolver.net import Net
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver
 
 class NoRedirection(urllib2.HTTPErrorProcessor):
     def http_response(self, request, response):
@@ -32,16 +29,13 @@ class NoRedirection(urllib2.HTTPErrorProcessor):
 
     https_response = http_response
 
-class Up2StreamResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class Up2StreamResolver(UrlResolver):
     name = "up2stream"
     domains = ["up2stream.com"]
     pattern = '(?://|\.)(up2stream\.com)/view\.php.+?ref=([0-9a-zA-Z]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)

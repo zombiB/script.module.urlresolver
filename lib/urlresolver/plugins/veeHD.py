@@ -16,16 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re, os, urllib
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import SiteAuth
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+import re
+import os
+import urllib
 from urlresolver import common
-from urlresolver.net import Net
+from urlresolver.resolver import UrlResolver
 
-class VeeHDResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
-    implements = [UrlResolver, SiteAuth, PluginSettings]
+class VeeHDResolver(UrlResolver):
     name = "VeeHD"
     domains = ["veehd.com"]
     pattern = '(?://|\.)(veehd\.com)/video/([0-9A-Za-z]+)'
@@ -34,13 +31,9 @@ class VeeHDResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
     cookie_file = os.path.join(profile_path, '%s.cookies' % name)
 
     def __init__(self):
-        p = self.get_setting('priority') or 1
-        self.priority = int(p)
-        self.net = Net()
-        try:
-            os.makedirs(os.path.dirname(self.cookie_file))
-        except OSError:
-            pass
+        self.net = common.Net()
+        try: os.makedirs(os.path.dirname(self.cookie_file))
+        except OSError: pass
 
     #UrlResolver methods
     def get_media_url(self, host, media_id):
@@ -101,17 +94,12 @@ class VeeHDResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         else:
             return False
 
-    #PluginSettings methods
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="%s_login" ' % (self.__class__.__name__)
-        xml += 'type="bool" label="login" default="false"/>\n'
-        xml += '<setting id="%s_username" enable="eq(-1,true)" ' % (self.__class__.__name__)
-        xml += 'type="text" label="username" default=""/>\n'
-        xml += '<setting id="%s_password" enable="eq(-2,true)" ' % (self.__class__.__name__)
-        xml += 'type="text" label="password" option="hidden" default=""/>\n'
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_login" type="bool" label="login" default="false"/>' % (cls.__name__))
+        xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
         return xml
+
         
-    #to indicate if this is a universal resolver
-    def isUniversal(self):
-        return False

@@ -21,24 +21,17 @@ import urllib
 import urllib2
 from lib import jsunpack
 from urlparse import urlparse
-from urlresolver.net import Net
 from urlresolver import common
-from urlresolver import HostedMediaFile
-from urlresolver.plugnplay import Plugin
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
+from urlresolver.resolver import UrlResolver
+from urlresolver.hmf import HostedMediaFile
 
-
-class VideoZooResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class VideoZooResolver(UrlResolver):
     name = "videozoo"
     domains = ["byzoo.org", "playpanda.net", "videozoo.me", "videowing.me", "easyvideo.me", "play44.net", "playbb.me", "video44.net"]
     pattern = 'http://((?:www\.)*(?:play44|playbb|video44|byzoo|playpanda|videozoo|videowing|easyvideo)\.(?:me|org|net|eu)/(?:embed[/0-9a-zA-Z]*?|gplus|picasa|gogo/)(?:\.php)*)\?.*?((?:vid|video|id|file)=[%0-9a-zA-Z_\-\./]+|.*)[\?&]*.*'
     
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_url(self, host, media_id):
         if media_id: return 'http://%s?%s' % (host, media_id)

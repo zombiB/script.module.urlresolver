@@ -18,23 +18,16 @@
 
 import re
 import urllib
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import SiteAuth
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
-from urlresolver import common
-from urlresolver.net import Net
 import json
+from urlresolver import common
+from urlresolver.resolver import UrlResolver
 
-class RPnetResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class RPnetResolver(UrlResolver):
     name = "RPnet"
     domains = ["*"]
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
         self.patterns = None
         self.hosts = None
 
@@ -93,17 +86,14 @@ class RPnetResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
                  
         return False
 
-    #PluginSettings methods
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting id="%s_login" ' % (self.__class__.__name__)
-        xml += 'type="bool" label="Login" default="false"/>\n'
-        xml += '<setting id="%s_username" enable="eq(-1,true)" ' % (self.__class__.__name__)
-        xml += 'type="text" label="username" default=""/>\n'
-        xml += '<setting id="%s_password" enable="eq(-2,true)" ' % (self.__class__.__name__)
-        xml += 'type="text" label="password" option="hidden" default=""/>\n'
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_login" type="bool" label="login" default="false"/>' % (cls.__name__))
+        xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>' % (cls.__name__))
+        xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
         return xml
-        
-    #to indicate if this is a universal resolver
+
+    @classmethod
     def isUniversal(self):
         return True

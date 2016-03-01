@@ -25,7 +25,7 @@ import xbmc
 import os
 import recaptcha_v2
 
-net = Net()
+net = common.Net()
 IMG_FILE = 'captcha_img.png'
 
 def get_response(img):

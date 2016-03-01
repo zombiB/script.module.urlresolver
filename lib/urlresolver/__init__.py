@@ -26,26 +26,29 @@ For most cases you probably want to use :func:`urlresolver.resolve` or
 
 
 '''
-
 import os
-import xml.dom.minidom
-import common
-import plugnplay
-from types import HostedMediaFile
-from plugnplay.interfaces import UrlResolver, UrlWrapper
-from plugnplay.interfaces import PluginSettings
-from plugnplay.interfaces import SiteAuth
 import xbmcgui
+import common
+import xml.dom.minidom
+from hmf import HostedMediaFile
+from resolver import UrlResolver
+from plugins import *
 
-#load all available plugins
-common.log_utils.log('Initializing URLResolver version: %s' % common.addon_version)
-plugnplay.set_plugin_dirs(common.plugins_path)
-
+common.log_utils.log('Initializing URLResolver version: %s' % (common.addon_version))
 MAX_SETTINGS = 75
 
-def lazy_plugin_scan():
-    if not UrlResolver.implementors():
-        plugnplay.scan_plugins(UrlWrapper)
+def relevant_resolvers(domain=None, include_universal=True, order_matters=False):
+    classes = UrlResolver.__class__.__subclasses__(UrlResolver)
+    relevant = []
+    for resolver in classes:
+        is_universal = resolver.isUniversal()
+        if not is_universal or (include_universal and is_universal):
+            if domain is None or (domain in resolver.domains or '*' in resolver.domains):
+                relevant.append(resolver)
+    
+    if order_matters:
+        relevant.sort(key=lambda x: x._get_priority())
+    return relevant
 
 def resolve(web_url):
     '''
@@ -77,7 +80,6 @@ def resolve(web_url):
         If the ``web_url`` could be resolved, a string containing the direct
         URL to the media file, if not, returns ``False``.
     '''
-    lazy_plugin_scan()
     source = HostedMediaFile(url=web_url)
     return source.resolve()
 
@@ -98,7 +100,6 @@ def filter_source_list(source_list):
         resolved by a resolver plugin removed.
     
     '''
-    lazy_plugin_scan()
     return [source for source in source_list if source]
 
 
@@ -129,31 +130,19 @@ def choose_source(sources):
         cancelled or none of the :class:`HostedMediaFile` are resolvable.
         
     '''
-    lazy_plugin_scan()
-    #get rid of sources with no resolver plugin
     sources = filter_source_list(sources)
-    
-    #show dialog to choose source
-    if len(sources) > 1:
+    if not sources:
+        common.log_utils.log_warning('no playable streams found')
+        return False
+    elif len(sources) == 1:
+        return sources[0]
+    else:
         dialog = xbmcgui.Dialog()
-        titles = []
-        for source in sources:
-            titles.append(source.title)
-        index = dialog.select('Choose your stream', titles)
+        index = dialog.select('Choose your stream', [source.title for source in sources])
         if index > -1:
             return sources[index]
         else:
             return False
-    
-    #only one playable source so just play it
-    elif len(sources) == 1:
-        return sources[0]
-    
-    #no playable sources available
-    else:
-        common.log_utils.log_error('no playable streams found')
-        return False
-    
         
 def display_settings():
     '''
@@ -168,8 +157,6 @@ def display_settings():
         All changes made to these setting by the user are global and will
         affect any addon that uses :mod:`urlresolver` and its plugins.
     '''
-    lazy_plugin_scan()
-    plugnplay.load_plugins()
     _update_settings_xml()
     common.addon.openSettings()
 
@@ -178,54 +165,46 @@ def _update_settings_xml():
     This function writes a new ``resources/settings.xml`` file which contains
     all settings for this addon and its plugins.
     '''
-    lazy_plugin_scan()
-    plugnplay.load_plugins()
-    
     try:
         os.makedirs(os.path.dirname(common.settings_file))
     except OSError:
         pass
 
-    new_xml = '<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n'
-    new_xml += '<settings>\n'
-    new_xml += '<category label="URLResolver">\n'
-    new_xml += '\t<setting default="true" id="allow_universal" label="Enable Universal Resolvers" type="bool"/>\n'
-    new_xml += '\t<setting id="personal_nid" label="Your NID" type="text" visible="false"/>\n'
-    new_xml += '</category>\n'
-    new_xml += '<category label="Universal Resolvers">\n'
+    new_xml = [
+        '<?xml version="1.0" encoding="utf-8" standalone="yes"?>',
+        '<settings>',
+        '<category label="URLResolver">',
+        '<setting default="true" id="allow_universal" label="Enable Universal Resolvers" type="bool"/>',
+        '<setting id="personal_nid" label="Your NID" type="text" visible="false"/>',
+        '</category>',
+        '<category label="Universal Resolvers">']
 
-    xml_text = '<settings>'
-    uni_text = '<settings>'
-    for imp in sorted(PluginSettings.implementors(), key=lambda x: x.name.upper()):
-        if imp.isUniversal():
-            uni_text += '<setting label="' + imp.name + '" type="lsep"/>'
-            uni_text += imp.get_settings_xml()
-        else:
-            xml_text += '<setting label="' + imp.name + '" type="lsep"/>'
-            xml_text += imp.get_settings_xml()
-    uni_text += '</settings>'
-    xml_text += '</settings>'
-    
-    settings_xml = xml.dom.minidom.parseString(uni_text)
-    for element in settings_xml.getElementsByTagName('setting'):
-        new_xml += '\t' + element.toprettyxml()
+    resolvers = relevant_resolvers(None, include_universal=True)
+    resolvers = sorted(resolvers, key=lambda x: x.name.upper())
+    for resolver in resolvers:
+        if resolver.isUniversal():
+            new_xml.append('<setting label="%s" type="lsep"/>' % (resolver.name))
+            new_xml += resolver.get_settings_xml()
+    new_xml.append('</category>')
+    new_xml.append('<category label="Resolvers 1">')
 
-    new_xml += '</category>\n'
-    new_xml += '<category label="Resolvers 1">\n'
     i = 0
     cat_count = 2
-    settings_xml = xml.dom.minidom.parseString(xml_text)
-    for element in settings_xml.getElementsByTagName('setting'):
-        if i > MAX_SETTINGS and element.getAttribute('type') == 'lsep':
-            new_xml += '</category>\n'
-            new_xml += '<category label="Resolvers %s">\n' % (cat_count)
-            cat_count += 1
-            i = 0
+    for resolver in resolvers:
+        if not resolver.isUniversal():
+            if i <= MAX_SETTINGS:
+                new_xml.append('<setting label="%s" type="lsep"/>' % (resolver.name))
+                res_xml = resolver.get_settings_xml()
+                new_xml += res_xml
+                i += len(res_xml) + 1
+            else:
+                new_xml.append('</category>')
+                new_xml.append('<category label="Resolvers %s">' % (cat_count))
+                cat_count += 1
+                i = 0
             
-        new_xml += '\t' + element.toprettyxml()
-        i += 1
-    new_xml += '</category>\n'
-    new_xml += '</settings>\n'
+    new_xml.append('</category>')
+    new_xml.append('</settings>')
         
     try:
         with open(common.settings_file, 'r') as f:
@@ -233,6 +212,9 @@ def _update_settings_xml():
     except:
         old_xml = ''
         
+    new_xml = ''.join(new_xml)
+    new_xml = xml.dom.minidom.parseString(new_xml)
+    new_xml = new_xml.toprettyxml()
     if old_xml != new_xml:
         common.log_utils.log_debug('Updating Settings XML')
         try:
