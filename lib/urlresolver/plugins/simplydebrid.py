@@ -43,20 +43,21 @@ class SimplyDebridResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         self.token = None
 
     def get_media_url(self, host, media_id):
-        query = urllib.urlencode({'dl': media_id})
-        url = self.base_url + query
-        try:
-            response = self.net.http_GET(url).content
-            if response:
-                common.log_utils.log_debug('Simply-Debrid: Resolved to %s' % (response))
-                if response.startswith('http'):
-                    return response
-                else:
-                    raise UrlResolver.ResolverError('Unusable Response from SD')
-            else:
-                raise UrlResolver.ResolverError('Null Response from SD')
-        except Exception as e:
-            raise UrlResolver.ResolverError('Link Not Found: Exception: %s' % (e))
+        if self.token is not None:
+            try:
+                query = urllib.urlencode({'action': 'generate', 'u': media_id, 'token': self.token})
+                url = self.base_url + query
+                response = self.net.http_GET(url).content
+                if response:
+                    js_result = json.loads(response)
+                    common.log_utils.log_debug('SD: Result: %s' % (js_result))
+                    if js_result['error']:
+                        msg = js_result.get('message', 'Unknown Error')
+                        raise UrlResolver.ResolverError('SD Resolve Failed: %s' % (msg))
+                    else:
+                        return js_result['link']
+            except Exception as e:
+                raise UrlResolver.ResolverError('SD Resolve: Exception: %s' % (e))
 
     def login(self):
         try:
