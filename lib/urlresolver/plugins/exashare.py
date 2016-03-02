@@ -43,14 +43,9 @@ class ExashareResolver(Plugin, UrlResolver, PluginSettings):
         try: r = re.search('src="([^"]+)', html).group(1)
         except: return
 
-        web_url = urlparse.urlparse(r).netloc
-        web_url = self.get_url(web_url, media_id)
+        headers = { 'Referer': web_url }
 
-        referer = '%s://%s/' % (urlparse.urlparse(r).scheme, urlparse.urlparse(r).netloc)
-
-        headers = { 'Referer': referer }
-
-        html = self.net.http_GET(web_url, headers=headers).content
+        html = self.net.http_GET(r, headers=headers).content
 
         stream_url = re.search('file\s*:\s*"(http.+?)"', html)
 
