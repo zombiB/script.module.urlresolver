@@ -17,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 import urllib
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from lib import jsunpack
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver

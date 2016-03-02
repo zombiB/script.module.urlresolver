@@ -17,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
@@ -59,7 +59,7 @@ class DivxstageResolver(Plugin, UrlResolver, PluginSettings):
         return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://embed.cloudtime.to/embed.php?v=%s' % media_id
+        return 'http://www.cloudtime.to/embed/?v=%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

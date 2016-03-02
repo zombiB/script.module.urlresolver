@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import urllib
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
@@ -26,7 +26,7 @@ from urlresolver.plugnplay import Plugin
 class VidggResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
     name = 'vid.gg'
-    domains = ['vidgg.to']
+    domains = ['vidgg.to', 'www.vid.gg']
     pattern = '(?://|\.)(vid.gg|vidgg.to)/(?:embed/\?id=|video/)([0-9a-z]+)'
 
     def __init__(self):
@@ -45,7 +45,7 @@ class VidggResolver(Plugin, UrlResolver, PluginSettings):
             raise UrlResolver.ResolverError("File Not Found or removed")
 
         api_call = "http://www.vidgg.to/api/player.api.php?{0}&file={1}&key={2}".format(
-            "numOfErrors=0&cid=1&cid2=undefined&pass=undefined&user=undefined",
+            "numOfErrors=0&cid=1&cid2=undefined&cid3=undefined&pass=undefined&user=undefined",
             media_id,
             urllib.quote_plus(filekey).replace(".", "%2E")
         )

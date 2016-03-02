@@ -17,7 +17,7 @@
 """
 
 import re
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -60,7 +60,7 @@ class VideoweedResolver(Plugin, UrlResolver, PluginSettings):
         return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://embed.bitvid.sx/embed.php?v=%s' % media_id
+        return 'http://www.bitvid.sx/embed/?v=%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

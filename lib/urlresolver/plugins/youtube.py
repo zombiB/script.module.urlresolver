@@ -17,7 +17,7 @@
 """
 
 import re
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
@@ -33,7 +33,7 @@ class YoutubeResolver(Plugin, UrlResolver, PluginSettings):
         self.priority = int(p)
 
     def get_media_url(self, host, media_id):
-        plugin = 'plugin://plugin.video.youtube/?action=play_video&videoid=' + media_id
+        plugin = 'plugin://plugin.video.youtube/play/?video_id=' + media_id
         return plugin
 
     def get_url(self, host, media_id):

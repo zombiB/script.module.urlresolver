@@ -21,7 +21,7 @@ import urllib
 import urllib2
 from lib import jsunpack
 from urlparse import urlparse
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver import common
 from urlresolver import HostedMediaFile
 from urlresolver.plugnplay import Plugin

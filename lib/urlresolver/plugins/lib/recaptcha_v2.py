@@ -142,9 +142,9 @@ class UnCaptchaReCaptcha:
             if not message:
                 token = re.findall('"this\.select\(\)">(.*?)</textarea>', html)[0]
                 if token:
-                    common.addon.log_debug('Captcha Success: %s' % (token))
+                    common.log_utils.log_debug('Captcha Success: %s' % (token))
                 else:
-                    common.addon.log_debug('Captcha Failed: %s')
+                    common.log_utils.log_debug('Captcha Failed: %s')
                 break
             else:
                 message = message[0]
@@ -169,7 +169,7 @@ def get_url(url, data=None, timeout=20, headers=None):
     post_data = urllib.urlencode(data, doseq=True)
     if 'User-Agent' not in headers:
         headers['User-Agent'] = common.FF_USER_AGENT
-    common.addon.log_debug('URL: |%s| Data: |%s| Headers: |%s|' % (url, post_data, headers))
+    common.log_utils.log_debug('URL: |%s| Data: |%s| Headers: |%s|' % (url, post_data, headers))
 
     req = urllib2.Request(url)
     for key in headers:

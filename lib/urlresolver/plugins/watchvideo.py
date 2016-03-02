@@ -1,7 +1,4 @@
-"""
-urlresolver XBMC Addon
-Copyright (C) 2011 t0mm0
-
+'''
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -14,20 +11,21 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-"""
+'''
 
 import re
 from urlresolver.net import Net
 from lib import jsunpack
+from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 
-class RapidVideoResolver(Plugin, UrlResolver, PluginSettings):
+class WatchVideoResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "rapidvideo.ws"
-    domains = ["rapidvideo.ws"]
-    pattern ='(?://|\.)(rapidvideo\.ws)/(?:embed-|)?([0-9A-Za-z]+)'
+    name = "watchvideo.us"
+    domains = ["watchvideo.us", "watchvideo4.us"]
+    pattern = '(?://|\.)(watchvideo[0-9]?\.us)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -36,24 +34,29 @@ class RapidVideoResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
         html = self.net.http_GET(web_url).content
 
-        for match in re.finditer('(eval.*?\)\)\))', html, re.DOTALL):
-            js_data = jsunpack.unpack(match.group(1))
-            js_data = js_data.replace('\\\'', '\'')
+        if html.find('404 Not Found') >= 0:
+            raise UrlResolver.ResolverError('File Removed')
+        
+        if html.find('Video is processing') >= 0:
+            raise UrlResolver.ResolverError('File still being processed')
 
-            stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', js_data)
-            stream_url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', js_data)
-            stream_url = [i for i in stream_url if not i.endswith('.srt')]
+        packed = re.search('(eval\(function.*?)\s*</script>', html, re.DOTALL)
+        if packed:
+            js = jsunpack.unpack(packed.group(1))
+        else:
+            js = html
 
-            if stream_url:
-                return stream_url[0]
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+        link = re.search('(?:m3u8").*?"(.*?)"', js)
+        if link:
+            common.log_utils.log_debug('watchvideo.us Link Found: %s' % link.group(1))
+            return link.group(1)
+
+        raise UrlResolver.ResolverError('Unable to find watchvideo.us video')
 
     def get_url(self, host, media_id):
-            return 'http://rapidvideo.ws/embed-%s.html' % media_id
+        return 'http://%s/%s.html' % (host,media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

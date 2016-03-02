@@ -18,7 +18,7 @@
 import random
 import re
 import math
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
@@ -44,8 +44,8 @@ class CastampResolver(Plugin, UrlResolver, PluginSettings):
         flashplayer = ""
         file = ""
 
-        common.addon.log("*******************************************")
-        common.addon.log("web_url: " + web_url)
+        common.log_utils.log("*******************************************")
+        common.log_utils.log("web_url: " + web_url)
 
         pattern_flashplayer = r"""'flashplayer': \"(.*?)\""""
         r = re.search(pattern_flashplayer, html)

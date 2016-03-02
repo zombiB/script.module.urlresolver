@@ -21,7 +21,7 @@ from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 from urlresolver import common
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 
 import re
 import urllib
@@ -57,7 +57,7 @@ class PremiumizeMeResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         else:
             raise UrlResolver.ResolverError('Unexpected Response Received')
 
-        common.addon.log_debug('Premiumize.me: Resolved to %s' % link)
+        common.log_utils.log_debug('Premiumize.me: Resolved to %s' % link)
         return link
 
     def get_url(self, host, media_id):
@@ -78,11 +78,11 @@ class PremiumizeMeResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
                 response = json.loads(response)
                 result = response['result']
                 log_msg = 'Premiumize.me patterns: %s hosts: %s' % (result['regexlist'], result['tldlist'])
-                common.addon.log_debug(log_msg)
+                common.log_utils.log_debug(log_msg)
                 self.hosts = result['tldlist']
                 self.patterns = [re.compile(regex) for regex in result['regexlist']]
         except Exception as e:
-            common.addon.log_error('Error getting Premiumize hosts: %s' % (e))
+            common.log_utils.log_error('Error getting Premiumize hosts: %s' % (e))
 
     def valid_url(self, url, host):
         if self.get_setting('login') == 'false': return False

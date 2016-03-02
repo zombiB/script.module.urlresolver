@@ -17,17 +17,17 @@
 """
 
 import re
-import json
+import urllib
 from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings
 from urlresolver.plugnplay import Plugin
 
-class VimeoResolver(Plugin, UrlResolver, PluginSettings):
+class MersalaResolver(Plugin, UrlResolver, PluginSettings):
     implements = [UrlResolver, PluginSettings]
-    name = "vimeo"
-    domains = ["vimeo.com"]
-    pattern = '(?://|\.)(vimeo\.com)/(?:video/)?([0-9a-zA-Z]+)'
+    name = "mersalaayitten.com"
+    domains = ["mersalaayitten.com"]
+    pattern = '(?://|\.)(mersalaayitten\.com)/embed/([0-9]+)'
 
     def __init__(self):
         p = self.get_setting('priority') or 100
@@ -36,47 +36,32 @@ class VimeoResolver(Plugin, UrlResolver, PluginSettings):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
-        data = self.net.http_GET(web_url).content
-        data = json.loads(data)
-
-        vids = data['request']['files']['progressive']
-        vids = [i['url'] for i in vids if 'url' in i]
-
-        if vids:
-            vUrlsCount = len(vids)
-
-            if (vUrlsCount > 0):
-                q = self.get_setting('quality')
-                # Lowest Quality
-                i = 0
-
-                if q == '1':
-                    # Medium Quality
-                    i = (int)(vUrlsCount / 2)
-                elif q == '2':
-                    # Highest Quality
-                    i = vUrlsCount - 1
-
-                vUrl = vids[i]
-                return vUrl
+        resp = self.net.http_GET(web_url)
+        html = resp.content
+        headers = dict(resp._response.info().items())
+        r = re.search("config: '(.*?)'", html)
+        if r:
+            stream_xml = r.group(1)
+            referer = {'Referer': 'http://mersalaayitten.com/media/nuevo/player.swf'}
+            response = self.net.http_GET(stream_xml, headers=referer)
+            xmlhtml = response.content
+            r2 = re.search('<file>(.*?)</file>', xmlhtml)
+            stream_url = r2.group(1) + '|Cookie=' + headers['set-cookie']
+            
+        else:
+            raise UrlResolver.ResolverError('no file located')
+        
+        return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://player.vimeo.com/video/%s/config' % media_id
-
+        return 'http://mersalaayitten.com/embed/%s' % (media_id)
+    
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-
+    
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
-
-    #PluginSettings methods
-    def get_settings_xml(self):
-        xml = PluginSettings.get_settings_xml(self)
-        xml += '<setting label="Video Quality" id="%s_quality" ' % self.__class__.__name__
-        xml += 'type="enum" values="Low|Medium|High" default="2" />\n'
-        return xml

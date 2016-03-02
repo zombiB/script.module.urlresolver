@@ -21,7 +21,7 @@ import re
 import json
 import urllib
 import urlparse
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver import common
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import PluginSettings

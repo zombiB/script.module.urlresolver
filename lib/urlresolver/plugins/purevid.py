@@ -21,7 +21,7 @@ import os
 import re
 import urllib
 import json
-from t0mm0.common.net import Net
+from urlresolver.net import Net
 from urlresolver.plugnplay.interfaces import UrlResolver
 from urlresolver.plugnplay.interfaces import SiteAuth
 from urlresolver.plugnplay.interfaces import PluginSettings
@@ -62,7 +62,7 @@ class PurevidResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
         for cookie in self.net._cj:
             cookies[cookie.name] = cookie.value
         url = url + '|' + urllib.urlencode({'Cookie': urllib.urlencode(cookies)})
-        common.addon.log_debug(url)
+        common.log_utils.log_debug(url)
         return url
                                                                                             
     def get_url(self, host, media_id):
@@ -84,17 +84,17 @@ class PurevidResolver(Plugin, UrlResolver, SiteAuth, PluginSettings):
             return True
         self.net.set_cookies(self.pv_cookie_file)
         source = self.net.http_GET(url).content
-        common.addon.log_debug(source.encode('utf-8'))
+        common.log_utils.log_debug(source.encode('utf-8'))
         if re.search("""<span>Welcome <strong>.*</strong></span>""", source) :
-            common.addon.log_debug('needLogin returning False')
+            common.log_utils.log_debug('needLogin returning False')
             return False
         else :
-            common.addon.log_debug('needLogin returning True')
+            common.log_utils.log_debug('needLogin returning True')
             return True
     
     def login(self):
         if self.needLogin() :
-            common.addon.log('login to purevid')
+            common.log_utils.log('login to purevid')
             url = 'http://www.purevid.com/?m=login'
             data = {'username' : self.get_setting('username'), 'password' : self.get_setting('password')}        
             source = self.net.http_POST(url,data).content        
