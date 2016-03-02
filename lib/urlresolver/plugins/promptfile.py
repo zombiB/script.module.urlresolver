@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib2
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class PromptfileResolver(UrlResolver):
     name = "promptfile"
@@ -38,7 +38,7 @@ class PromptfileResolver(UrlResolver):
         html = self.net.http_POST(web_url, data).content
         html = re.compile(r'clip\s*:\s*\{.*?url\s*:\s*[\"\'](.+?)[\"\']', re.DOTALL).search(html)
         if not html:
-            raise UrlResolver.ResolverError('File Not Found or removed')
+            raise ResolverError('File Not Found or removed')
         stream_url = html.group(1)
         stream_url = urllib2.urlopen(urllib2.Request(stream_url)).geturl()
         return stream_url
@@ -52,6 +52,6 @@ class PromptfileResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

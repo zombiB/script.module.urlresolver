@@ -21,7 +21,7 @@ import urllib
 import urllib2
 from lib import captcha_lib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class HugefilesResolver(UrlResolver):
     name = "hugefiles"
@@ -39,17 +39,17 @@ class HugefilesResolver(UrlResolver):
 
         r = re.findall('File Not Found', html)
         if r:
-            raise UrlResolver.ResolverError('File Not Found or removed')
+            raise ResolverError('File Not Found or removed')
 
         # Grab data values
         data = {}
         r = re.findall(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"', html)
-        
+
         if r:
             for name, value in r:
                 data[name] = value
         else:
-            raise UrlResolver.ResolverError('Unable to resolve link')
+            raise ResolverError('Unable to resolve link')
 
         data['method_free'] = 'Free Download'
         data.update(captcha_lib.do_captcha(html))
@@ -60,16 +60,16 @@ class HugefilesResolver(UrlResolver):
         # Re-grab data values
         data = {}
         r = re.findall(r'type="hidden"\s+name="(.+?)"\s+value="(.*?)"', html)
-        
+
         if r:
             for name, value in r:
                 data[name] = value
         else:
-            raise UrlResolver.ResolverError('Unable to resolve link')
+            raise ResolverError('Unable to resolve link')
 
         data['referer'] = web_url
 
-        headers = { 'User-Agent': common.IE_USER_AGENT }
+        headers = {'User-Agent': common.IE_USER_AGENT}
 
         common.log_utils.log_debug('HugeFiles - Requesting POST URL: %s with data: %s' % (web_url, data))
         request = urllib2.Request(web_url, data=urllib.urlencode(data), headers=headers)
@@ -79,7 +79,7 @@ class HugefilesResolver(UrlResolver):
 
         common.log_utils.log_debug('Hugefiles stream Found: %s' % stream_url)
         return stream_url
- 
+
     def get_url(self, host, media_id):
         return 'http://hugefiles.net/%s' % media_id
 
@@ -89,6 +89,6 @@ class HugefilesResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

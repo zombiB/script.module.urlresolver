@@ -22,7 +22,7 @@ import json
 import xbmcgui
 import xbmc
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 CLIENT_ID = 'MUQMIQX6YWDSU'
 USER_AGENT = 'URLResolver for Kodi/%s' % (common.addon_version)
@@ -54,7 +54,7 @@ class RealDebridResolver(UrlResolver):
                     self.set_setting('client_id', '')
                     self.set_setting('client_secret', '')
                     self.set_setting('token', '')
-                    raise UrlResolver.ResolverError('Real Debrid Auth Failed & No Refresh Token')
+                    raise ResolverError('Real Debrid Auth Failed & No Refresh Token')
             else:
                 try:
                     js_result = json.loads(e.read())
@@ -64,9 +64,9 @@ class RealDebridResolver(UrlResolver):
                         msg = 'Unknown Error (1)'
                 except:
                     msg = 'Unknown Error (2)'
-                raise UrlResolver.ResolverError('Real Debrid Error: %s (%s)' % (msg, e.code))
+                raise ResolverError('Real Debrid Error: %s (%s)' % (msg, e.code))
         except Exception as e:
-            raise UrlResolver.ResolverError('Unexpected Exception during RD Unrestrict: %s' % (e))
+            raise ResolverError('Unexpected Exception during RD Unrestrict: %s' % (e))
         else:
             js_result = json.loads(result)
             links = []
@@ -76,7 +76,7 @@ class RealDebridResolver(UrlResolver):
                 for alt in js_result['alternative']:
                     link = self.__get_link(alt)
                     if link is not None: links.append(link)
-                    
+
             if len(links) == 1 or self.get_setting('autopick') == 'true':
                 return links[0][1]
             elif len(links) > 1:
@@ -85,8 +85,8 @@ class RealDebridResolver(UrlResolver):
                 if ret > -1:
                     return links[ret][1]
             else:
-                raise UrlResolver.ResolverError('No usable link from Real Debrid')
-        
+                raise ResolverError('No usable link from Real Debrid')
+
     def __get_link(self, link):
         if 'download' in link:
             if 'quality' in link:
@@ -94,7 +94,7 @@ class RealDebridResolver(UrlResolver):
             else:
                 label = link['download']
             return (label, link['download'])
-        
+
     # SiteAuth methods
     def login(self):
         if not self.get_setting('token'):
@@ -118,8 +118,8 @@ class RealDebridResolver(UrlResolver):
             self.set_setting('client_secret', '')
             self.set_setting('token', '')
             self.set_setting('refresh', '')
-            raise UrlResolver.ResolverError('Unable to Refresh Real Debrid Token: %s' % (e))
-    
+            raise ResolverError('Unable to Refresh Real Debrid Token: %s' % (e))
+
     def authorize_resolver(self):
         url = 'https://api.real-debrid.com/oauth/v2/device/code?client_id=%s&new_credentials=yes' % (CLIENT_ID)
         js_result = json.loads(self.net.http_GET(url, headers=self.headers).content)
@@ -143,7 +143,7 @@ class RealDebridResolver(UrlResolver):
                     break
         finally:
             pd.close()
-            
+
         url = 'https://api.real-debrid.com/oauth/v2/token'
         data = {'client_id': js_result['client_id'], 'client_secret': js_result['client_secret'], 'code': device_code, 'grant_type': 'http://oauth.net/grant_type/device/1.0'}
         self.set_setting('client_id', js_result['client_id'])
@@ -153,7 +153,7 @@ class RealDebridResolver(UrlResolver):
         common.log_utils.log_debug('Authorizing Real Debrid Result: |%s|' % (js_result))
         self.set_setting('token', js_result['access_token'])
         self.set_setting('refresh', js_result['refresh_token'])
-        
+
     def get_url(self, host, media_id):
         return media_id
 
@@ -171,7 +171,7 @@ class RealDebridResolver(UrlResolver):
             except Exception as e:
                 common.log_utils.log_error('Error getting RD regexes: %s' % (e))
                 self.hosters = []
-        common.log_utils.log_debug('RealDebrid hosters : %s' % self.hosters)
+        # common.log_utils.log_debug('RealDebrid hosters : %s' % self.hosters)
         return self.hosters
 
     def get_hosts(self):
@@ -184,8 +184,11 @@ class RealDebridResolver(UrlResolver):
                 self.hosts = []
         common.log_utils.log_debug('RealDebrid hosts : %s' % self.hosts)
 
+    @classmethod
+    def _is_enabled(cls):
+        return cls.get_setting('enabled') == 'true' and cls.get_setting('authorize') == 'true'
+
     def valid_url(self, url, host):
-        if self.get_setting('authorize') == 'false': return False
         common.log_utils.log_debug('in valid_url %s : %s' % (url, host))
         if url:
             self.get_all_hosters()

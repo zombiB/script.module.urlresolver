@@ -18,11 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class Shared2meResolver(UrlResolver):
     name = 'shared2.me'
-    domains = [ 'shared2.me' ]
+    domains = ['shared2.me']
     pattern = '(?://|\.)(shared2\.me)/(?:play|frame)/([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -35,8 +35,8 @@ class Shared2meResolver(UrlResolver):
 
         stream_url = re.compile('path *: *"(http.+?)"').findall(html)[-1]
         return stream_url
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return 'http://shared2.me/frame/%s' % media_id
@@ -47,6 +47,6 @@ class Shared2meResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -20,7 +20,7 @@ import re
 import json
 import urlparse
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VideoTTResolver(UrlResolver):
     name = "videott"
@@ -65,7 +65,7 @@ class VideoTTResolver(UrlResolver):
             vUrl = vUrl[0][1]
             return vUrl
 
-        raise UrlResolver.ResolverError('The requested video was not found.')
+        raise ResolverError('The requested video was not found.')
 
     def get_url(self, host, media_id):
         return 'http://www.video.tt/watch_video.php?v=%s' % media_id

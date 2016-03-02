@@ -19,7 +19,7 @@
 import re
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidCrazyResolver(UrlResolver):
     name = 'vidcrazy.net'
@@ -36,7 +36,7 @@ class VidCrazyResolver(UrlResolver):
         if r:
             stream_url = urllib.unquote_plus(r.group(1))
         else:
-            raise UrlResolver.ResolverError('no file located')
+            raise ResolverError('no file located')
         return stream_url
 
     def get_url(self, host, media_id):

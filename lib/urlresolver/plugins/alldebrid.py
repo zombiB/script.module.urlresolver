@@ -23,7 +23,7 @@ import urllib
 import json
 import xbmcgui
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class AllDebridResolver(UrlResolver):
     name = "AllDebrid"
@@ -40,7 +40,7 @@ class AllDebridResolver(UrlResolver):
         except OSError:
             pass
 
-    #UrlResolver methods
+    # UrlResolver methods
     def get_media_url(self, host, media_id):
         common.log_utils.log('in get_media_url %s : %s' % (host, media_id))
         dialog = xbmcgui.Dialog()
@@ -53,42 +53,42 @@ class AllDebridResolver(UrlResolver):
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             common.log_utils.log(str(exc_type) + " : " + fname + " : " + str(exc_tb.tb_lineno))
             dialog.ok(' all-Debrid ', ' all-Debrid server timed out ', '', '')
-            return self.unresolvable(3,'alldebrid : error contacting the site')
+            return self.unresolvable(3, 'alldebrid : error contacting the site')
         common.log_utils.log('************* %s' % source.encode('utf-8'))
 
         if re.search('login', source):
             dialog.ok(' All Debrid Message ', ' Your account may have Expired, please check by going to the website ', '', '')
-            return self.unresolvable(0,'alldebrid : Your account may have expired')
+            return self.unresolvable(0, 'alldebrid : Your account may have expired')
         if re.search('Hoster unsupported or under maintenance', source):
             dialog.ok(' All Debrid Message ', ' Sorry this hoster is not supported, change the priority level in resolver settings for this host ', '', '')
-            return self.unresolvable(2,'alldebrid : pb for supporting this hoster')
-        #Go
+            return self.unresolvable(2, 'alldebrid : pb for supporting this hoster')
+        # Go
         finallink = ''
-        #try json return
+        # try json return
         try:
-            link      = json.loads(source)
+            link = json.loads(source)
             streaming = link['streaming']
-            line      = [] 
-            for item in streaming :
+            line = []
+            for item in streaming:
                 line.append(item.encode('utf-8'))
             result = xbmcgui.Dialog().select('Choose the link', line)
-            if result != -1 :
-                finallink = streaming[str(line[result])].encode('utf-8')                  
-        #classic method
-        except :
-            link =re.compile("href='(.+?)'").findall(source)
+            if result != -1:
+                finallink = streaming[str(line[result])].encode('utf-8')
+        # classic method
+        except:
+            link = re.compile("href='(.+?)'").findall(source)
             if len(link) != 0:
-                finallink = link[0].encode('utf-8')               
-        #end
+                finallink = link[0].encode('utf-8')
+        # end
         common.log_utils.log('finallink is %s' % finallink)
-        if finallink != '' :
+        if finallink != '':
             self.media_url = finallink
             return finallink
-        #false/errors
-        elif 'Invalid link' in source :
-            return self.unresolvable(1,'Invalid link')
-        else :
-            return self.unresolvable(0,'No generated_link')
+        # false/errors
+        elif 'Invalid link' in source:
+            raise ResolverError('Invalid link')
+        else:
+            raise ResolverError('No generated_link')
 
     def get_url(self, host, media_id):
         return media_id
@@ -105,7 +105,6 @@ class AllDebridResolver(UrlResolver):
         return self.allHosters
 
     def valid_url(self, url, host):
-        if self.get_setting('login') == 'false': return False
         common.log_utils.log_debug('in valid_url %s : %s' % (url, host))
         if url:
             match = re.search('//(.*?)/', url)
@@ -120,12 +119,12 @@ class AllDebridResolver(UrlResolver):
 
         return False
 
-    def  checkLogin(self):
+    def checkLogin(self):
         url = 'http://alldebrid.com/service.php'
         if not os.path.exists(self.cookie_file):
-               return True
+            return True
         self.net.set_cookies(self.cookie_file)
-        source =  self.net.http_GET(url).content
+        source = self.net.http_GET(url).content
         common.log_utils.log(source)
         if re.search('login', source):
             common.log_utils.log('checkLogin returning False')
@@ -134,12 +133,12 @@ class AllDebridResolver(UrlResolver):
             common.log_utils.log('checkLogin returning True')
             return True
 
-    #SiteAuth methods
+    # SiteAuth methods
     def login(self):
         if self.checkLogin():
             try:
                 common.log_utils.log('Need to login since session is invalid')
-                login_data = urllib.urlencode({'action' : 'login','login_login' : self.get_setting('username'), 'login_password' : self.get_setting('password')})
+                login_data = urllib.urlencode({'action': 'login', 'login_login': self.get_setting('username'), 'login_password': self.get_setting('password')})
                 url = 'http://alldebrid.com/register/?' + login_data
                 source = self.net.http_GET(url).content
                 if re.search('Control panel', source):
@@ -147,9 +146,9 @@ class AllDebridResolver(UrlResolver):
                     self.net.set_cookies(self.cookie_file)
                     return True
             except:
-                    common.log_utils.log('error with http_GET')
-                    dialog = xbmcgui.Dialog()
-                    dialog.ok(' Real-Debrid ', ' Unexpected error, Please try again.', '', '')
+                common.log_utils.log('error with http_GET')
+                dialog = xbmcgui.Dialog()
+                dialog.ok(' Real-Debrid ', ' Unexpected error, Please try again.', '', '')
             else:
                 return False
         else:

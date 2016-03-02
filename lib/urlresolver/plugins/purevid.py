@@ -22,7 +22,7 @@ import re
 import urllib
 import json
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class PureVidResolver(UrlResolver):
     name = "purevid"
@@ -55,17 +55,17 @@ class PureVidResolver(UrlResolver):
         url = url + '|' + urllib.urlencode({'Cookie': urllib.urlencode(cookies)})
         common.log_utils.log_debug(url)
         return url
-                                                                                            
+
     def get_url(self, host, media_id):
         return 'http://www.purevid.com/?m=video_info_embed_flv&id=%s' % media_id
-                        
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 
@@ -79,23 +79,23 @@ class PureVidResolver(UrlResolver):
         if re.search("""<span>Welcome <strong>.*</strong></span>""", source) :
             common.log_utils.log_debug('needLogin returning False')
             return False
-        else :
+        else:
             common.log_utils.log_debug('needLogin returning True')
             return True
-    
+
     def login(self):
-        if self.needLogin() :
+        if self.needLogin():
             common.log_utils.log('login to purevid')
             url = 'http://www.purevid.com/?m=login'
-            data = {'username' : self.get_setting('username'), 'password' : self.get_setting('password')}        
-            source = self.net.http_POST(url,data).content        
-            if re.search(self.get_setting('username'), source):            
+            data = {'username': self.get_setting('username'), 'password': self.get_setting('password')}
+            source = self.net.http_POST(url, data).content
+            if re.search(self.get_setting('username'), source):
                 self.net.save_cookies(self.pv_cookie_file)
                 self.net.set_cookies(self.pv_cookie_file)
                 return True
             else:
                 return False
-        else :
+        else:
             return True
 
     @classmethod

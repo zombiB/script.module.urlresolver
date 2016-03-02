@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class MovDivxResolver(UrlResolver):
     name = "movdivx"
@@ -38,7 +38,7 @@ class MovDivxResolver(UrlResolver):
             key, value = match.groups()
             data[key] = value
         data['method_free'] = 'Continue to Stream >>'
-        
+
         html = self.net.http_POST(web_url, data).content
 
         # get url from packed javascript
@@ -54,10 +54,10 @@ class MovDivxResolver(UrlResolver):
                 if match:
                     return match.group(1)
 
-        raise UrlResolver.ResolverError('failed to parse link')
+        raise ResolverError('failed to parse link')
 
     def get_url(self, host, media_id):
-            return 'http://movdivx.com/%s.html' % (media_id)
+        return 'http://movdivx.com/%s.html' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -65,6 +65,6 @@ class MovDivxResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

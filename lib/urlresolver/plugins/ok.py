@@ -22,7 +22,7 @@ import json
 import urllib
 import xbmcgui
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class OKResolver(UrlResolver):
     name = "ok.ru"
@@ -58,9 +58,9 @@ class OKResolver(UrlResolver):
         if result != -1:
             return purged_jsonvars[lines[result]].encode('utf-8')
         else:
-            raise UrlResolver.ResolverError('No link selected')
+            raise ResolverError('No link selected')
 
-        raise UrlResolver.ResolverError('No video found')
+        raise ResolverError('No video found')
 
     def __replaceQuality(self, qual):
         return self.qual_map.get(qual.lower(), '000')
@@ -84,7 +84,7 @@ class OKResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 

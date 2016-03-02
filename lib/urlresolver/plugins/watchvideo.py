@@ -16,7 +16,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class WatchVideoResolver(UrlResolver):
     name = "watchvideo.us"
@@ -31,10 +31,10 @@ class WatchVideoResolver(UrlResolver):
         html = self.net.http_GET(web_url).content
 
         if html.find('404 Not Found') >= 0:
-            raise UrlResolver.ResolverError('File Removed')
-        
+            raise ResolverError('File Removed')
+
         if html.find('Video is processing') >= 0:
-            raise UrlResolver.ResolverError('File still being processed')
+            raise ResolverError('File still being processed')
 
         packed = re.search('(eval\(function.*?)\s*</script>', html, re.DOTALL)
         if packed:
@@ -47,10 +47,10 @@ class WatchVideoResolver(UrlResolver):
             common.log_utils.log_debug('watchvideo.us Link Found: %s' % link.group(1))
             return link.group(1)
 
-        raise UrlResolver.ResolverError('Unable to find watchvideo.us video')
+        raise ResolverError('Unable to find watchvideo.us video')
 
     def get_url(self, host, media_id):
-        return 'http://%s/%s.html' % (host,media_id)
+        return 'http://%s/%s.html' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -58,6 +58,6 @@ class WatchVideoResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -20,7 +20,7 @@ import re
 import urllib
 import json
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class PremiumizeMeResolver(UrlResolver):
     name = "Premiumize.me"
@@ -45,9 +45,9 @@ class PremiumizeMeResolver(UrlResolver):
             if response['status'] == 200:
                 link = response['result']['location']
             else:
-                raise UrlResolver.ResolverError('Link Not Found: Error Code: %s' % response['status'])
+                raise ResolverError('Link Not Found: Error Code: %s' % response['status'])
         else:
-            raise UrlResolver.ResolverError('Unexpected Response Received')
+            raise ResolverError('Unexpected Response Received')
 
         common.log_utils.log_debug('Premiumize.me: Resolved to %s' % link)
         return link
@@ -77,8 +77,6 @@ class PremiumizeMeResolver(UrlResolver):
             common.log_utils.log_error('Error getting Premiumize hosts: %s' % (e))
 
     def valid_url(self, url, host):
-        if self.get_setting('login') == 'false': return False
-
         self.get_all_hosters()
         if url:
             if not url.endswith('/'): url += '/'

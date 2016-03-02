@@ -17,6 +17,7 @@ headers = [
 ]
 
 class AADecoder(object):
+
     def __init__(self, aa_encoded_data):
         self.encoded_str = aa_encoded_data.replace('/*´∇｀*/', '')
         self.b = ["(c^_^o)", "(ﾟΘﾟ)", "((o^_^o) - (ﾟΘﾟ))", "(o^_^o)",
@@ -73,7 +74,7 @@ class AADecoder(object):
                 result = []
                 if enc_char.startswith('('):
                     l = 0
-                    
+
                     for t in enc_char[1:]:
                         l += 1
                         # print 'looping',findClose,startpos,t,balance
@@ -90,7 +91,7 @@ class AADecoder(object):
                             continue
                         elif t == '(':
                             balance += 1
-                
+
                 if result is None or len(result) == 0:
                     return ""
                 else:
@@ -99,7 +100,7 @@ class AADecoder(object):
                         if value == "":
                             return ""
                         else:
-                            
+
                             str_char += value
                     return str_char
 
@@ -115,7 +116,7 @@ class AADecoder(object):
             return val
         except:
             pass
-        
+
     def decode_digit(self, enc_int, radix):
         enc_int = enc_int.replace('(ﾟΘﾟ)', '1').replace('(ﾟｰﾟ)', '4').replace('(c^_^o)', '0').replace('(o^_^o)', '3')
         # rr = '(\(.+?\)\))\+'
@@ -134,7 +135,7 @@ class AADecoder(object):
                 else:
                     v += str(eval(c))
         return v
-            
+
         # mode 0=+, 1=-
         mode = 0
         value = 0
@@ -198,7 +199,7 @@ class AADecoder(object):
             else:
                 enc_char = data[:data.find(begin_char)]
                 data = data[len(enc_char):]
-            
+
             radix = 8
             # Detect radix 16 for utf8 char
             if enc_char.find(alt_char) == 0:
@@ -206,7 +207,7 @@ class AADecoder(object):
                 radix = 16
 
             str_char = self.decode_char(enc_char, radix)
-            
+
             if str_char == "":
                 # print "no match :  "
                 # print data + "\nout = " + out + "\n"

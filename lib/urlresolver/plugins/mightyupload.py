@@ -20,7 +20,7 @@ import re
 import urllib
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class MightyuploadResolver(UrlResolver):
     name = "mightyupload"
@@ -43,7 +43,7 @@ class MightyuploadResolver(UrlResolver):
             html = self.net.http_GET(r.group(1)).content
         r = re.search("<div id=\"player_code\">.*?<script type='text/javascript'>(.*?)</script>", html, re.DOTALL)
         if not r:
-            raise UrlResolver.ResolverError('Unable to resolve Mightyupload link. Player config not found.')
+            raise ResolverError('Unable to resolve Mightyupload link. Player config not found.')
         r_temp = re.search("file: '([^']+)'", r.group(1))
         if r_temp:
             stream_url = r_temp.group(1)
@@ -54,17 +54,17 @@ class MightyuploadResolver(UrlResolver):
                 r = re.search('"src"value="([^"]+)', js.replace('\\', ''))
 
             if not r:
-                raise UrlResolver.ResolverError('Unable to resolve Mightyupload link. Filelink not found.')
+                raise ResolverError('Unable to resolve Mightyupload link. Filelink not found.')
 
             stream_url = r.group(1)
 
         if stream_url:
-            return stream_url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
+            return stream_url + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
         else:
-            raise UrlResolver.ResolverError('Unable to resolve link')
+            raise ResolverError('Unable to resolve link')
 
     def get_url(self, host, media_id):
-            return 'http://www.mightyupload.com/embed-%s.html' % (media_id)
+        return 'http://www.mightyupload.com/embed-%s.html' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -72,6 +72,6 @@ class MightyuploadResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

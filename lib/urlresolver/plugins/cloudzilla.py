@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class CloudZillaResolver(UrlResolver):
     name = "cloudzilla"
@@ -35,10 +35,10 @@ class CloudZillaResolver(UrlResolver):
         if match:
             return match.group(1)
         else:
-            raise UrlResolver.ResolverError('Unable to resolve cloudtime link. Filelink not found.')
-        
+            raise ResolverError('Unable to resolve cloudtime link. Filelink not found.')
+
     def get_url(self, host, media_id):
-            return 'http://%s/embed/%s' % (host, media_id)
+        return 'http://%s/embed/%s' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -46,6 +46,6 @@ class CloudZillaResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

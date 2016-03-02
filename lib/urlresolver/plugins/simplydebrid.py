@@ -17,7 +17,7 @@
 """
 
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 import urlparse
 import urllib
 import json
@@ -46,11 +46,11 @@ class SimplyDebridResolver(UrlResolver):
                     common.log_utils.log_debug('SD: Result: %s' % (js_result))
                     if js_result['error']:
                         msg = js_result.get('message', 'Unknown Error')
-                        raise UrlResolver.ResolverError('SD Resolve Failed: %s' % (msg))
+                        raise ResolverError('SD Resolve Failed: %s' % (msg))
                     else:
                         return js_result['link']
             except Exception as e:
-                raise UrlResolver.ResolverError('SD Resolve: Exception: %s' % (e))
+                raise ResolverError('SD Resolve: Exception: %s' % (e))
 
     def login(self):
         try:
@@ -60,12 +60,12 @@ class SimplyDebridResolver(UrlResolver):
             js_result = json.loads(response)
             if js_result['error']:
                 msg = js_result.get('message', 'Unknown Error')
-                raise UrlResolver.ResolverError('SD Login Failed: %s' % (msg))
+                raise ResolverError('SD Login Failed: %s' % (msg))
             else:
                 self.token = js_result['token']
         except Exception as e:
-            raise UrlResolver.ResolverError('SD Login Exception: %s' % (e))
-    
+            raise ResolverError('SD Login Exception: %s' % (e))
+
     def get_url(self, host, media_id):
         return media_id
 
@@ -84,7 +84,6 @@ class SimplyDebridResolver(UrlResolver):
             common.log_utils.log_error('Error getting Simply-Debrid hosts: %s' % (e))
 
     def valid_url(self, url, host):
-        if self.get_setting('login') == 'false': return False
         self.get_all_hosters()
         if url:
             try: host = urlparse.urlparse(url).hostname

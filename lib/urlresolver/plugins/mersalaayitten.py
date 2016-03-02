@@ -18,7 +18,7 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class MersalaResolver(UrlResolver):
     name = "mersalaayitten.com"
@@ -41,21 +41,21 @@ class MersalaResolver(UrlResolver):
             xmlhtml = response.content
             r2 = re.search('<file>(.*?)</file>', xmlhtml)
             stream_url = r2.group(1) + '|Cookie=' + headers['set-cookie']
-            
+
         else:
-            raise UrlResolver.ResolverError('no file located')
-        
+            raise ResolverError('no file located')
+
         return stream_url
 
     def get_url(self, host, media_id):
         return 'http://mersalaayitten.com/embed/%s' % (media_id)
-    
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

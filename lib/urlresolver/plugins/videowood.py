@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VideowoodResolver(UrlResolver):
     name = "videowood"
@@ -35,7 +35,7 @@ class VideowoodResolver(UrlResolver):
         headers = {'Referer': web_url}
         html = self.net.http_GET(web_url, headers=headers).content
         if "This video doesn't exist." in html:
-            raise UrlResolver.ResolverError('The requested video was not found.')
+            raise ResolverError('The requested video was not found.')
         packed = re.search('(eval\(function\(p,a,c,k,e,d\)\{.+\))', html)
         unpacked = None
         if packed:
@@ -49,7 +49,7 @@ class VideowoodResolver(UrlResolver):
         if stream_url:
             return stream_url
         else:
-            raise UrlResolver.ResolverError('File not found')
+            raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'http://videowood.tv/embed/%s' % media_id

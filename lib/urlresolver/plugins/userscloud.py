@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class UsersCloudResolver(UrlResolver):
     name = "userscloud"
@@ -48,7 +48,7 @@ class UsersCloudResolver(UrlResolver):
             if stream_url:
                 return stream_url[0]
 
-        raise UrlResolver.ResolverError('File not found')
+        raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'https://%s/%s' % (host, media_id)

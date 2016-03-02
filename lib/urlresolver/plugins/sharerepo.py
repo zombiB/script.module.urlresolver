@@ -20,7 +20,7 @@ import re
 import urllib
 import urllib2
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class SharerepoResolver(UrlResolver):
     name = "sharerepo"
@@ -45,13 +45,13 @@ class SharerepoResolver(UrlResolver):
                 html = self.net.http_GET(web_url, headers=headers).content
             else:
                 raise
-            
+
         link = re.search("file\s*:\s*'([^']+)", html)
         if link:
             common.log_utils.log_debug('ShareRepo Link Found: %s' % link.group(1))
             return link.group(1) + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
         else:
-            raise UrlResolver.ResolverError('Unable to resolve ShareRepo Link')
+            raise ResolverError('Unable to resolve ShareRepo Link')
 
     def get_url(self, host, media_id):
         return 'http://sharerepo.com/f/%s' % media_id
@@ -62,6 +62,6 @@ class SharerepoResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

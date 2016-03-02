@@ -18,7 +18,7 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VshareResolver(UrlResolver):
     name = "vshare"
@@ -32,13 +32,13 @@ class VshareResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         link = self.net.http_GET(web_url).content
         if link.find('404 - Error') >= 0:
-            raise UrlResolver.ResolverError('The requested video was not found.')
+            raise ResolverError('The requested video was not found.')
 
         video_link = str(re.compile("url[: ]*'(.+?)'").findall(link)[0])
         if len(video_link) > 0:
             return video_link
         else:
-            raise UrlResolver.ResolverError('No playable video found.')
+            raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         return 'http://vshare.io/v/%s/width-620/height-280/' % media_id

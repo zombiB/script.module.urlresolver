@@ -20,7 +20,7 @@ import re
 import urllib
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidlockersResolver(UrlResolver):
     name = "vidlockers"
@@ -39,11 +39,11 @@ class VidlockersResolver(UrlResolver):
             form_values[i.group(1)] = i.group(2)
 
         html = self.net.http_POST(web_url, form_data=form_values).content
-        
+
         r = re.search('file\s*:\s*"([^"]+)', html)
         if r:
             stream_url = r.group(1)
-        
+
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             js_data = jsunpack.unpack(match.group(1))
             match2 = re.search('<param\s+name="src"\s*value="([^"]+)', js_data)
@@ -53,15 +53,15 @@ class VidlockersResolver(UrlResolver):
                 match2 = re.search('<embed.*?type="video.*?src="([^"]+)', js_data)
                 if match2:
                     stream_url = match2.group(1)
-            
+
         if stream_url:
-            stream_url += '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT, 'Referer': web_url })
+            stream_url += '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT, 'Referer': web_url})
             return stream_url
 
-        raise UrlResolver.ResolverError('Unable to resolve vidlockers link. Filelink not found.')
+        raise ResolverError('Unable to resolve vidlockers link. Filelink not found.')
 
     def get_url(self, host, media_id):
-            return 'http://vidlockers.ag/%s' % media_id
+        return 'http://vidlockers.ag/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

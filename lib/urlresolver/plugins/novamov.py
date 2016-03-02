@@ -18,11 +18,11 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class NovamovResolver(UrlResolver):
     name = "novamov"
-    domains = [ 'novamov.com', 'auroravid.to' ]
+    domains = ['novamov.com', 'auroravid.to']
     pattern = '(?://|\.)(novamov.com|auroravid.to)/(?:video/|embed/\?v=)([A-Za-z0-9]+)'
 
     def __init__(self):
@@ -49,7 +49,7 @@ class NovamovResolver(UrlResolver):
             if r:
                 stream_url = r.group(1)
             else:
-                raise UrlResolver.ResolverError('File Not Found or removed')
+                raise ResolverError('File Not Found or removed')
 
         return stream_url
 
@@ -62,6 +62,6 @@ class NovamovResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

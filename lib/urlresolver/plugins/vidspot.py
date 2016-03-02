@@ -20,7 +20,7 @@ import re
 import urllib
 import urlparse
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidSpotResolver(UrlResolver):
     name = "vidspot"
@@ -38,26 +38,26 @@ class VidSpotResolver(UrlResolver):
         r = re.findall(r'type="hidden" name="(.+?)"\s* value="?(.+?)">', html)
         for name, value in r:
             data[name] = value
-            
+
         html = self.net.http_POST(url, data).content
-        
+
         r = re.search('"sources"\s*:\s*\[(.*?)\]', html, re.DOTALL)
         if r:
             fragment = r.group(1)
             stream_url = None
             for match in re.finditer('"file"\s*:\s*"([^"]+)', fragment):
                 stream_url = match.group(1)
-            
+
             if stream_url:
                 stream_url = '%s?%s&direct=false' % (stream_url.split('?')[0], urlparse.urlparse(stream_url).query)
-                return stream_url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
+                return stream_url + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
             else:
-                raise UrlResolver.ResolverError('could not find file')
+                raise ResolverError('could not find file')
         else:
-            raise UrlResolver.ResolverError('could not find sources')
-        
+            raise ResolverError('could not find sources')
+
     def get_url(self, host, media_id):
-        return 'http://vidspot.net/%s' % media_id 
+        return 'http://vidspot.net/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

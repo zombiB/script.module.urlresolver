@@ -22,14 +22,14 @@ import urllib2
 from lib import jsunpack
 from urlparse import urlparse
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 from urlresolver.hmf import HostedMediaFile
 
 class VideoZooResolver(UrlResolver):
     name = "videozoo"
     domains = ["byzoo.org", "playpanda.net", "videozoo.me", "videowing.me", "easyvideo.me", "play44.net", "playbb.me", "video44.net"]
     pattern = 'http://((?:www\.)*(?:play44|playbb|video44|byzoo|playpanda|videozoo|videowing|easyvideo)\.(?:me|org|net|eu)/(?:embed[/0-9a-zA-Z]*?|gplus|picasa|gogo/)(?:\.php)*)\?.*?((?:vid|video|id|file)=[%0-9a-zA-Z_\-\./]+|.*)[\?&]*.*'
-    
+
     def __init__(self):
         self.net = common.Net()
 
@@ -71,7 +71,7 @@ class VideoZooResolver(UrlResolver):
                             stream_url = 'http://%s/%s.php?url=%s' % (new_host, re_src.group(1), re_url.group(1))
                             stream_url = self._redirect_test(stream_url)
                         else:
-                            raise UrlResolver.ResolverError('File not found')
+                            raise ResolverError('File not found')
         if r:
             stream_url = urllib.unquote_plus(r.group(1))
             if 'http' not in stream_url:
@@ -84,7 +84,7 @@ class VideoZooResolver(UrlResolver):
             else:
                 return stream_url
         else:
-            raise UrlResolver.ResolverError('File not found')
+            raise ResolverError('File not found')
 
     def _redirect_test(self, url):
         opener = urllib2.build_opener()
@@ -100,4 +100,4 @@ class VideoZooResolver(UrlResolver):
             if e.code == 403:
                 if url != e.geturl():
                     return e.geturl()
-            raise UrlResolver.ResolverError('File not found')
+            raise ResolverError('File not found')

@@ -19,11 +19,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class IsharedResolver(UrlResolver):
     name = 'ishared.eu'
-    domains = [ 'ishared.eu' ]
+    domains = ['ishared.eu']
     pattern = '(?://|\.)(ishared\.eu)/(?:video|embed)/(.*?)(?:/|$)'
 
     def __init__(self):
@@ -36,7 +36,7 @@ class IsharedResolver(UrlResolver):
 
         unpacked = ''
         packed = html.split('\n')
-        for i in packed: 
+        for i in packed:
             try: unpacked += jsunpack.unpack(i).replace('\\\'', '\'')
             except: pass
         html += unpacked
@@ -48,8 +48,8 @@ class IsharedResolver(UrlResolver):
             stream_url = re.findall('var\s+%s\s*=\s*\'(.+?)\'' % match[0], html)
             if stream_url:
                 return stream_url[0]
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return 'http://ishared.eu/embed/%s' % media_id
@@ -60,6 +60,6 @@ class IsharedResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

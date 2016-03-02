@@ -22,12 +22,12 @@ import re
 import base64
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class TeramixerResolver(UrlResolver):
     name = "teramixer"
-    domains = [ 'teramixer.com' ]
-    pattern ='(?://|\.)(teramixer\.com)/(?:embed/|)?([0-9A-Za-z]+)'
+    domains = ['teramixer.com']
+    pattern = '(?://|\.)(teramixer\.com)/(?:embed/|)?([0-9A-Za-z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -43,13 +43,13 @@ class TeramixerResolver(UrlResolver):
             url = base64.b64decode(url)
             if not url.startswith('aws'): url = url[1:]
 
-            stream_url = 'http://%s' % url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
+            stream_url = 'http://%s' % url + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
             return stream_url
         except IndexError as e:
-            if re.search("""<title>File not found or deleted - Teramixer</title>""", html) :
-                raise UrlResolver.ResolverError('File not found or removed')
+            if re.search("""<title>File not found or deleted - Teramixer</title>""", html):
+                raise ResolverError('File not found or removed')
             else:
-                raise UrlResolver.ResolverError(e)
+                raise ResolverError(e)
 
     def get_url(self, host, media_id):
         return 'http://www.teramixer.com/%s' % media_id
@@ -60,6 +60,6 @@ class TeramixerResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -19,12 +19,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class RapidVideoResolver(UrlResolver):
     name = "rapidvideo.ws"
     domains = ["rapidvideo.ws"]
-    pattern ='(?://|\.)(rapidvideo\.ws)/(?:embed-|)?([0-9A-Za-z]+)'
+    pattern = '(?://|\.)(rapidvideo\.ws)/(?:embed-|)?([0-9A-Za-z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -44,11 +44,11 @@ class RapidVideoResolver(UrlResolver):
 
             if stream_url:
                 return stream_url[0]
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-            return 'http://rapidvideo.ws/embed-%s.html' % media_id
+        return 'http://rapidvideo.ws/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -56,6 +56,6 @@ class RapidVideoResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

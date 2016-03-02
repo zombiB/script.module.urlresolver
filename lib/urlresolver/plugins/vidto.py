@@ -18,7 +18,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidtoResolver(UrlResolver):
     name = "vidto"
@@ -46,8 +46,8 @@ class VidtoResolver(UrlResolver):
             if stream_url:
                 return stream_url
             else:
-                raise UrlResolver.ResolverError("File Link Not Found")
-        
+                raise ResolverError("File Link Not Found")
+
     def get_url(self, host, media_id):
         return 'http://vidto.me/embed-%s.html' % media_id
 

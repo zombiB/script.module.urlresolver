@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidAgResolver(UrlResolver):
     name = "vid.ag"
@@ -37,12 +37,12 @@ class VidAgResolver(UrlResolver):
             r = re.search('file\s*:\s*"([^"]+)', js_data)
             if r:
                 return r.group(1)
-        
+
         r = re.search('file\s*:\s*"([^"]+)', html)
         if r:
             return r.group(1)
 
-        raise UrlResolver.ResolverError('File Not Found or removed')
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return 'http://vid.ag/embed-%s.html' % media_id

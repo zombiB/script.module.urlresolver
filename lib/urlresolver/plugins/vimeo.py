@@ -19,7 +19,7 @@
 import re
 import json
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VimeoResolver(UrlResolver):
     name = "vimeo"

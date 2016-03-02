@@ -18,7 +18,7 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 import xbmc
 
 class UpToBoxResolver(UrlResolver):
@@ -97,7 +97,7 @@ class UpToBoxResolver(UrlResolver):
         except:
             pass
 
-        raise UrlResolver.ResolverError('File not found')
+        raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'http://uptobox.com/%s' % media_id
@@ -111,6 +111,6 @@ class UpToBoxResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

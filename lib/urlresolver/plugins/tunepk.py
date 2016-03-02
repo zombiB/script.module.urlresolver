@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class TunePkResolver(UrlResolver):
     name = "tune.pk"
@@ -32,7 +32,7 @@ class TunePkResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         link = repr(self.net.http_GET(web_url).content)
         if link.find('404 Not Found') >= 0:
-            raise UrlResolver.ResolverError('The requested video was not found.')
+            raise ResolverError('The requested video was not found.')
 
         videoUrl = []
         # borrowed from AJ's turtle-x
@@ -58,7 +58,7 @@ class TunePkResolver(UrlResolver):
 
             return vUrl
         else:
-            raise UrlResolver.ResolverError('No playable video found.')
+            raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         return 'http://embed.tune.pk/play/%s' % media_id

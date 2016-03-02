@@ -19,7 +19,7 @@
 import re
 import xml.etree.ElementTree as ET
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class MediaPlayBoxResolver(UrlResolver):
     name = "MediaPlayBox"
@@ -47,8 +47,8 @@ class MediaPlayBoxResolver(UrlResolver):
                 result = root.find('./video/src')
                 if result is not None:
                     return result.text
-        
-        raise UrlResolver.ResolverError('Unable to find mediaplaybox video')
+
+        raise ResolverError('Unable to find mediaplaybox video')
 
     def get_url(self, host, media_id):
         return 'http://mediaplaybox.com/video/%s' % media_id
@@ -59,6 +59,6 @@ class MediaPlayBoxResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

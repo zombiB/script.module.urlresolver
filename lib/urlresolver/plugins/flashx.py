@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class FlashxResolver(UrlResolver):
     name = "flashx"
@@ -52,8 +52,8 @@ class FlashxResolver(UrlResolver):
         if best_link:
             return best_link
         else:
-            raise UrlResolver.ResolverError('Unable to resolve Flashx link. Filelink not found.')
-        
+            raise ResolverError('Unable to resolve Flashx link. Filelink not found.')
+
     def get_url(self, host, media_id):
         return 'http://www.flashx.tv/embed-%s.html' % media_id
 
@@ -63,7 +63,7 @@ class FlashxResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 

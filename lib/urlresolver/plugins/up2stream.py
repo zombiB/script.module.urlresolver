@@ -21,9 +21,10 @@ import urllib
 import urllib2
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class NoRedirection(urllib2.HTTPErrorProcessor):
+
     def http_response(self, request, response):
         return response
 
@@ -41,8 +42,8 @@ class Up2StreamResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
 
         headers = {
-                   'User-Agent': common.IOS_USER_AGENT,
-                   'Referer': web_url
+            'User-Agent': common.IOS_USER_AGENT,
+            'Referer': web_url
         }
 
         html = self.net.http_GET(web_url, headers=headers).content
@@ -63,17 +64,17 @@ class Up2StreamResolver(UrlResolver):
                 stream_url += '|' + urllib.urlencode(headers)
                 return stream_url
         except:
-            UrlResolver.ResolverError("File Not Playable")
+            ResolverError("File Not Playable")
 
     def get_url(self, host, media_id):
         return 'http://up2stream.com/view.php?ref=%s' % media_id
-    
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

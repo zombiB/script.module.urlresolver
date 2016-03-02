@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidUpResolver(UrlResolver):
     name = "vidup"
@@ -47,11 +47,11 @@ class VidUpResolver(UrlResolver):
             if best_stream_url:
                 return best_stream_url
 
-            raise UrlResolver.ResolverError('File Not Found or removed')
+            raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-            return 'http://vidup.me/embed-%s.html' % media_id
-    
+        return 'http://vidup.me/embed-%s.html' % media_id
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:

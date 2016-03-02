@@ -20,11 +20,11 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class ZettahostResolver(UrlResolver):
     name = 'zettahost.tv'
-    domains = [ 'zettahost.tv' ]
+    domains = ['zettahost.tv']
     pattern = '(?://|\.)(zettahost\.tv)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -33,7 +33,7 @@ class ZettahostResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
 
-        headers = { 'User-Agent': common.IOS_USER_AGENT }
+        headers = {'User-Agent': common.IOS_USER_AGENT}
 
         html = self.net.http_GET(web_url, headers=headers).content
 
@@ -46,8 +46,8 @@ class ZettahostResolver(UrlResolver):
 
             if stream_url:
                 return stream_url[0]
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return 'http://zettahost.tv/embed-%s.html' % media_id

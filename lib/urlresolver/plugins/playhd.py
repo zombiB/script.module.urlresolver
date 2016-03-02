@@ -19,7 +19,7 @@
 import re
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class PlayHDResolver(UrlResolver):
     name = "playhd.video"
@@ -36,21 +36,21 @@ class PlayHDResolver(UrlResolver):
         headers = dict(resp._response.info().items())
         r = re.search('"content_video".*\n.*?src="(.*?)"', html)
         if r:
-            stream_url = r.group(1) + '|' + urllib.urlencode({ 'Cookie': headers['set-cookie'] })
+            stream_url = r.group(1) + '|' + urllib.urlencode({'Cookie': headers['set-cookie']})
         else:
-            raise UrlResolver.ResolverError('no file located')
-        
+            raise ResolverError('no file located')
+
         return stream_url
 
     def get_url(self, host, media_id):
         return 'http://www.playhd.video/embed.php?vid=%s' % (media_id)
-    
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidggResolver(UrlResolver):
     name = 'vid.gg'
@@ -37,7 +37,7 @@ class VidggResolver(UrlResolver):
         if r:
             filekey = r.group(1)
         else:
-            raise UrlResolver.ResolverError("File Not Found or removed")
+            raise ResolverError("File Not Found or removed")
 
         api_call = "http://www.vidgg.to/api/player.api.php?{0}&file={1}&key={2}".format(
             "numOfErrors=0&cid=1&cid2=undefined&cid3=undefined&pass=undefined&user=undefined",
@@ -49,12 +49,12 @@ class VidggResolver(UrlResolver):
         rapi = re.search("url=(.+?)&title=", api_html)
         if rapi:
             return rapi.group(1)
-        
-        raise UrlResolver.ResolverError("File Not Found or removed")
+
+        raise ResolverError("File Not Found or removed")
 
     def get_url(self, host, media_id):
         return 'http://www.vidgg.to/video/%s' % media_id
-    
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:

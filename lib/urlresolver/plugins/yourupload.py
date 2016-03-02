@@ -19,12 +19,11 @@
 import re
 import urllib2
 from urlresolver import common
-from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class YourUploadResolver(UrlResolver):
     name = "yourupload.com"
-    domains = [ "yourupload.com", "yucache.net" ]
+    domains = ["yourupload.com", "yucache.net"]
     pattern = '(?://|\.)(yourupload\.com|yucache\.net)/(?:watch|embed)?/?([0-9A-Za-z]+)'
 
     def __init__(self):
@@ -45,12 +44,12 @@ class YourUploadResolver(UrlResolver):
             stream_url = r.group(1)
             stream_url = urllib2.urlopen(urllib2.Request(stream_url, headers=headers)).geturl()
 
-            return stream_url 
+            return stream_url
         else:
-            raise UrlResolver.ResolverError('no file located')
+            raise ResolverError('no file located')
 
     def get_url(self, host, media_id):
-            return 'http://www.yourupload.com/embed/%s' % media_id
+        return 'http://www.yourupload.com/embed/%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

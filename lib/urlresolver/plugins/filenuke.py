@@ -20,7 +20,7 @@ import re
 import urllib
 import urllib2
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class FilenukeResolver(UrlResolver):
     name = "filenuke"
@@ -32,19 +32,17 @@ class FilenukeResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        headers = {
-                   'User-Agent': common.IE_USER_AGENT
-        }
+        headers = {'User-Agent': common.IE_USER_AGENT}
 
         html = self.net.http_GET(web_url, headers=headers).content
         r = re.search('<a[^>]*id="go-next"[^>*]href="([^"]+)', html)
         if r:
             next_url = 'http://' + host + r.group(1)
             html = self.net.http_GET(next_url, headers=headers).content
-        
+
         if 'file you were looking for could not be found' in html:
-            raise UrlResolver.ResolverError('File Not Found or removed')
-        
+            raise ResolverError('File Not Found or removed')
+
         r = re.search("var\s+lnk\d+\s*=\s*'(.*?)'", html)
         if r:
             stream_url = r.group(1)
@@ -52,17 +50,17 @@ class FilenukeResolver(UrlResolver):
             stream_url = stream_url + '|' + urllib.urlencode(headers)
             return stream_url
         else:
-            raise UrlResolver.ResolverError('Unable to locate link')
+            raise ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
         return 'http://filenuke.com/%s' % media_id
-        
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

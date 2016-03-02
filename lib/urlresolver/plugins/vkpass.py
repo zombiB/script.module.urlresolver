@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import xbmcgui
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VKPassResolver(UrlResolver):
     name = "VKPass.com"
@@ -36,7 +36,7 @@ class VKPassResolver(UrlResolver):
         html5 = re.findall('}\((.*?)\)\)<', html)
 
         if not vBlocks and not html5:
-            raise UrlResolver.ResolverError('No vsource found')
+            raise ResolverError('No vsource found')
 
         data = dict()
         data['purged_jsonvars'] = {}
@@ -62,13 +62,13 @@ class VKPassResolver(UrlResolver):
         if result != -1:
             return data['purged_jsonvars'][data['lines'][result]].encode('utf-8') + '|User-Agent=%s' % (common.IE_USER_AGENT)
         else:
-            raise UrlResolver.ResolverError('No link selected')
+            raise ResolverError('No link selected')
 
     def __decodeLinks(self, html, list, data):
         if "source" not in list:
             return data
 
-        numerals="0123456789abcdefghijklmnopqrstuvwxyz"
+        numerals = "0123456789abcdefghijklmnopqrstuvwxyz"
         letters = re.findall('([0-9a-z])', html)
         for letter in letters:
             html = re.sub('\\b' + letter + '\\b', list[numerals.index(letter)], html)

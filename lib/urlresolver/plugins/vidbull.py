@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidbullResolver(UrlResolver):
     name = "vidbull"
@@ -30,16 +30,16 @@ class VidbullResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         headers = {
-                   'User-Agent': common.IOS_USER_AGENT
-                }
-        
+            'User-Agent': common.IOS_USER_AGENT
+        }
+
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url, headers=headers).content
         match = re.search('<source\s+src="([^"]+)', html)
         if match:
             return match.group(1)
         else:
-            raise UrlResolver.ResolverError('File Link Not Found')
+            raise ResolverError('File Link Not Found')
 
     def get_url(self, host, media_id):
         return 'http://www.vidbull.com/%s' % media_id

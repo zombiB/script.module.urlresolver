@@ -19,11 +19,11 @@ import random
 import re
 import math
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class CastampResolver(UrlResolver):
     name = "castamp"
-    domains = [ "castamp.com" ]
+    domains = ["castamp.com"]
     pattern = '(?://|\.)(castamp\.com)/embed\.php\?c=(.*?)&'
 
     def __init__(self):
@@ -45,7 +45,7 @@ class CastampResolver(UrlResolver):
         if r:
             flashplayer = r.group(1)
 
-        pattern_streamer  = r"""'streamer': '(.*?)'"""
+        pattern_streamer = r"""'streamer': '(.*?)'"""
         r = re.search(pattern_streamer, html)
         if r:
             streamer = r.group(1)
@@ -64,9 +64,9 @@ class CastampResolver(UrlResolver):
         chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz"
         string_length = 8
         randomstring = ''
-        for x in range(0, string_length):
+        for _x in range(0, string_length):
             rnum = int(math.floor(random.random() * len(chars)))
-            randomstring += chars[rnum:rnum+1]
+            randomstring += chars[rnum:rnum + 1]
         domainsa = randomstring
         return 'http://www.castamp.com/embed.php?c=%s&tk=%s' % (media_id, domainsa)
 
@@ -76,6 +76,6 @@ class CastampResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

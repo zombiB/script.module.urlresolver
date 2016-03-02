@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class AllVidResolver(UrlResolver):
     name = "allvid"
@@ -46,7 +46,7 @@ class AllVidResolver(UrlResolver):
             if r:
                 return r.group(1)
         else:
-            raise UrlResolver.ResolverError('File not found')
+            raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
@@ -57,6 +57,6 @@ class AllVidResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

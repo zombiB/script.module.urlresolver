@@ -18,7 +18,7 @@
 
 
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 import re
 import urllib2
 import xbmcgui
@@ -78,7 +78,7 @@ class GoogleResolver(UrlResolver):
                             if result != -1:
                                 vid_sel = url_list[result]
                             else:
-                                raise UrlResolver.ResolverError('No link selected')
+                                raise ResolverError('No link selected')
         if vid_sel:
             if ('redirector.' in vid_sel) or ('googleusercontent' in vid_sel):
                 stream_url = urllib2.urlopen(vid_sel).geturl()
@@ -87,7 +87,7 @@ class GoogleResolver(UrlResolver):
             if stream_url:
                 return stream_url
 
-        raise UrlResolver.ResolverError('File not found')
+        raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'https://%s/%s' % (host, media_id)
@@ -98,7 +98,7 @@ class GoogleResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 

@@ -19,7 +19,7 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class UsersFilesResolver(UrlResolver):
     name = "UsersFiles"
@@ -45,7 +45,7 @@ class UsersFilesResolver(UrlResolver):
             if stream_url:
                 return stream_url[0]
 
-        raise UrlResolver.ResolverError('Unable to find userfiles video')
+        raise ResolverError('Unable to find userfiles video')
 
     def get_url(self, host, media_id):
         return 'http://usersfiles.com/%s' % media_id

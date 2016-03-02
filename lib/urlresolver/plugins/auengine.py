@@ -19,7 +19,7 @@
 import re
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class AuEngineResolver(UrlResolver):
     name = "auengine.com"
@@ -37,10 +37,10 @@ class AuEngineResolver(UrlResolver):
         if r:
             return urllib.unquote_plus(r.group(1))
         else:
-            raise UrlResolver.ResolverError('no file located')
+            raise ResolverError('no file located')
 
     def get_url(self, host, media_id):
-            return 'http://www.auengine.com/embed.php?file=%s' % (media_id)
+        return 'http://www.auengine.com/embed.php?file=%s' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -48,6 +48,6 @@ class AuEngineResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

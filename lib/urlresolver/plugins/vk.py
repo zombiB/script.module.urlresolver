@@ -22,7 +22,7 @@ import json
 import urllib
 import urlparse
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 import xbmcgui
 
 class VKResolver(UrlResolver):
@@ -40,7 +40,7 @@ class VKResolver(UrlResolver):
 
         query = urlparse.parse_qs(media_id)
 
-        try: oid, video_id = query['oid'][0] , query['id'][0]
+        try: oid, video_id = query['oid'][0], query['id'][0]
         except: oid, video_id = re.findall('(.*)_(.*)', media_id)[0]
 
         try: hash = query['hash'][0]
@@ -62,7 +62,7 @@ class VKResolver(UrlResolver):
                 quality_list.append(quality[3:])
                 link_list.append(result[quality])
                 best_link = result[quality]
-        
+
         if self.get_setting('auto_pick') == 'true' and best_link:
             return best_link + '|' + urllib.urlencode(headers)
         else:
@@ -70,13 +70,13 @@ class VKResolver(UrlResolver):
                 if len(quality_list) > 1:
                     result = xbmcgui.Dialog().select('Choose the link', quality_list)
                     if result == -1:
-                        raise UrlResolver.ResolverError('No link selected')
+                        raise ResolverError('No link selected')
                     else:
                         return link_list[result] + '|' + urllib.urlencode(headers)
                 else:
                     return link_list[0] + '|' + urllib.urlencode(headers)
-        
-        raise UrlResolver.ResolverError('No video found')
+
+        raise ResolverError('No video found')
 
     def __get_private(self, oid, video_id):
         private_url = 'http://vk.com/al_video.php?act=show_inline&al=1&video=%s_%s' % (oid, video_id)
@@ -97,7 +97,7 @@ class VKResolver(UrlResolver):
         match = re.search('"hash"\s*:\s*"(.+?)"', html)
         if match: return match.group(1)
         return ''
-    
+
     def get_url(self, host, media_id):
         return 'http://vk.com/video_ext.php?%s' % media_id
 

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 MAX_TRIES = 3
 
@@ -34,7 +34,7 @@ class TwentyFourUploadingResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
-        
+
         tries = 0
         while tries < MAX_TRIES:
             data = {}
@@ -42,7 +42,7 @@ class TwentyFourUploadingResolver(UrlResolver):
                 key, value = match.groups()
                 data[key] = value
             data['method_free'] = 'Free Download'
-            
+
             html = self.net.http_POST(web_url, form_data=data).content
 
             for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
@@ -56,10 +56,10 @@ class TwentyFourUploadingResolver(UrlResolver):
 
             tries += 1
 
-        raise UrlResolver.ResolverError('Unable to resolve 24uploading link. Filelink not found.')
+        raise ResolverError('Unable to resolve 24uploading link. Filelink not found.')
 
     def get_url(self, host, media_id):
-            return 'http://24uploading.com/%s' % (media_id)
+        return 'http://24uploading.com/%s' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

@@ -19,7 +19,7 @@
 import re
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 import xbmcgui
 
 class FilePupResolver(UrlResolver):
@@ -50,16 +50,16 @@ class FilePupResolver(UrlResolver):
             else:
                 result = xbmcgui.Dialog().select('Choose the link', qualities)
                 if result == -1:
-                    raise UrlResolver.ResolverError('No link selected')
+                    raise ResolverError('No link selected')
                 else:
                     pick_quality = qualities[result]
-                    
+
             if not def_quality or pick_quality == def_quality:
                 return default_url
             else:
                 return default_url.replace('.mp4?', '-%s.mp4?' % (pick_quality))
         else:
-            raise UrlResolver.ResolverError('Unable to location download link')
+            raise ResolverError('Unable to location download link')
 
     def __get_def_source(self, html):
         default_url = ''
@@ -69,21 +69,21 @@ class FilePupResolver(UrlResolver):
             if match:
                 default_url = match.group(1) + '|' + urllib.urlencode({'User-Agent': common.SMU_USER_AGENT})
         return default_url
-        
+
     def __get_default(self, html):
         match = re.search('defaultQuality\s*:\s*"([^"]+)', html)
         if match:
             return match.group(1)
         else:
             return ''
-    
+
     def __get_qualities(self, html):
         qualities = []
         match = re.search('qualities\s*:\s*\[(.*?)\]', html)
         if match:
             qualities = re.findall('"([^"]+)"', match.group(1))
         return qualities
-    
+
     def get_url(self, host, media_id):
         return 'http://www.filepup.net/play/%s' % (media_id)
 
@@ -93,7 +93,7 @@ class FilePupResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 

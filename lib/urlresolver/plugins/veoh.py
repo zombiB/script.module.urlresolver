@@ -18,7 +18,7 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VeohResolver(UrlResolver):
     name = "veoh"
@@ -35,14 +35,14 @@ class VeohResolver(UrlResolver):
             if (len(r) > 0):
                 return r[0]
 
-        url = 'http://www.veoh.com/rest/video/'+media_id+'/details'
+        url = 'http://www.veoh.com/rest/video/' + media_id + '/details'
         html = self.net.http_GET(url).content
-        file = re.compile('fullPreviewHashPath="(.+?)"').findall(html)
+        file_id = re.compile('fullPreviewHashPath="(.+?)"').findall(html)
 
-        if len(file) == 0:
-            raise UrlResolver.ResolverError('File Not Found or removed')
+        if len(file_id) == 0:
+            raise ResolverError('File Not Found or removed')
 
-        return file[0]
+        return file_id[0]
 
     def get_url(self, host, media_id):
         return 'http://veoh.com/watch/%s' % media_id

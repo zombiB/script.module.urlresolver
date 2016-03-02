@@ -19,11 +19,11 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class ZstreamResolver(UrlResolver):
     name = 'zstream.to'
-    domains = [ 'zstream.to' ]
+    domains = ['zstream.to']
     pattern = '(?://|\.)(zstream\.to)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -39,8 +39,8 @@ class ZstreamResolver(UrlResolver):
 
         if stream_url:
             return stream_url[-1]
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return 'http://zstream.to/embed-%s.html' % media_id

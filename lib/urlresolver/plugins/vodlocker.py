@@ -18,7 +18,7 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VodlockerResolver(UrlResolver):
     name = "vodlocker.com"
@@ -32,14 +32,14 @@ class VodlockerResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         link = self.net.http_GET(web_url).content
         if link.find('404 Not Found') >= 0:
-            raise UrlResolver.ResolverError('The requested video was not found.')
+            raise ResolverError('The requested video was not found.')
 
         video_link = str(re.compile('file[: ]*"(.+?)"').findall(link)[0])
 
         if len(video_link) > 0:
             return video_link
         else:
-            raise UrlResolver.ResolverError('No playable video found.')
+            raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         return 'http://vodlocker.com/embed-%s-640x400.html' % media_id
@@ -53,4 +53,3 @@ class VodlockerResolver(UrlResolver):
 
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
-

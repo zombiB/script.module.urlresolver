@@ -21,7 +21,7 @@ import urllib
 import xbmc
 from lib import captcha_lib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 MAX_TRIES = 3
 
@@ -50,25 +50,25 @@ class ClickNUploadResolver(UrlResolver):
             html = self.net.http_POST(web_url, data, headers=headers).content
             if tries > 0:
                 xbmc.sleep(6000)
-            
+
             if '>File Download Link Generated<' in html:
                 r = re.search("onClick\s*=\s*\"window\.open\('([^']+)", html)
                 if r:
-                    return r.group(1) + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT })
-            
+                    return r.group(1) + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
+
             tries = tries + 1
-            
-        raise UrlResolver.ResolverError('Unable to locate link')
+
+        raise ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
         return 'http://%s/%s' % (host, media_id)
-        
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -20,7 +20,7 @@ import re
 import os
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VeeHDResolver(UrlResolver):
     name = "VeeHD"
@@ -35,10 +35,10 @@ class VeeHDResolver(UrlResolver):
         try: os.makedirs(os.path.dirname(self.cookie_file))
         except OSError: pass
 
-    #UrlResolver methods
+    # UrlResolver methods
     def get_media_url(self, host, media_id):
         if not self.get_setting('login') == 'true' or not (self.get_setting('username') and self.get_setting('password')):
-            raise UrlResolver.ResolverError('VeeHD requires a username & password')
+            raise ResolverError('VeeHD requires a username & password')
 
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
@@ -47,7 +47,7 @@ class VeeHDResolver(UrlResolver):
         for match in re.finditer('playeriframe.+?src\s*:\s*"([^"]+)', html):
             player_url = 'http://%s%s' % (host, match.group(1))
             html = self.net.http_GET(player_url).content
-            
+
             # if the player html contains an iframe the iframe url has to be gotten and then the player_url tried again
             r = re.search('<iframe.*?src="([^"]+)', html)
             if r:
@@ -62,11 +62,11 @@ class VeeHDResolver(UrlResolver):
                     stream_url = urllib.unquote(r.group(1))
                     return stream_url
 
-        raise UrlResolver.ResolverError('File Not Found or Removed')
-        
+        raise ResolverError('File Not Found or Removed')
+
     def get_url(self, host, media_id):
         return 'http://veehd.com/video/%s' % media_id
-        
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
@@ -76,8 +76,8 @@ class VeeHDResolver(UrlResolver):
 
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
-       
-    #SiteAuth methods
+
+    # SiteAuth methods
     def login(self):
         loginurl = 'http://veehd.com/login'
         ref = 'http://veehd.com/'
@@ -101,5 +101,3 @@ class VeeHDResolver(UrlResolver):
         xml.append('<setting id="%s_username" enable="eq(-1,true)" type="text" label="Username" default=""/>' % (cls.__name__))
         xml.append('<setting id="%s_password" enable="eq(-2,true)" type="text" label="Password" option="hidden" default=""/>' % (cls.__name__))
         return xml
-
-        

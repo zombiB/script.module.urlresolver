@@ -23,7 +23,7 @@ import re
 import json
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class MailRuResolver(UrlResolver):
     name = "mail.ru"
@@ -52,12 +52,12 @@ class MailRuResolver(UrlResolver):
                     best_quality = int(video['key'][:-1])
 
                 if 'set-cookie' in headers:
-                    stream_url += '|' + urllib.urlencode({ 'Cookie': headers['set-cookie'] })
+                    stream_url += '|' + urllib.urlencode({'Cookie': headers['set-cookie']})
 
             if stream_url:
                 return stream_url
 
-        raise UrlResolver.ResolverError('No playable video found.')
+        raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         user, media_id = media_id.split('|')

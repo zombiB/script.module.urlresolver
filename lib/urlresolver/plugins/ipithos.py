@@ -20,11 +20,11 @@
 import re
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class IpithosResolver(UrlResolver):
     name = 'ipithos.to'
-    domains = [ 'ipithos.to' ]
+    domains = ['ipithos.to']
     pattern = '(?://|\.)(ipithos\.to)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -33,7 +33,7 @@ class IpithosResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
 
-        headers = { 'User-Agent': common.IOS_USER_AGENT }
+        headers = {'User-Agent': common.IOS_USER_AGENT}
 
         html = self.net.http_GET(web_url, headers=headers).content
 
@@ -46,8 +46,8 @@ class IpithosResolver(UrlResolver):
 
             if stream_url:
                 return stream_url[0]
-            
-        raise UrlResolver.ResolverError('File Not Found or removed')
+
+        raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return 'http://ipithos.to/embed-%s.html' % media_id
@@ -58,6 +58,6 @@ class IpithosResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

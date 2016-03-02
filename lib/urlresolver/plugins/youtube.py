@@ -17,7 +17,7 @@
 """
 
 import re
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class YoutubeResolver(UrlResolver):
     name = "youtube"

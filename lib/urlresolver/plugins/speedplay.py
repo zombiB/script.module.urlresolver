@@ -15,7 +15,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class SpeedPlayResolver(UrlResolver):
     name = "speedplay.xyz"
@@ -30,10 +30,10 @@ class SpeedPlayResolver(UrlResolver):
         html = self.net.http_GET(web_url).content
 
         if html.find('404 Not Found') >= 0:
-            raise UrlResolver.ResolverError('File Removed')
-        
+            raise ResolverError('File Removed')
+
         if html.find('Video is processing') >= 0:
-            raise UrlResolver.ResolverError('File still being processed')
+            raise ResolverError('File still being processed')
 
         js = html
         link = re.search('(?:m3u8").*?"(.*?)"', js)
@@ -41,10 +41,10 @@ class SpeedPlayResolver(UrlResolver):
             common.log_utils.log_debug('speedplay Link Found: %s' % link.group(1))
             return link.group(1)
 
-        raise UrlResolver.ResolverError('Unable to find speedplay video')
+        raise ResolverError('Unable to find speedplay video')
 
     def get_url(self, host, media_id):
-        return 'http://%s/%s.html' % (host,media_id)
+        return 'http://%s/%s.html' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -52,6 +52,6 @@ class SpeedPlayResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

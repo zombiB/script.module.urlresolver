@@ -19,11 +19,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class FacebookResolver(UrlResolver):
     name = "facebook"
-    domains = [ "facebook.com" ]
+    domains = ["facebook.com"]
     pattern = '(?://|\.)(facebook\.com)/.+?video_id=([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -35,7 +35,7 @@ class FacebookResolver(UrlResolver):
 
         if link.find('Video Unavailable') >= 0:
             err_message = 'The requested video was not found.'
-            raise UrlResolver.ResolverError(err_message)
+            raise ResolverError(err_message)
 
         params = re.compile('"params","([\w\%\-\.\\\]+)').findall(link)[0]
         html = urllib.unquote(params.replace('\u0025', '%')).decode('utf-8')
@@ -57,7 +57,7 @@ class FacebookResolver(UrlResolver):
             return vUrl
 
         else:
-            raise UrlResolver.ResolverError('No playable video found.')
+            raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         return 'https://www.facebook.com/video/embed?video_id=%s' % media_id
@@ -68,7 +68,7 @@ class FacebookResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host
 

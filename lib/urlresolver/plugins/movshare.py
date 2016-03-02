@@ -18,7 +18,7 @@
 
 import re
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class MovshareResolver(UrlResolver):
     name = "movshare"
@@ -49,7 +49,7 @@ class MovshareResolver(UrlResolver):
             if r:
                 stream_url = r.group(1)
             else:
-                raise UrlResolver.ResolverError('File Not Found or removed')
+                raise ResolverError('File Not Found or removed')
 
         return stream_url
 
@@ -62,6 +62,6 @@ class MovshareResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -24,7 +24,7 @@ import urllib
 import urllib2
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VideoMegaResolver(UrlResolver):
     name = "videomega"
@@ -40,7 +40,7 @@ class VideoMegaResolver(UrlResolver):
             'User-Agent': common.IOS_USER_AGENT,
             'Referer': web_url
         }
-        
+
         html = self.net.http_GET(web_url, headers=headers).content
         if jsunpack.detect(html):
             js_data = jsunpack.unpack(html)
@@ -56,9 +56,9 @@ class VideoMegaResolver(UrlResolver):
                 stream_url += '|' + urllib.urlencode(headers)
                 return stream_url
         except:
-            UrlResolver.ResolverError("File Not Playable")
+            ResolverError("File Not Playable")
 
-        raise UrlResolver.ResolverError('No playable video found.')
+        raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         return 'http://videomega.tv/cdn.php?ref=%s' % media_id

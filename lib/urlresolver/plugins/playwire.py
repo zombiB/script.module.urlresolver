@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import xml.etree.ElementTree as ET
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class PlaywireResolver(UrlResolver):
     name = "playwire"
@@ -44,15 +44,15 @@ class PlaywireResolver(UrlResolver):
             else:
                 accessdenied = root.find('Message')
                 if accessdenied is not None:
-                    raise UrlResolver.ResolverError('You do not have permission to view this content')
+                    raise ResolverError('You do not have permission to view this content')
 
-                raise UrlResolver.ResolverError('No playable video found.')
+                raise ResolverError('No playable video found.')
         else:  # json source
             r = re.search('"src":"(.+?)"', html)
             if r:
                 return r.group(1)
             else:
-                raise UrlResolver.ResolverError('No playable video found.')
+                raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
         if not 'v2' in host:
@@ -66,6 +66,6 @@ class PlaywireResolver(UrlResolver):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

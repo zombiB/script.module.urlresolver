@@ -20,7 +20,7 @@ import re
 import urllib
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.resolver import UrlResolver
+from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidziResolver(UrlResolver):
     name = "vidzi"
@@ -35,19 +35,19 @@ class VidziResolver(UrlResolver):
         html = self.net.http_GET(web_url).content
 
         if '404 Not Found' in html:
-            raise UrlResolver.ResolverError('File Not Found or removed')
+            raise ResolverError('File Not Found or removed')
 
         r = re.search('file\s*:\s*"([^"]+)', html)
         if r:
-            return r.group(1) + '|' + urllib.urlencode({ 'Referer': 'http://vidzi.tv/nplayer/jwplayer.flash.swf' })
+            return r.group(1) + '|' + urllib.urlencode({'Referer': 'http://vidzi.tv/nplayer/jwplayer.flash.swf'})
         else:
             for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
                 js_data = jsunpack.unpack(match.group(1))
                 r = re.search('file\s*:\s*"([^"]+)', js_data)
                 if r:
                     return r.group(1)
-                
-        raise UrlResolver.ResolverError('Unable to locate link')
+
+        raise ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
