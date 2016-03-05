@@ -35,7 +35,7 @@ from hmf import HostedMediaFile
 from urlresolver.resolver import UrlResolver
 from plugins import *
 
-common.log_utils.log('Initializing URLResolver version: %s' % (common.addon_version))
+common.log_utils.log_notice('Initializing URLResolver version: %s' % (common.addon_version))
 MAX_SETTINGS = 75
 
 PLUGIN_DIRS = []
@@ -249,6 +249,6 @@ def _update_settings_xml():
         except:
             raise
     else:
-        common.log_utils.log_notice('No Settings Update Needed')
+        common.log_utils.log_debug('No Settings Update Needed')
 
 _update_settings_xml()

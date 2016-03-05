@@ -33,22 +33,18 @@ class ResolverError(Exception):
 
 class UrlResolver(object):
     __metaclass__ = abc.ABCMeta
-
     '''
     Your plugin needs to implement the abstract methods in this interface if
     it wants to be able to resolve URLs
     
-    priority: (int) The order in which plugins will be tried. Lower numbers are tried first.
     domains: (array) List of domains handled by this plugin. (Use ["*"] for universal resolvers.)
     '''
-    priority = 100
     domains = ['localdomain']
 
     @abc.abstractmethod
     def get_media_url(self, host, media_id):
         '''
-        The part of your plugin that does the actual resolving. You must
-        implement this method.
+        The method that does the actual resolving. You must implement this method.
 
         Args:
             host (str): the host the link is on
@@ -62,10 +58,30 @@ class UrlResolver(object):
 
     @abc.abstractmethod
     def get_url(self, host, media_id):
+        '''
+        The method that converts a host and media_id into a valid url
+
+        Args:
+            host (str): the host the link is on
+            media_id (str): the media_id the can be returned by get_host_and_id
+
+        Returns:
+            a valid url on the host this resolver resolves
+        '''
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_host_and_id(self, url):
+        '''
+        The method that converts a host and media_id into a valid url
+
+        Args:
+            url (str): a valid url on the host this resolver resolves
+
+        Returns:
+            host (str): the host the link is on
+            media_id (str): the media_id the can be returned by get_host_and_id
+        '''
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -75,8 +91,8 @@ class UrlResolver(object):
         implement this method.
 
         Returns:
-            ``True`` if this plugin thinks it can resolve the ``web_url``,
-            otherwise ``False``.
+            True if this plugin thinks it can hangle the web_url or host
+            otherwise False.
         '''
         raise NotImplementedError
 
@@ -102,10 +118,10 @@ class UrlResolver(object):
         This method should return XML which describes the settings you would
         like for your plugin. You should make sure that the ``id`` starts
         with your plugins class name (which can be found using
-        :attr:`self.__class__.__name__`) followed by an underscore.
+        :attr:`cls.__name__`) followed by an underscore.
 
         Override this method if you want your plugin to have more settings than
-        just 'priority'. If you do and still want the priority setting you
+        just 'priority'. If you do and still want the defaults settings you
         should call this method from the base class first.
 
         Returns:

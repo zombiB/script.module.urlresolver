@@ -21,6 +21,8 @@ import traceback
 import urlresolver
 from urlresolver import common
 
+resolver_cache = {}
+
 class HostedMediaFile:
     '''
     This class represents a piece of media (file or stream) that is hosted
@@ -78,9 +80,7 @@ class HostedMediaFile:
         else:
             self._domain = self.__top_domain(self._host)
 
-        include_universal = common.get_setting('allow_universal') == "true"
-        self.__klasses = urlresolver.relevant_resolvers(self._domain, include_universal=include_universal, include_external=True, order_matters=True)
-        self. __resolvers = [klass() for klass in self.__klasses]
+        self.__resolvers = self.__get_resolvers()
         if not url:
             for resolver in self.__resolvers:  # Find a valid URL
                 try:
@@ -91,6 +91,20 @@ class HostedMediaFile:
                     # Shity resolver. Ignore
                     continue
 
+    def __get_resolvers(self):
+        include_universal = common.get_setting('allow_universal') == "true"
+        klasses = urlresolver.relevant_resolvers(self._domain, include_universal=include_universal, include_external=True, order_matters=True)
+        resolvers = []
+        for klass in klasses:
+            if klass in resolver_cache:
+                common.log_utils.log_debug('adding resolver from cache: %s' % (klass))
+                resolvers.append(resolver_cache[klass])
+            else:
+                common.log_utils.log_debug('adding resolver to cache: %s' % (klass))
+                resolver_cache[klass] = klass()
+                resolvers.append(resolver_cache[klass])
+        return resolvers
+    
     def __top_domain(self, url):
         regex = "(\w{2,}\.\w{2,3}\.\w{2}|\w{2,}\.\w{2,3})$"
         elements = urlparse.urlparse(url)
