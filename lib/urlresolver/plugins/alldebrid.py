@@ -43,25 +43,17 @@ class AllDebridResolver(UrlResolver):
     # UrlResolver methods
     def get_media_url(self, host, media_id):
         common.log_utils.log('in get_media_url %s : %s' % (host, media_id))
-        dialog = xbmcgui.Dialog()
         try:
             url = 'http://www.alldebrid.com/service.php?link=%s' % media_id
             source = self.net.http_GET(url).content
             source = source.decode('utf-8')
         except Exception, e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            common.log_utils.log(str(exc_type) + " : " + fname + " : " + str(exc_tb.tb_lineno))
-            dialog.ok(' all-Debrid ', ' all-Debrid server timed out ', '', '')
-            return self.unresolvable(3, 'alldebrid : error contacting the site')
-        common.log_utils.log('************* %s' % source.encode('utf-8'))
+            raise ResolverError('alldebrid : error contacting the site')
 
         if re.search('login', source):
-            dialog.ok(' All Debrid Message ', ' Your account may have Expired, please check by going to the website ', '', '')
-            return self.unresolvable(0, 'alldebrid : Your account may have expired')
+            raise ResolverError('alldebrid : Your account may have expired')
         if re.search('Hoster unsupported or under maintenance', source):
-            dialog.ok(' All Debrid Message ', ' Sorry this hoster is not supported, change the priority level in resolver settings for this host ', '', '')
-            return self.unresolvable(2, 'alldebrid : pb for supporting this hoster')
+            raise ResolverError('alldebrid : unsupported hoster')
         # Go
         finallink = ''
         # try json return
@@ -147,8 +139,7 @@ class AllDebridResolver(UrlResolver):
                     return True
             except:
                 common.log_utils.log('error with http_GET')
-                dialog = xbmcgui.Dialog()
-                dialog.ok(' Real-Debrid ', ' Unexpected error, Please try again.', '', '')
+                raise ResolverError('Unexpected Error during login')
             else:
                 return False
         else:
