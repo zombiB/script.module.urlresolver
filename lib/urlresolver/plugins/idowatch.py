@@ -20,8 +20,6 @@ import re
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-MAX_TRIES = 3
-
 class IDoWatchResolver(UrlResolver):
     name = "idowatch"
     domains = ["idowatch.net"]

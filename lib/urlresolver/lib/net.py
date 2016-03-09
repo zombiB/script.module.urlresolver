@@ -191,8 +191,7 @@ class Net:
             An :class:`HttpResponse` object containing headers and other
             meta-information about the page and the page content.
         '''
-        return self._fetch(url, form_data, headers=headers,
-                           compression=compression)
+        return self._fetch(url, form_data, headers=headers, compression=compression)
 
     def http_HEAD(self, url, headers={}):
         '''
@@ -211,8 +210,8 @@ class Net:
         '''
         req = HeadRequest(url)
         req.add_header('User-Agent', self._user_agent)
-        for k, v in headers.items():
-            req.add_header(k, v)
+        for key in headers:
+            req.add_header(key, headers[key])
         response = urllib2.urlopen(req)
         return HttpResponse(response)
 
@@ -237,7 +236,6 @@ class Net:
             An :class:`HttpResponse` object containing headers and other
             meta-information about the page and the page content.
         '''
-        encoding = ''
         req = urllib2.Request(url)
         if form_data:
             if isinstance(form_data, basestring):
@@ -250,9 +248,9 @@ class Net:
             req.add_header(key, headers[key])
         if compression:
             req.add_header('Accept-Encoding', 'gzip')
+        req.add_unredirected_header('Host', req.get_host())
         response = urllib2.urlopen(req)
         return HttpResponse(response)
-
 
 class HttpResponse:
     '''
@@ -289,16 +287,11 @@ class HttpResponse:
         except:
             pass
 
-        r = re.search('<meta\s+http-equiv="Content-Type"\s+content="(?:.+?);' +
-                      '\s+charset=(.+?)"', html, re.IGNORECASE)
-        if r:
-            encoding = r.group(1)
-
-        try:
-            html = unicode(html, encoding)
-        except:
-            pass
-
+        r = re.search('<meta\s+http-equiv="Content-Type"\s+content="(?:.+?);\s+charset=(.+?)"', html, re.IGNORECASE)
+        if r: encoding = r.group(1)
+        try: html = unicode(html, encoding)
+        except: pass
+        
         self.content = html
 
     def get_headers(self):
