@@ -49,12 +49,10 @@ class Net:
 
     _cj = cookielib.LWPCookieJar()
     _proxy = None
-    _user_agent = 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 ' + \
-                  '(KHTML, like Gecko) Chrome/13.0.782.99 Safari/535.1'
+    _user_agent = 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0'
     _http_debug = False
 
-    def __init__(self, cookie_file='', proxy='', user_agent='',
-                 http_debug=False):
+    def __init__(self, cookie_file='', proxy='', user_agent='', http_debug=False):
         '''
         Kwargs:
             cookie_file (str): Full path to a file to be used to load and save
@@ -242,11 +240,14 @@ class Net:
         encoding = ''
         req = urllib2.Request(url)
         if form_data:
-            form_data = urllib.urlencode(form_data)
+            if isinstance(form_data, basestring):
+                form_data = form_data
+            else:
+                form_data = urllib.urlencode(form_data, True)
             req = urllib2.Request(url, form_data)
         req.add_header('User-Agent', self._user_agent)
-        for k, v in headers.items():
-            req.add_header(k, v)
+        for key in headers:
+            req.add_header(key, headers[key])
         if compression:
             req.add_header('Accept-Encoding', 'gzip')
         response = urllib2.urlopen(req)
