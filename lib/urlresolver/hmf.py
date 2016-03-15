@@ -1,18 +1,20 @@
-#    urlresolver XBMC Addon
-#    Copyright (C) 2011 t0mm0
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+    URLResolver Addon for Kodi
+    Copyright (C) 2016 t0mm0, tknorris
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import urllib2
 import urlparse
 import re
@@ -60,7 +62,7 @@ class HostedMediaFile:
         must pass either ``url`` or ``host`` AND ``media_id``.
     '''
 
-    def __init__(self, url='', host='', media_id='', title=''):
+    def __init__(self, url='', host='', media_id='', title='', include_disabled=False):
         '''
         Args:
             url (str): a URL to a web page that represents a piece of media.
@@ -80,7 +82,7 @@ class HostedMediaFile:
         else:
             self._domain = self.__top_domain(self._host)
 
-        self.__resolvers = self.__get_resolvers()
+        self.__resolvers = self.__get_resolvers(include_disabled)
         if not url:
             for resolver in self.__resolvers:  # Find a valid URL
                 try:
@@ -91,9 +93,10 @@ class HostedMediaFile:
                     # Shity resolver. Ignore
                     continue
 
-    def __get_resolvers(self):
+    def __get_resolvers(self, include_disabled):
         include_universal = common.get_setting('allow_universal') == "true"
-        klasses = urlresolver.relevant_resolvers(self._domain, include_universal=include_universal, include_external=True, order_matters=True)
+        klasses = urlresolver.relevant_resolvers(self._domain, include_universal=include_universal,
+                                                 include_external=True, include_disabled=include_disabled, order_matters=True)
         resolvers = []
         for klass in klasses:
             if klass in resolver_cache:
@@ -133,6 +136,13 @@ class HostedMediaFile:
         '''
         return self._media_id
 
+    def get_resolvers(self, validated=False):
+        '''
+        Returns the list of resolvers of this :class:`HostedMediaFile`.
+        '''
+        if validated: self.valid_url()
+        return self.__resolvers
+        
     def resolve(self):
         '''
         Resolves this :class:`HostedMediaFile` to a media URL.
@@ -169,7 +179,9 @@ class HostedMediaFile:
                 if resolver == self.__resolvers[-1]:
                     common.log_utils.log_debug(traceback.format_exc())
                     raise
+
         self.__resolvers = []  # No resolvers.
+        self._valid_url = False
         return False
 
     def valid_url(self):
@@ -187,18 +199,19 @@ class HostedMediaFile:
                     print 'resolvable!'
 
         '''
-        if self._valid_url is not None: return self._valid_url
-        for resolver in self.__resolvers:
-            try:
-                if resolver.valid_url(self._url, self._domain):
-                    self._valid_url = True
-                    return True
-            except:
-                # print sys.exc_info()
-                continue
-        self._valid_url = False
-        self.__resolvers = []
-        return False
+        if self._valid_url is None:
+            resolvers = []
+            for resolver in self.__resolvers:
+                try:
+                    if resolver.valid_url(self._url, self._domain):
+                        resolvers.append(resolver)
+                except:
+                    # print sys.exc_info()
+                    continue
+                
+            self.__resolvers = resolvers
+            self._valid_url = True if resolvers else False
+        return self._valid_url
 
     def __test_stream(self, stream_url):
         '''
@@ -214,30 +227,40 @@ class HostedMediaFile:
             headers[header] = urllib.unquote(headers[header])
         common.log_utils.log_debug('Setting Headers on UrlOpen: %s' % (headers))
 
-        request = urllib2.Request(stream_url.split('|')[0], headers=headers)
-
-        #  set urlopen timeout to 10 seconds
-        try: http_code = urllib2.urlopen(request, timeout=15).getcode()
+        try:
+            msg = ''
+            request = urllib2.Request(stream_url.split('|')[0], headers=headers)
+            #  set urlopen timeout to 15 seconds
+            http_code = urllib2.urlopen(request, timeout=15).getcode()
         except urllib2.URLError as e:
-            # treat an unhandled url type as success
-            if hasattr(e, 'reason') and 'unknown url type' in str(e.reason).lower():
-                return True
-            else:
-                if isinstance(e, urllib2.HTTPError):
-                    http_code = e.code
+            if hasattr(e, 'reason'):
+                # treat an unhandled url type as success
+                if 'unknown url type' in str(e.reason).lower():
+                    return True
                 else:
-                    http_code = 600
-        except: http_code = 601
+                    msg = e.reason
+                    
+            if isinstance(e, urllib2.HTTPError):
+                http_code = e.code
+            else:
+                http_code = 600
+            if not msg: msg = str(e)
+        except Exception as e:
+            http_code = 601
+            msg = str(e)
 
         # added this log line for now so that we can catch any logs on streams that are rejected due to test_stream failures
         # we can remove it once we are sure this works reliably
-        if int(http_code) >= 400: common.log_utils.log('Stream UrlOpen Failed: Url: %s HTTP Code: %s' % (stream_url, http_code))
+        if int(http_code) >= 400:
+            common.log_utils.log_warning('Stream UrlOpen Failed: Url: %s HTTP Code: %s Msg: %s' % (stream_url, http_code, msg))
 
         return int(http_code) < 400
 
     def __nonzero__(self):
-        if self._valid_url is None: return self.valid_url()
-        return self._valid_url
+        if self._valid_url is None:
+            return self.valid_url()
+        else:
+            return self._valid_url
 
     def __str__(self):
         return "{url: |%s| host: |%s| media_id: |%s|}" % (self._url, self._host, self._media_id)

@@ -1,19 +1,19 @@
 """
-urlresolver XBMC Addon
-Copyright (C) 2013 t0mm0, JUL1EN094, bstrdsmkr
+    URLResolver Addon for Kodi
+    Copyright (C) 2016 t0mm0, tknorris
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import re
@@ -51,9 +51,7 @@ class RealDebridResolver(UrlResolver):
                     self.refresh_token()
                     return self.get_media_url(host, media_id, retry=True)
                 else:
-                    self.set_setting('client_id', '')
-                    self.set_setting('client_secret', '')
-                    self.set_setting('token', '')
+                    self.reset_authorization()
                     raise ResolverError('Real Debrid Auth Failed & No Refresh Token')
             else:
                 try:
@@ -114,10 +112,7 @@ class RealDebridResolver(UrlResolver):
             self.set_setting('refresh', js_result['refresh_token'])
         except Exception as e:
             # empty all auth settings to force a re-auth on next use
-            self.set_setting('client_id', '')
-            self.set_setting('client_secret', '')
-            self.set_setting('token', '')
-            self.set_setting('refresh', '')
+            self.reset_authorization()
             raise ResolverError('Unable to Refresh Real Debrid Token: %s' % (e))
 
     def authorize_resolver(self):
@@ -154,6 +149,12 @@ class RealDebridResolver(UrlResolver):
         self.set_setting('token', js_result['access_token'])
         self.set_setting('refresh', js_result['refresh_token'])
 
+    def reset_authorization(self):
+        self.set_setting('client_id', '')
+        self.set_setting('client_secret', '')
+        self.set_setting('token', '')
+        self.set_setting('refresh', '')
+    
     def get_url(self, host, media_id):
         return media_id
 
@@ -186,7 +187,7 @@ class RealDebridResolver(UrlResolver):
 
     @classmethod
     def _is_enabled(cls):
-        return cls.get_setting('enabled') == 'true' and cls.get_setting('authorize') == 'true'
+        return cls.get_setting('enabled') == 'true' and cls.get_setting('token')
 
     def valid_url(self, url, host):
         common.log_utils.log_debug('in valid_url %s : %s' % (url, host))
@@ -207,9 +208,9 @@ class RealDebridResolver(UrlResolver):
     @classmethod
     def get_settings_xml(cls):
         xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_authorize" type="bool" label="I have a Real Debrid Account" default="false"/>' % (cls.__name__))
-        xml.append('<setting type="lsep" label="***RD Authorization will be performed when you select the first RD link***"/>')
         xml.append('<setting id="%s_autopick" type="bool" label="Choose Primary Link Automatically" default="false"/>' % (cls.__name__))
+        xml.append('<setting id="%s_auth" type="action" label="(Re)Authorize My Account" action="RunPlugin(plugin://script.module.urlresolver/?mode=auth_rd)"/>' % (cls.__name__))
+        xml.append('<setting id="%s_reset" type="action" label="Reset My Authorization" action="RunPlugin(plugin://script.module.urlresolver/?mode=reset_rd)"/>' % (cls.__name__))
         xml.append('<setting id="%s_token" visible="false" type="text" default=""/>' % (cls.__name__))
         xml.append('<setting id="%s_refresh" visible="false" type="text" default=""/>' % (cls.__name__))
         xml.append('<setting id="%s_client_id" visible="false" type="text" default=""/>' % (cls.__name__))
