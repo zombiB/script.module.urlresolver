@@ -68,7 +68,7 @@ def relevant_resolvers(domain=None, include_universal=True, include_external=Fal
     for resolver in classes:
         if include_disabled or resolver._is_enabled():
             if include_universal or not resolver.isUniversal():
-                if domain is None or (domain in resolver.domains or '*' in resolver.domains):
+                if domain is None or (any(domain in res_domain for res_domain in resolver.domains) or '*' in resolver.domains):
                     relevant.append(resolver)
 
     if order_matters:
