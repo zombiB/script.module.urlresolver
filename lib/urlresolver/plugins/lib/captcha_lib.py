@@ -18,14 +18,13 @@
     reusable captcha methods
 """
 from urlresolver import common
-from urlresolver.net import Net
 import re
 import xbmcgui
 import xbmc
 import os
 import recaptcha_v2
 
-net = Net()
+net = common.Net()
 IMG_FILE = 'captcha_img.png'
 
 def get_response(img):
@@ -53,7 +52,7 @@ def do_captcha(html):
     recaptcha = re.search('<script\s+type="text/javascript"\s+src="(http://www.google.com[^"]+)', html)
     recaptcha_v2 = re.search('data-sitekey="([^"]+)', html)
     xfilecaptcha = re.search('<img\s+src="([^"]+/captchas/[^"]+)', html)
-    
+
     if solvemedia:
         return do_solvemedia_captcha(solvemedia.group(1))
     elif recaptcha:
@@ -85,7 +84,7 @@ def do_solvemedia_captcha(captcha_url):
     captcha_img = os.path.join(common.profile_path, IMG_FILE)
     try: os.remove(captcha_img)
     except: pass
-    
+
     # Check for alternate puzzle type - stored in a div
     alt_frame = re.search('<div><iframe src="(/papi/media[^"]+)', html)
     if alt_frame:
@@ -95,7 +94,7 @@ def do_solvemedia_captcha(captcha_url):
             open(captcha_img, 'wb').write(alt_puzzle.group(1).decode('base64'))
     else:
         open(captcha_img, 'wb').write(net.http_GET("http://api.solvemedia.com%s" % re.search('<img src="(/papi/media[^"]+)"', html).group(1)).content)
-            
+
     solution = get_response(captcha_img)
     data['adcopy_response'] = solution
     html = net.http_POST('http://api.solvemedia.com/papi/verify.noscript', data)

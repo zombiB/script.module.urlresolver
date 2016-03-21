@@ -18,44 +18,39 @@
 
 import re
 import urllib
-from urlresolver.net import Net
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver import common
+from urlresolver.resolver import UrlResolver, ResolverError
 
-class PlayHDResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class PlayHDResolver(UrlResolver):
     name = "playhd.video"
-    domains = ["www.playhd.video"]
-    pattern = '(?://|\.)(playhd\.video)/embed\.php?.*?vid=([0-9]+)[\?&]*'
+    domains = ["www.playhd.video","www.playhd.fo"]
+    pattern = '(?://|\.)(playhd\.(?:video|fo))/embed\.php?.*?vid=([0-9]+)[\?&]*'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         resp = self.net.http_GET(web_url)
         html = resp.content
-        headers = dict(resp._response.info().items())
+        headers = dict(self.net.get_cookies())
         r = re.search('"content_video".*\n.*?src="(.*?)"', html)
         if r:
-            stream_url = r.group(1) + '|' + urllib.urlencode({ 'Cookie': headers['set-cookie'] })
+            stream_url = r.group(1) + '|' + urllib.urlencode({ 'Cookie': headers['www.playhd.video']['/']['AVS'], 'Referer': 'http://www.playhd.video/embed.php' })
         else:
-            raise UrlResolver.ResolverError('no file located')
-        
+            raise ResolverError('no file located')
+
         return stream_url
 
     def get_url(self, host, media_id):
         return 'http://www.playhd.video/embed.php?vid=%s' % (media_id)
-    
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

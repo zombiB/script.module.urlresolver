@@ -27,6 +27,7 @@ import xbmcgui
 from urlresolver import common
 
 class cInputWindow(xbmcgui.WindowDialog):
+
     def __init__(self, *args, **kwargs):
         bg_image = os.path.join(common.addon_path, 'resources', 'images', 'DialogBack2.png')
         check_image = os.path.join(common.addon_path, 'resources', 'images', 'checked.png')
@@ -128,6 +129,7 @@ class cInputWindow(xbmcgui.WindowDialog):
             self.close()
 
 class UnCaptchaReCaptcha:
+
     def processCaptcha(self, key, lang):
         headers = {'Referer': 'https://www.google.com/recaptcha/api2/demo', 'Accept-Language': lang}
         html = get_url('http://www.google.com/recaptcha/api/fallback?k=%s' % (key), headers=headers)
@@ -162,7 +164,7 @@ class UnCaptchaReCaptcha:
             html = get_url("http://www.google.com/recaptcha/api/fallback?k=%s" % (key), data=data, headers=headers)
         return token
 
-# TODO: Replace with Net() when urlencode is fixed in _fetch
+# TODO: Replace with common.Net() when urlencode is fixed in _fetch
 def get_url(url, data=None, timeout=20, headers=None):
     if headers is None: headers = {}
     if data is None: data = {}

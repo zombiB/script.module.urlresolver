@@ -17,22 +17,16 @@
 """
 
 import re
-import urllib
-from urlresolver.net import Net
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver import common
+from urlresolver.resolver import UrlResolver, ResolverError
 
-class MersalaResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class MersalaResolver(UrlResolver):
     name = "mersalaayitten.com"
     domains = ["mersalaayitten.com"]
     pattern = '(?://|\.)(mersalaayitten\.com)/embed/([0-9]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -47,21 +41,21 @@ class MersalaResolver(Plugin, UrlResolver, PluginSettings):
             xmlhtml = response.content
             r2 = re.search('<file>(.*?)</file>', xmlhtml)
             stream_url = r2.group(1) + '|Cookie=' + headers['set-cookie']
-            
+
         else:
-            raise UrlResolver.ResolverError('no file located')
-        
+            raise ResolverError('no file located')
+
         return stream_url
 
     def get_url(self, host, media_id):
         return 'http://mersalaayitten.com/embed/%s' % (media_id)
-    
+
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

@@ -17,24 +17,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import re
-from urlresolver.net import Net
+import urllib
 from lib import jsunpack
 from urlresolver import common
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
-from urlresolver.plugnplay import Plugin
+from urlresolver.resolver import UrlResolver, ResolverError
 import xbmc
 
-class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class CloudyVideosResolver(UrlResolver):
     name = "cloudyvideos"
     domains = ["cloudyvideos.com"]
     pattern = '(?://|\.)(cloudyvideos\.com)/([0-9a-zA-Z]+)'
 
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
@@ -47,7 +42,7 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
         xbmc.sleep(2000)
         header = {'Referer': web_url}
         html = self.net.http_POST(web_url, form_data=form_values, headers=header).content
-        
+
         r = re.search("file\s*:\s*'([^']+)'", html)
         if r:
             stream_url = r.group(1)
@@ -61,14 +56,14 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
                 match2 = re.search('<embed.*?type="video.*?src="([^"]+)', js_data)
                 if match2:
                     stream_url = match2.group(1)
-            
-        if stream_url:
-            return stream_url + '|' + urllib.urlencode({ 'User-Agent': common.IE_USER_AGENT, 'Referer': web_url })
 
-        raise UrlResolver.ResolverError('Unable to resolve cloudyvideos link. Filelink not found.')
+        if stream_url:
+            return stream_url + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT, 'Referer': web_url})
+
+        raise ResolverError('Unable to resolve cloudyvideos link. Filelink not found.')
 
     def get_url(self, host, media_id):
-            return 'http://cloudyvideos.com/%s' % (media_id)
+        return 'http://cloudyvideos.com/%s' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -76,6 +71,6 @@ class CloudyVideosResolver(Plugin, UrlResolver, PluginSettings):
             return r.groups()
         else:
             return False
-    
+
     def valid_url(self, url, host):
         return re.search(self.pattern, url) or self.name in host

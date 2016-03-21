@@ -15,10 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
 import os
-import log_utils  # @UnusedImport
-import net  # @UnusedImport
+from lib import log_utils  # @UnusedImport
+from lib.net import Net  # @UnusedImport
 import xbmcaddon
 import xbmc
 

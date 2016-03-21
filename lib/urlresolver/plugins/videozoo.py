@@ -21,24 +21,17 @@ import urllib
 import urllib2
 from lib import jsunpack
 from urlparse import urlparse
-from urlresolver.net import Net
 from urlresolver import common
-from urlresolver import HostedMediaFile
-from urlresolver.plugnplay import Plugin
-from urlresolver.plugnplay.interfaces import UrlResolver
-from urlresolver.plugnplay.interfaces import PluginSettings
+from urlresolver.resolver import UrlResolver, ResolverError
+from urlresolver.hmf import HostedMediaFile
 
-
-class VideoZooResolver(Plugin, UrlResolver, PluginSettings):
-    implements = [UrlResolver, PluginSettings]
+class VideoZooResolver(UrlResolver):
     name = "videozoo"
     domains = ["byzoo.org", "playpanda.net", "videozoo.me", "videowing.me", "easyvideo.me", "play44.net", "playbb.me", "video44.net"]
     pattern = 'http://((?:www\.)*(?:play44|playbb|video44|byzoo|playpanda|videozoo|videowing|easyvideo)\.(?:me|org|net|eu)/(?:embed[/0-9a-zA-Z]*?|gplus|picasa|gogo/)(?:\.php)*)\?.*?((?:vid|video|id|file)=[%0-9a-zA-Z_\-\./]+|.*)[\?&]*.*'
-    
+
     def __init__(self):
-        p = self.get_setting('priority') or 100
-        self.priority = int(p)
-        self.net = Net()
+        self.net = common.Net()
 
     def get_url(self, host, media_id):
         if media_id: return 'http://%s?%s' % (host, media_id)
@@ -78,7 +71,7 @@ class VideoZooResolver(Plugin, UrlResolver, PluginSettings):
                             stream_url = 'http://%s/%s.php?url=%s' % (new_host, re_src.group(1), re_url.group(1))
                             stream_url = self._redirect_test(stream_url)
                         else:
-                            raise UrlResolver.ResolverError('File not found')
+                            raise ResolverError('File not found')
         if r:
             stream_url = urllib.unquote_plus(r.group(1))
             if 'http' not in stream_url:
@@ -91,7 +84,7 @@ class VideoZooResolver(Plugin, UrlResolver, PluginSettings):
             else:
                 return stream_url
         else:
-            raise UrlResolver.ResolverError('File not found')
+            raise ResolverError('File not found')
 
     def _redirect_test(self, url):
         opener = urllib2.build_opener()
@@ -107,4 +100,4 @@ class VideoZooResolver(Plugin, UrlResolver, PluginSettings):
             if e.code == 403:
                 if url != e.geturl():
                     return e.geturl()
-            raise UrlResolver.ResolverError('File not found')
+            raise ResolverError('File not found')
