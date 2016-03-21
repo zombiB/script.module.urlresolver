@@ -56,33 +56,25 @@ class AADecoder(object):
         str_char = ""
         while enc_char != '':
             found = False
-            for i in range(len(self.b)):
-                # print self.b[i],enc_char.find(self.b[i])
-                if enc_char.find(self.b[i]) == 0:
-                    str_char += self.base_repr(i, radix)
-                    enc_char = enc_char[len(self.b[i]):]
-                    found = True
-                    break
 
-            # print 'found',found,enc_char
             if not found:
-                # enc_char=enc_char.replace('(ﾟΘﾟ)','1').replace('(ﾟｰﾟ)','4').replace('(c^_^o)','0').replace('(o^_^o)','3')
-                # print 'enc_char',enc_char
-                startpos = 0
-                findClose = True
-                balance = 1
-                result = []
+                for i in range(len(self.b)):             
+                    enc_char=enc_char.replace(self.b[i], str(i))
+
+                startpos=0
+                findClose=True
+                balance=1
+                result=[]
                 if enc_char.startswith('('):
                     l = 0
 
                     for t in enc_char[1:]:
-                        l += 1
-                        # print 'looping',findClose,startpos,t,balance
-                        if findClose and t == ')':
-                            balance -= 1
-                            if balance == 0:
-                                result += [enc_char[startpos:l + 1]]
-                                findClose = False
+                        l+=1
+                        if findClose and t==')':
+                            balance-=1;
+                            if balance==0:
+                                result+=[enc_char[startpos:l+1]]
+                                findClose=False
                                 continue
                         elif not findClose and t == '(':
                             startpos = l
@@ -110,18 +102,17 @@ class AADecoder(object):
 
     def parseJSString(self, s):
         try:
-            # offset = 1 if s[0] == '+' else 0
-            tmp = (s.replace('!+[]', '1').replace('!![]', '1').replace('[]', '0'))  # .replace('(','str(')[offset:])
+            offset=1 if s[0]=='+' else 0
+            tmp=(s.replace('!+[]','1').replace('!![]','1').replace('[]','0'))#.replace('(','str(')[offset:])
             val = int(eval(tmp))
             return val
         except:
             pass
 
     def decode_digit(self, enc_int, radix):
-        enc_int = enc_int.replace('(ﾟΘﾟ)', '1').replace('(ﾟｰﾟ)', '4').replace('(c^_^o)', '0').replace('(o^_^o)', '3')
-        # rr = '(\(.+?\)\))\+'
-        rerr = enc_int.split('))+')  # re.findall(rr,enc_int)
-        v = ""
+        rr='(\(.+?\)\))\+'
+        rerr=enc_int.split('))+')
+        v=""
         for c in rerr:
             if len(c) > 0:
                 if c.strip().endswith('+'):
@@ -136,7 +127,6 @@ class AADecoder(object):
                     v += str(eval(c))
         return v
 
-        # mode 0=+, 1=-
         mode = 0
         value = 0
 
@@ -169,7 +159,6 @@ class AADecoder(object):
     def decode(self):
         self.encoded_str = re.sub('^\s+|\s+$', '', self.encoded_str)
 
-        # get data
         pattern = (r"\(ﾟДﾟ\)\[ﾟoﾟ\]\+ (.+?)\(ﾟДﾟ\)\[ﾟoﾟ\]\)")
         result = re.search(pattern, self.encoded_str, re.DOTALL)
         if result is None:
@@ -178,20 +167,17 @@ class AADecoder(object):
 
         data = result.group(1)
 
-        # hex decode string
         begin_char = "(ﾟДﾟ)[ﾟεﾟ]+"
         alt_char = "(oﾟｰﾟo)+ "
 
         out = ''
         while data != '':
-            # Check new char
             if data.find(begin_char) != 0:
                 print "AADecoder: data not found"
                 return False
 
             data = data[len(begin_char):]
 
-            # Find encoded char
             enc_char = ""
             if data.find(begin_char) == -1:
                 enc_char = data
@@ -201,7 +187,6 @@ class AADecoder(object):
                 data = data[len(enc_char):]
 
             radix = 8
-            # Detect radix 16 for utf8 char
             if enc_char.find(alt_char) == 0:
                 enc_char = enc_char[len(alt_char):]
                 radix = 16
@@ -209,8 +194,8 @@ class AADecoder(object):
             str_char = self.decode_char(enc_char, radix)
 
             if str_char == "":
-                # print "no match :  "
-                # print data + "\nout = " + out + "\n"
+                print "no match :  "
+                print  data + "\nout = " + out + "\n"
                 return False
             out += chr(int(str_char, radix))
 
@@ -223,7 +208,6 @@ class AADecoder(object):
 def getUrl(url, cookieJar=None, post=None, timeout=20, headers=None):
     cookie_handler = urllib2.HTTPCookieProcessor(cookieJar)
     opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
-    # opener = urllib2.install_opener(opener)
     req = urllib2.Request(url)
     req.add_header('User-Agent', common.FF_USER_AGENT)
     if headers:
@@ -233,4 +217,6 @@ def getUrl(url, cookieJar=None, post=None, timeout=20, headers=None):
     response = opener.open(req, post, timeout=timeout)
     link = response.read()
     response.close()
-    return link
+    return link;
+
+
