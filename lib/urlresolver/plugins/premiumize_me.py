@@ -74,6 +74,7 @@ class PremiumizeMeResolver(UrlResolver):
                 return result['tldlist'], [re.compile(regex) for regex in result['regexlist']]
         except Exception as e:
             common.log_utils.log_error('Error getting Premiumize hosts: %s' % (e))
+        return [], []
 
     def valid_url(self, url, host):
         if not self.patterns or not self.hosts:
