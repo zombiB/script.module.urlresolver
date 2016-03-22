@@ -10,12 +10,6 @@ import re
 import urllib2
 from urlresolver import common
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Connection', 'keep-alive']
-]
-
 
 class AADecoder(object):
     def __init__(self, aa_encoded_data):
@@ -245,19 +239,3 @@ class AADecoder(object):
             return False
 
         return out
-
-
-def getUrl(url, cookieJar=None, post=None, timeout=20, headers=None):
-    cookie_handler = urllib2.HTTPCookieProcessor(cookieJar)
-    opener = urllib2.build_opener(cookie_handler, urllib2.HTTPBasicAuthHandler(), urllib2.HTTPHandler())
-    req = urllib2.Request(url)
-    req.add_header('User-Agent',
-                   'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.154 Safari/537.36')
-    if headers:
-        for h, hv in headers:
-            req.add_header(h, hv)
-
-    response = opener.open(req, post, timeout=timeout)
-    link = response.read()
-    response.close()
-    return link
