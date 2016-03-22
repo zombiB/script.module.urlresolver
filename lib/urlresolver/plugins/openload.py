@@ -79,27 +79,28 @@ class OpenLoadResolver(UrlResolver):
         except Exception as e:
             common.log_utils.log_debug('Exception during openload resolve parse: %s' % (e))
 
-        try:
-            info_url = 'https://api.openload.io/1/file/info?file=%s' % (media_id)
-            js_result = self.__get_json(info_url)
-            if 'result' in js_result and media_id in js_result['result']:
-                if js_result['result'][media_id]['status'] != 200:
-                    raise ResolverError('File Not Available')
-            ticket_url = 'https://api.openload.io/1/file/dlticket?file=%s' % (media_id)
-            js_result = self.__get_json(ticket_url)
-            video_url = 'https://api.openload.io/1/file/dl?file=%s&ticket=%s' % (media_id, js_result['result']['ticket'])
-            captcha_url = js_result['result'].get('captcha_url', None)
-            if captcha_url:
-                captcha_response = captcha_lib.get_response(captcha_url)
-                if captcha_response:
-                    video_url += '&captcha_response=%s' % urllib.quote(captcha_response)
-            xbmc.sleep(js_result['result']['wait_time'] * 1000)
-            js_result = self.__get_json(video_url)
-            return js_result['result']['url'] + '?mime=true'
-        except ResolverError:
-            raise
-        except Exception as e:
-            raise ResolverError('Exception in openload: %s' % (e))
+# Commented out because, by default, all openload videos no longer work with their API so it's a waste
+#         try:
+#             info_url = 'https://api.openload.io/1/file/info?file=%s' % (media_id)
+#             js_result = self.__get_json(info_url)
+#             if 'result' in js_result and media_id in js_result['result']:
+#                 if js_result['result'][media_id]['status'] != 200:
+#                     raise ResolverError('File Not Available')
+#             ticket_url = 'https://api.openload.io/1/file/dlticket?file=%s' % (media_id)
+#             js_result = self.__get_json(ticket_url)
+#             video_url = 'https://api.openload.io/1/file/dl?file=%s&ticket=%s' % (media_id, js_result['result']['ticket'])
+#             captcha_url = js_result['result'].get('captcha_url', None)
+#             if captcha_url:
+#                 captcha_response = captcha_lib.get_response(captcha_url)
+#                 if captcha_response:
+#                     video_url += '&captcha_response=%s' % urllib.quote(captcha_response)
+#             xbmc.sleep(js_result['result']['wait_time'] * 1000)
+#             js_result = self.__get_json(video_url)
+#             return js_result['result']['url'] + '?mime=true'
+#         except ResolverError:
+#             raise
+#         except Exception as e:
+#             raise ResolverError('Exception in openload: %s' % (e))
 
         raise ResolverError('Unable to resolve openload.io link. Filelink not found.')
 
