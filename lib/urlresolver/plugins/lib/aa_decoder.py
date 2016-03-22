@@ -7,7 +7,6 @@
 # ------------------------------------------------------------
 # Modified by Shani 
 import re
-import urllib2
 from urlresolver import common
 
 
