@@ -21,6 +21,7 @@ import time
 import pickle
 import hashlib
 import os
+import shutil
 import kodi
 
 try:
@@ -29,6 +30,14 @@ try:
         os.makedirs(cache_path)
 except Exception as e:
     log_utils.log('Failed to create cache: %s: %s' % (cache_path, e), log_utils.LOGWARNING)
+    
+def reset_cache():
+    try:
+        shutil.rmtree(cache_path)
+        return True
+    except Exception as e:
+        log_utils.log('Failed to Reset Cache: %s' % (e), log_utils.LOGWARNING)
+        return False
     
 def _get_func(name, args=None, kwargs=None, cache_limit=1):
     now = time.time()
