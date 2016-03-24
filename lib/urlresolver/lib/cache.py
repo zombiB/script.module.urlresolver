@@ -31,6 +31,8 @@ try:
 except Exception as e:
     log_utils.log('Failed to create cache: %s: %s' % (cache_path, e), log_utils.LOGWARNING)
     
+cache_enabled = kodi.get_setting('use_cache') == 'true'
+    
 def reset_cache():
     try:
         shutil.rmtree(cache_path)
@@ -40,6 +42,7 @@ def reset_cache():
         return False
     
 def _get_func(name, args=None, kwargs=None, cache_limit=1):
+    if not cache_enabled: return False, None
     now = time.time()
     max_age = now - (cache_limit * 60 * 60)
     if args is None: args = []
@@ -56,12 +59,15 @@ def _get_func(name, args=None, kwargs=None, cache_limit=1):
     return False, None
     
 def _save_func(name, args=None, kwargs=None, result=None):
-    if args is None: args = []
-    if kwargs is None: kwargs = {}
-    pickled_result = pickle.dumps(result)
-    full_path = os.path.join(cache_path, _get_filename(name, args, kwargs))
-    with open(full_path, 'w') as f:
-        f.write(pickled_result)
+    try:
+        if args is None: args = []
+        if kwargs is None: kwargs = {}
+        pickled_result = pickle.dumps(result)
+        full_path = os.path.join(cache_path, _get_filename(name, args, kwargs))
+        with open(full_path, 'w') as f:
+            f.write(pickled_result)
+    except Exception as e:
+        log_utils.log('Failure during cache write: %s' % (e), log_utils.LOGWARNING)
 
 def _get_filename(name, args, kwargs):
     arg_hash = hashlib.md5(name).hexdigest() + hashlib.md5(str(args)).hexdigest() + hashlib.md5(str(kwargs)).hexdigest()
