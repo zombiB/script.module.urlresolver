@@ -18,10 +18,13 @@
 import urllib
 import urllib2
 import urlparse
+import socket
 import xml.etree.ElementTree as ET
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
+MAX_REDIR = 10
+TIMEOUT = 1
 class NoRedirection(urllib2.HTTPErrorProcessor):
 
     def http_response(self, request, response):
@@ -43,20 +46,31 @@ class ZeveraResolver(UrlResolver):
         username = self.get_setting('username')
         password = self.get_setting('password')
         url = 'http://api.zevera.com/jDownloader.ashx?'
-        query = urllib.urlencode({'cmd': 'generatedownloaddirect', 'login': username, 'pass': password, 'ourl': media_id})
+        query = urllib.urlencode({'cmd': 'generatedownloaddirect', 'login': username, 'pass': password, 'olink': media_id})
         url = url + query
         opener = urllib2.build_opener(NoRedirection)
         urllib2.install_opener(opener)
-        request = urllib2.Request(url)
-        response = urllib2.urlopen(request)
-        if response.getcode() == 302:
-            link = response.info().getheader('Location')
-        else:
-            common.log_utils.log_warning('Unexpected Zevera Response (%s): %s' % (response.getcode(), response.read()))
-            raise ResolverError('Zevera: Unexpected Response Received')
-        
-        common.log_utils.log_debug('Zevera: Resolved to %s' % (link))
-        return link
+        redirs = 0
+        while redirs < MAX_REDIR:
+            request = urllib2.Request(url)
+            request.get_method = lambda: 'HEAD'
+            try:
+                response = urllib2.urlopen(request, timeout=TIMEOUT)
+                if response.getcode() == 200:
+                    common.log_utils.log_debug('Zevera: Resolved to %s' % (url))
+                    return url
+                elif response.getcode() == 302:
+                    url = response.info().getheader('Location')
+                    redirs += 1
+                    common.log_utils.log_debug('Zevera Redir #%d: %s' % (redirs, url))
+                else:
+                    common.log_utils.log_warning('Unexpected Zevera Response (%s): %s' % (response.getcode(), response.read()))
+                    raise ResolverError('Zevera: Unexpected Response Received')
+            except socket.timeout:
+                common.log_utils.log_warning('Zevera timeout: %s' % (url))
+                raise ResolverError('Zevera: Timeout')
+
+        raise ResolverError('Zevera: Redirect beyond max allowed (%s)' % (MAX_REDIR))
 
     def get_url(self, host, media_id):
         return media_id
