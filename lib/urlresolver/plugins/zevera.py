@@ -24,7 +24,7 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 MAX_REDIR = 10
-TIMEOUT = 1
+TIMEOUT = 2
 class NoRedirection(urllib2.HTTPErrorProcessor):
 
     def http_response(self, request, response):
