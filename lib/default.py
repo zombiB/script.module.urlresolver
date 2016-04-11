@@ -37,6 +37,7 @@ def auth_rd():
 @url_dispatcher.register(MODES.RESET_RD)
 def reset_rd():
     kodi.close_all()
+    kodi.sleep(500)  # sleep or reset won't work for some reason
     from urlresolver.plugins import realdebrid
     rd = realdebrid.RealDebridResolver()
     rd.reset_authorization()
