@@ -1,6 +1,6 @@
 '''
-Allmyvideos urlresolver plugin
-Copyright (C) 2013 Vinnydude
+    urlresolver XBMC Addon
+    Copyright (C) 2016 Gujal
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,42 +17,44 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
-import xbmc
 
-class MooShareResolver(UrlResolver):
-    name = "mooshare"
-    domains = ["mooshare.biz"]
-    pattern = '(?://|\.)(mooshare\.biz)/(?:embed-|iframe/)?([0-9a-zA-Z]+)'
+
+class LetwatchResolver(UrlResolver):
+    name = 'fastplay.sx'
+    domains = ['fastplay.sx']
+    pattern = '(?://|\.)(fastplay\.sx)/(?:flash-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
-        url = self.get_url(host, media_id)
-        html = self.net.http_GET(url).content
+        web_url = self.get_url(host, media_id)
+        html = self.net.http_GET(web_url).content
 
-        data = {}
-        if '<form role="search"' in html and '<Form method="POST" action=\'\'>' in html: html = html.split('<Form method="POST" action=\'\'>')[1]
-        r = re.findall(r'type="hidden" name="(.+?)"\s* value="?(.+?)">', html)
-        for name, value in r:
-            data[name] = value
-        data[u'referer'] = ''
-        data[u'usr_login'] = ''
-        data[u'imhuman'] = 'Proceed to video'
-        data[u'btn_download'] = 'Proceed to video'
-        xbmc.sleep(5000)
-        html = self.net.http_POST(url, data).content
+        if html.find('404 Not Found') >= 0:
+            raise ResolverError('File Removed')
 
-        r = re.search('file\s*:\s*"(.+?)"', html)
-        if r:
-            return r.group(1)
+        if html.find('Video is processing') >= 0:
+            raise ResolverError('File still being processed')
+
+        packed = re.search('(eval\(function.*?)\s*</script>', html, re.DOTALL)
+        if packed:
+            js = jsunpack.unpack(packed.group(1))
         else:
-            raise ResolverError('could not find video')
+            js = html
+
+        link = re.search('sources[\d\D]+(http.*?)",label', js)
+        if link:
+            common.log_utils.log_debug('fastplay.sx Link Found: %s' % link.group(1))
+            return link.group(1)
+
+        raise ResolverError('Unable to find fastplay.sx video')
 
     def get_url(self, host, media_id):
-        return 'http://mooshare.biz/%s' % media_id
+        return 'http://%s/flash-%s.html' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)

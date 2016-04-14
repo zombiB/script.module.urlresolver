@@ -1,6 +1,6 @@
 """
     urlresolver XBMC Addon
-    Copyright (C) 2011 t0mm0
+    Copyright (C) 2016 Gujal
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,9 +21,10 @@ import urllib
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
+
 class PlayHDResolver(UrlResolver):
     name = "playhd.video"
-    domains = ["www.playhd.video","www.playhd.fo"]
+    domains = ["www.playhd.video", "www.playhd.fo"]
     pattern = '(?://|\.)(playhd\.(?:video|fo))/embed\.php?.*?vid=([0-9]+)[\?&]*'
 
     def __init__(self):
@@ -34,16 +35,18 @@ class PlayHDResolver(UrlResolver):
         resp = self.net.http_GET(web_url)
         html = resp.content
         headers = dict(self.net.get_cookies())
+        encoded_headers = urllib.urlencode({'Cookie': headers['www.playhd.video']['/']['AVS'], 
+                                            'Referer': 'http://www.playhd.video/embed.php'})
         r = re.search('"content_video".*\n.*?src="(.*?)"', html)
         if r:
-            stream_url = r.group(1) + '|' + urllib.urlencode({ 'Cookie': headers['www.playhd.video']['/']['AVS'], 'Referer': 'http://www.playhd.video/embed.php' })
+            stream_url = r.group(1) + '|' + encoded_headers
         else:
             raise ResolverError('no file located')
 
         return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://www.playhd.video/embed.php?vid=%s' % (media_id)
+        return 'http://www.playhd.video/embed.php?vid=%s' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
