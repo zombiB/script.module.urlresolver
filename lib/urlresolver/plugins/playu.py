@@ -35,9 +35,11 @@ class PlayUResolver(UrlResolver):
         if 'was deleted' in link :
             raise ResolverError('File Removed')
             
-        r = re.search('file: "(http.*?)"', link)
+        r = re.search('file\s*:\s*"([^"]+)', link)
         if r:
             return r.group(1)
+        
+        raise ResolverError('Unable to find playu.net video')
 
     def get_url(self, host, media_id):
         return 'http://playu.net/embed-%s.html' % media_id
