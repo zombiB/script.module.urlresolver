@@ -17,6 +17,7 @@
 """
 import xbmcgui
 import re
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -39,21 +40,10 @@ class TheVideosResolver(UrlResolver):
                 stream_url, label = match.groups()
                 sources.append((label, stream_url))
         
-        if len(sources) == 1:
-            return sources[0][1]
-        elif len(sources) > 1:
-            try: sources.sort(key=lambda x: int(x[0][:-1]), reverse=True)
-            except: pass
-            if self.get_setting('auto_pick') == 'true':
-                return sources[0][1]
-            else:
-                result = xbmcgui.Dialog().select('Choose the link', [source[0] for source in sources])
-                if result == -1:
-                    raise ResolverError('No link selected')
-                else:
-                    return sources[result][1] + '|User-Agent=%s' % (common.FF_USER_AGENT)
-                
-        raise ResolverError('Video Link Not Found')
+        try: sources.sort(key=lambda x: int(x[0][:-1]), reverse=True)
+        except: pass
+        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        return source + '|User-Agent=%s' % (common.FF_USER_AGENT)
 
     def get_url(self, host, media_id):
         return 'http://thevideos.tv/embed-%s.html' % media_id
