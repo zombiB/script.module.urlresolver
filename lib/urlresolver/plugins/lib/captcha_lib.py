@@ -26,7 +26,7 @@ import recaptcha_v2
 import helpers
 
 net = common.Net()
-IMG_FILE = 'captcha_img.png'
+IMG_FILE = 'captcha_img.gif'
 
 def get_response(img):
     try:
