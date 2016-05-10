@@ -20,7 +20,7 @@ import os
 import re
 import urllib
 import json
-import xbmcgui
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -52,16 +52,7 @@ class AllDebridResolver(UrlResolver):
                 raise ResolverError('alldebrid: %s' % (js_data['error']))
             
             if 'streaming' in js_data:
-                streams = js_data['streaming']
-                if len(streams) == 0:
-                    raise ResolverError('alldebrid: no usable streams')
-                elif len(streams) == 1:
-                    return streams.values()[0]
-                else:
-                    lines = [key for key in streams]
-                    result = xbmcgui.Dialog().select('Choose the link', lines)
-                    if result > -1:
-                        return streams[lines[result]]
+                return helpers.pick_source(js_data['streaming'].items())
         except ResolverError:
             raise
         except:
