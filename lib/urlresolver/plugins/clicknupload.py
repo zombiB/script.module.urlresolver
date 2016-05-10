@@ -40,7 +40,7 @@ class ClickNUploadResolver(UrlResolver):
         tries = 0
         while tries < MAX_TRIES:
             data = helpers.get_hidden(html)
-            data['method_free'] = 'Free Download'
+            data['method_free'] = 'Free+Download'
             data.update(captcha_lib.do_captcha(html))
             headers = {
                 'Referer': web_url
