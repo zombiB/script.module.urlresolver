@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 import re
 import urllib2
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -34,10 +35,9 @@ class PromptfileResolver(UrlResolver):
         html = self.net.http_GET(web_url, headers=headers).content
         match = re.search("val\(\)\s*\+\s*'([^']+)", html)
         suffix = match.group(1) if match else ''
-        data = {}
-        r = re.findall(r'type\s*=\s*"hidden"[^>]+name\s*=\s*"(.+?)"\s*value\s*=\s*"(.*?)"', html)
-        for name, value in r:
-            data[name] = value + suffix
+        data = helpers.get_hidden(html)
+        for name in data:
+            data[name] = data[name] + suffix
         
         headers['Referer'] = web_url
         html = self.net.http_POST(web_url, form_data=data, headers=headers).content

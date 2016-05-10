@@ -19,7 +19,7 @@ import re
 import xbmcgui
 from urlresolver.resolver import ResolverError
 
-def find_hidden(html, form_id=None):
+def get_hidden(html, form_id=None):
     hidden = {}
     if form_id:
         pattern = '''<form [^>]*id\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>'''
