@@ -17,6 +17,7 @@
 """
 import re
 import xbmcgui
+from urlresolver import common
 from urlresolver.resolver import ResolverError
 
 def get_hidden(html, form_id=None):
@@ -31,8 +32,9 @@ def get_hidden(html, form_id=None):
             match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
             match1 = re.search('''value\s*=\s*['"]([^'"]+)''', field.group(0))
             if match and match1:
-                hidden[match.group(1)] = match.group(1)
+                hidden[match.group(1)] = match1.group(1)
             
+    common.log_utils.log_debug('Hidden fields are: %s' % (hidden))
     return hidden
 
 def pick_source(sources, auto_pick=False):
