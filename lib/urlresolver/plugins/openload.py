@@ -66,14 +66,15 @@ class OpenLoadResolver(UrlResolver):
             web_url = self.get_url(host, media_id)
             headers = {'User-Agent': common.FF_USER_AGENT}
             html = self.net.http_GET(web_url, headers=headers).content.encode('utf-8')
-            aaencoded = re.findall('id=\"olvideo\".*\n.*?text/javascript\">(.*)</script>', html)[0]
+            aaencoded = re.findall('id="olvideo".*?text/javascript\">(.*?)</script>', html, re.DOTALL)[0]
             dtext = AADecoder(aaencoded).decode()
-            dtext = re.findall('window.vs=(.*?);', dtext)[0]
+            dtext = re.findall('window\.[A-Za-z0-9_]+=(.*?);', dtext)[0]
             dtext = conv(dtext)
             return dtext.replace("https", "http") + '|User-Agent=%s' % common.FF_USER_AGENT
 
         except Exception as e:
             common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
+            raise
 
         # Commented out because, by default, all openload videos no longer work with their API so it's a waste
         #         try:
