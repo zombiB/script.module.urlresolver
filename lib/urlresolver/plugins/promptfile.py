@@ -40,9 +40,7 @@ class PromptfileResolver(UrlResolver):
             data[name] = data[name] + suffix
         
         headers['Referer'] = web_url
-        common.log_utils.log('%s - %s' % (data, headers))
         html = self.net.http_POST(web_url, form_data=data, headers=headers).content
-        common.log_utils.log(html)
         html = re.compile(r'clip\s*:\s*\{.*?url\s*:\s*[\"\'](.+?)[\"\']', re.DOTALL).search(html)
         if not html:
             raise ResolverError('File Not Found or removed')
