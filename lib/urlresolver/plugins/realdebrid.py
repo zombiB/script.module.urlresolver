@@ -20,6 +20,7 @@ import re
 import urllib2
 import json
 import xbmc
+import xbmcgui
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
