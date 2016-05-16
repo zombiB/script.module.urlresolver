@@ -45,6 +45,7 @@ class OKResolver(UrlResolver):
         except: pass
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
         source = source.encode('utf-8') + '|' + urllib.urlencode(self.header)
+        return source
 
     def __replaceQuality(self, qual):
         return self.qual_map.get(qual.lower(), '000')
