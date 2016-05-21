@@ -22,7 +22,7 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 
-class LetwatchResolver(UrlResolver):
+class FastplayResolver(UrlResolver):
     name = 'fastplay.sx'
     domains = ['fastplay.sx']
     pattern = '(?://|\.)(fastplay\.sx)/(?:flash-|embed-)?([0-9a-zA-Z]+)'
