@@ -1,5 +1,5 @@
 """
-    urlresolver XBMC Addon
+    urlresolver Kodi Addon
     Copyright (C) 2016 Gujal
 
     This program is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class PlayUResolver(UrlResolver):
-    name = 'playu'
-    domains = ['playu.net']
-    pattern = '(?://|\.)(playu\.net)/(?:embed-)?([0-9a-zA-Z]+)'
+    name = "playu"
+    domains = ["playu.net", "playu.me"]
+    pattern = '(?://|\.)(playu\.(?:net|me))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -35,14 +35,14 @@ class PlayUResolver(UrlResolver):
         if 'was deleted' in link :
             raise ResolverError('File Removed')
             
-        r = re.search('file\s*:\s*"([^"]+)', link)
+        r = re.search('file\s*:\s*"(http[^"]+)', link)
         if r:
             return r.group(1)
         
         raise ResolverError('Unable to find playu.net video')
 
     def get_url(self, host, media_id):
-        return 'http://playu.net/embed-%s.html' % media_id
+        return 'http://playu.me/embed-%s.html' % media_id
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
