@@ -41,7 +41,7 @@ class OKResolver(UrlResolver):
             quality = self.__replaceQuality(entry['name'])
             sources.append((quality, entry['url']))
 
-        try: sources.sort(key=int, reverse=True)
+        try: sources.sort(key=lambda x:int(x[0]), reverse=True)
         except: pass
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
         source = source.encode('utf-8') + '|' + urllib.urlencode(self.header)
