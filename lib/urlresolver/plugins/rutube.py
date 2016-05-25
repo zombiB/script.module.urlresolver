@@ -22,6 +22,7 @@
 import re
 import urllib
 import HTMLParser
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
