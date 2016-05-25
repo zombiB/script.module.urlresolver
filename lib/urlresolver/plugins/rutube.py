@@ -22,6 +22,7 @@
 import re
 import urllib
 import HTMLParser
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -46,12 +47,15 @@ class RuTubeResolver(UrlResolver):
             response = self.net.http_GET(m3u8)
             m3u8 = response.content
             
-            url = re.compile('\n(.+?i=(.+?)_.+?)\n').findall(m3u8)
-            url = url[::-1]
-            stream_url = url[0][0]
+            sources = re.compile('\n(.+?i=(.+?))\n').findall(m3u8)
+            sources = sources[::-1]
+            sources = [sublist[::-1] for sublist in sources]
+            
+            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            source = source.encode('utf-8')
 
-            if stream_url:
-                return stream_url
+            if source:
+                return source
 
         raise ResolverError('No playable video found.')
 
