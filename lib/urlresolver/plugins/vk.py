@@ -53,8 +53,8 @@ class VKResolver(UrlResolver):
 
         try: result = json.loads(html)['response']
         except: result = self.__get_private(oid, video_id)
-        sources = result.items()
-        try: sources.sort(key=lambda x: int(x[0][3:]), reverse=True)
+        sources = [(key[3:], result[key]) for key in result if re.match('url\d+', key)]
+        try: sources.sort(key=lambda x: int(x[0]), reverse=True)
         except: pass
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
         return source + '|' + urllib.urlencode(headers)
