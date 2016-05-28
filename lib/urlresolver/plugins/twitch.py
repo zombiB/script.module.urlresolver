@@ -55,7 +55,7 @@ class TwitchResolver(UrlResolver):
     def _is_enabled(cls):
         if not common.has_addon('plugin.video.twitch'):
             return False
-        return cls.get_setting('enabled') == 'true'
+        return super(cls, cls)._is_enabled()
 
     def valid_url(self, url, host):
         if common.has_addon('plugin.video.twitch'):
