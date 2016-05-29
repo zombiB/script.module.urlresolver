@@ -43,9 +43,10 @@ class MailRuResolver(UrlResolver):
             try:
                 js_data = json.loads(html)
                 headers = dict(response._response.info().items())
-                if 'set-cookie' in headers: cookie = urllib.urlencode({'Cookie': headers['set-cookie']})
+                cookie = ''
+                if 'set-cookie' in headers: cookie = '|' + urllib.urlencode({'Cookie': headers['set-cookie']})
 
-                sources = [('%s' % video['key'], '%s|%s' % (video['url'], cookie)) for video in js_data['videos']]
+                sources = [('%s' % video['key'], '%s%s' % (video['url'], cookie)) for video in js_data['videos']]
                 sources = sources[::-1]
                 source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
                 source = source.encode('utf-8')
