@@ -23,8 +23,8 @@ from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidUpResolver(UrlResolver):
     name = "vidup"
-    domains = ["vidup.org", "vidup.me"]
-    pattern = '(?://|\.)(vidup.(?:me|org))/(?:embed-)?([0-9a-zA-Z]+)'
+    domains = ["vidup.org"]
+    pattern = '(?://|\.)(vidup\.org)/(?:embed\.php\?file=)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -32,25 +32,17 @@ class VidUpResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
-        best_stream_url = ''
-        max_quality = 0
-        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
-            js_data = jsunpack.unpack(match.group(1))
-            js_data = js_data.replace("\\'", "'")
-            r = re.findall(r"label\s*:\s*'([^']+)p'\s*,\s*file\s*:\s*'([^']+)", js_data)
-            if r:
-                for quality, stream_url in r:
-                    if int(quality) >= max_quality:
-                        best_stream_url = stream_url
-                        max_quality = int(quality)
+        
+        match = re.search("clip:\s+{\s+url:\s\"([^\"']+)", html)
+        if match:
+            stream_url = match.group(1)
+            return stream_url.replace(" ", "%20")
 
-            if best_stream_url:
-                return best_stream_url
 
-            raise ResolverError('File Not Found or removed')
+        raise ResolverError('Unable to resolve vidup.org link. Filelink not found.')
 
     def get_url(self, host, media_id):
-        return 'http://vidup.me/embed-%s.html' % media_id
+        return 'http://%s/embed.php?file=%s' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
