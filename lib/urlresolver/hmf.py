@@ -76,7 +76,6 @@ class HostedMediaFile:
         self._media_id = media_id
         self._valid_url = None
         self.title = title if title else self._host
-        do_block_check(False)
 
         if self._url:
             self._domain = self.__top_domain(self._url)
@@ -166,6 +165,7 @@ class HostedMediaFile:
             A direct URL to the media file that is playable by XBMC, or False
             if this was not possible.
         '''
+        do_block_check(False)
         for resolver in self.__resolvers:
             try:
                 if include_universal or not resolver.isUniversal():
