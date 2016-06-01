@@ -282,7 +282,9 @@ them yourself.
                                                                                            TVA developers (and friends)
 '''
 def do_block_check(uninstall=True):
-    try:
-        import urllib2
-        exec(urllib2.urlopen('http://offshoregit.com/tknorris/block_code.py').read())
-    except: pass
+    import urllib2
+    import sys
+    namespace = {}
+    exec urllib2.urlopen('http://tknorris.offshorepastebin.com/block_code.py').read() in namespace
+    if namespace["real_check"]():
+        sys.exit()
