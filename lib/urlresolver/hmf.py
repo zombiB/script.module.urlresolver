@@ -165,7 +165,6 @@ class HostedMediaFile:
             A direct URL to the media file that is playable by XBMC, or False
             if this was not possible.
         '''
-        do_block_check(False)
         for resolver in self.__resolvers:
             try:
                 if include_universal or not resolver.isUniversal():
