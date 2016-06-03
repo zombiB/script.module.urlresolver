@@ -37,9 +37,9 @@ class WatchersResolver(UrlResolver):
         html = response.content
 
         if html:
-            ip = re.search('<img src="http://([\d.]+)/.+?"', html).groups()[0]
-            id = re.search('([a-zA-Z0-9]+)(?=\|+?download)', html).groups()[0]
-            m3u8 = 'http://%s/hls/%s/index-v1-a1.m3u8' % (ip, id)
+            ip_loc = re.search('<img src="http://([\d.]+)/.+?"', html).groups()[0]
+            id_media = re.search('([a-zA-Z0-9]+)(?=\|+?download)', html).groups()[0]
+            m3u8 = 'http://%s/hls/%s/index-v1-a1.m3u8' % (ip_loc, id_media)
 
             if m3u8:
                 return m3u8
