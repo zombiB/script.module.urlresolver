@@ -224,16 +224,15 @@ def _update_settings_xml():
     cat_count = 2
     for resolver in resolvers:
         if not resolver.isUniversal():
-            if i <= MAX_SETTINGS:
-                new_xml.append('\t\t<setting label="%s" type="lsep"/>' % (resolver.name))
-                res_xml = resolver.get_settings_xml()
-                new_xml += ['\t\t' + line for line in res_xml]
-                i += len(res_xml) + 1
-            else:
+            if i > MAX_SETTINGS:
                 new_xml.append('\t</category>')
                 new_xml.append('\t<category label="Resolvers %s">' % (cat_count))
                 cat_count += 1
                 i = 0
+            new_xml.append('\t\t<setting label="%s" type="lsep"/>' % (resolver.name))
+            res_xml = resolver.get_settings_xml()
+            new_xml += ['\t\t' + line for line in res_xml]
+            i += len(res_xml) + 1
 
     new_xml.append('\t</category>')
     new_xml.append('</settings>')

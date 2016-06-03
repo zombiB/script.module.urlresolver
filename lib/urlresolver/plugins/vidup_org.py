@@ -22,7 +22,7 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class VidUpResolver(UrlResolver):
-    name = "vidup"
+    name = "vidup.org"
     domains = ["vidup.org"]
     pattern = '(?://|\.)(vidup\.org)/(?:embed\.php\?file=)?([0-9a-zA-Z]+)'
 
