@@ -17,7 +17,6 @@
 """
 
 import re
-from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -38,7 +37,6 @@ class VidUpResolver(UrlResolver):
             stream_url = match.group(1)
             return stream_url.replace(" ", "%20")
 
-
         raise ResolverError('Unable to resolve vidup.org link. Filelink not found.')
 
     def get_url(self, host, media_id):
@@ -50,6 +48,3 @@ class VidUpResolver(UrlResolver):
             return r.groups()
         else:
             return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
