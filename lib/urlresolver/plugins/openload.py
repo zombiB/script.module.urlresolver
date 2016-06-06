@@ -18,12 +18,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 import json
-import urllib
-from lib import captcha_lib
+# import urllib
+# from lib import captcha_lib
 from lib.aa_decoder import AADecoder
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
-import xbmc
+# import xbmc
 
 
 class OpenLoadResolver(UrlResolver):
@@ -66,18 +66,22 @@ class OpenLoadResolver(UrlResolver):
             web_url = self.get_url(host, media_id)
             headers = {'User-Agent': common.FF_USER_AGENT}
             html = self.net.http_GET(web_url, headers=headers).content.encode('utf-8')
-            aaencoded = re.findall('id="olvideo".*?text/javascript\">(.*?)</script>', html, re.DOTALL)[0]
-            dtext = AADecoder(aaencoded).decode()
-            #print dtext
-            dtext1 = re.findall('window\..+?=(.*?);', dtext)
-            if len(dtext1)==0:
-                dtext1=re.findall('.*attr\(\"href\",\((.*)',dtext)
-            dtext = conv(dtext1[0])
-            return dtext.replace("https", "http") + '|User-Agent=%s' % common.FF_USER_AGENT
+            aaencoded = re.search('id="olvideo".*?text/javascript\">(?P<enc_1>.*?)</script>.*?text/javascript\">'
+                                  '(?P<enc_2>.*?)</script>.*?text/javascript\">(?P<enc_3>.*?)</script>', html, re.DOTALL)
+            if aaencoded:
+                dtext = AADecoder(aaencoded.group('enc_2')).decode()
+                # print dtext
+                dtext1 = re.findall('window\..+?=(.*?);', dtext)
+                if len(dtext1)==0:
+                    dtext1=re.findall('.*attr\(\"href\",\((.*)',dtext)
+                dtext = conv(dtext1[0])
+                return dtext.replace("https", "http") + '|User-Agent=%s' % common.FF_USER_AGENT
 
         except Exception as e:
             common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
             raise
+
+        raise ResolverError('Unable to resolve openload.io link. Filelink not found.')
 
         # Commented out because, by default, all openload videos no longer work with their API so it's a waste
         #         try:
@@ -96,13 +100,11 @@ class OpenLoadResolver(UrlResolver):
         #                     video_url += '&captcha_response=%s' % urllib.quote(captcha_response)
         #             xbmc.sleep(js_result['result']['wait_time'] * 1000)
         #             js_result = self.__get_json(video_url)
-        #             return js_result['result']['url'] + '?mime=true'
+        #             return js_result['result']['url'] + '?mime=true' + '|User-Agent=%s' % common.FF_USER_AGENT
         #         except ResolverError:
         #             raise
         #         except Exception as e:
         #             raise ResolverError('Exception in openload: %s' % (e))
-
-        raise ResolverError('Unable to resolve openload.io link. Filelink not found.')
 
     def __get_json(self, url):
         result = self.net.http_GET(url).content
