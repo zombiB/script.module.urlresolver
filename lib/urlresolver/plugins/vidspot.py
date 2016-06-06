@@ -53,7 +53,7 @@ class VidSpotResolver(UrlResolver):
             raise ResolverError('could not find sources')
 
     def get_url(self, host, media_id):
-        return 'http://vidspot.net/%s' % media_id
+        return 'http://vidspot.net/embed-%s.html' % (media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
