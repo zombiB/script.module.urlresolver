@@ -227,7 +227,7 @@ class HostedMediaFile:
         try: headers = dict([item.split('=') for item in (stream_url.split('|')[1]).split('&')])
         except: headers = {}
         for header in headers:
-            headers[header] = urllib.unquote(headers[header])
+            headers[header] = urllib.unquote_plus(headers[header])
         common.log_utils.log_debug('Setting Headers on UrlOpen: %s' % (headers))
 
         try:
