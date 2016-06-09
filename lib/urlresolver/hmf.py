@@ -178,7 +178,8 @@ class HostedMediaFile:
                             self._valid_url = True
                             return stream_url
             except Exception as e:
-                common.log_utils.log_error('%s Error - From: %s Link: %s: %s' % (type(e).__name__, resolver.name, self._url, e))
+                url = self._url.encode('utf-8') if isinstance(self._url, unicode) else self._url
+                common.log_utils.log_error('%s Error - From: %s Link: %s: %s' % (type(e).__name__, resolver.name, url, e))
                 if resolver == self.__resolvers[-1]:
                     common.log_utils.log_debug(traceback.format_exc())
                     raise
