@@ -24,9 +24,9 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class WatchersResolver(UrlResolver):
-    name = "watchers.to"
+    name = "watchers"
     domains = ['watchers.to']
-    pattern = '(?://|\.)(watchers\.to)/embed-([a-zA-Z0-9]+)'
+    pattern = '(?://|\.)(watchers\.to)/(?:embed-)?([a-zA-Z0-9]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -55,7 +55,4 @@ class WatchersResolver(UrlResolver):
             return r.groups()
         else:
             return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
         
