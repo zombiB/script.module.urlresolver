@@ -16,16 +16,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
 import re
+import os
 # import json
 # import urllib
 # import xbmc
 # from lib import captcha_lib
-from lib.aa_decoder import AADecoder
+# from lib.aa_decoder import AADecoder
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
+OL_SOURCE = 'https://offshoregit.com/tvaresolvers/ol_gmu.py'
+OL_PATH = os.path.join(common.plugins_path, 'ol_gmu.py')
 
 class OpenLoadResolver(UrlResolver):
     name = "openload"
@@ -35,56 +37,25 @@ class OpenLoadResolver(UrlResolver):
     def __init__(self):
         self.net = common.Net()
 
-    def get_media_url(self, host, media_id):
-        def baseN(num, b, numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
-            return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
-
-        def conv(s, addfactor=None):
-            if 'function()' in s:
-                addfactor = s.split('b.toString(')[1].split(')')[0]
-                fname = re.findall('function\(\)\{function (.*?)\(', s)[0]
-                s = s.replace(fname, 'myfunc')
-                s = ''.join(s.split('}')[1:])
-            if '+' not in s:
-                if '.0.toString' in s:
-                    ival, b = s.split('.0.toString(')
-                    b = b.replace(')', '')
-                    return baseN(int(ival), int(eval(b)))
-                elif 'myfunc' in s:
-                    b, ival = s.split('myfunc(')[1].split(',')
-                    ival = ival.replace(')', '').replace('(', '').replace(';', '')
-                    b = b.replace(')', '').replace('(', '').replace(';', '')
-                    b = eval(addfactor.replace('a', b))
-                    return baseN(int(ival), int(b))
-                else:
-                    return eval(s)
-            r = ''
-            for ss in s.split('+'):
-                r += conv(ss, addfactor)
-            return r
-
+    @common.cache.cache_method(cache_limit=8)
+    def get_ol_code(self):
         try:
+            new_py = self.net.http_GET(OL_SOURCE).content
+            if new_py:
+                with open(OL_PATH, 'w') as f:
+                    f.write(new_py)
+        except Exception as e:
+            common.log_utils.log_warning('Exception during openload code retrieve: %s' % e)
+            
+    def get_media_url(self, host, media_id):
+        try:
+            self.get_ol_code()
+            import ol_gmu
             web_url = self.get_url(host, media_id)
-            headers = {'User-Agent': common.FF_USER_AGENT}
-            html = self.net.http_GET(web_url, headers=headers).content.encode('utf-8')
-            aaencoded = re.findall('<script type="text/javascript">(ﾟωﾟ.*?)</script>', html, re.DOTALL)
-            if aaencoded:
-                enc_index = re.search('welikekodi_ya_rly\s*=\s*([0-9/\*\-\+ ]+);', html)  # only digits, math ops, whitespace. [^;] too loose for eval
-                if enc_index:
-                    enc_index = eval(enc_index.group(1))
-                    dtext = AADecoder(aaencoded[enc_index]).decode()
-                    dtext1 = re.findall('window\..+?=(.*?);', dtext)
-                    if len(dtext1) == 0:
-                        dtext1 = re.findall('.*attr\(\"href\",\((.*)', dtext)
-                    dtext = conv(dtext1[0])
-                    return dtext.replace("https", "http") + '|User-Agent=%s' % common.FF_USER_AGENT
-
+            return ol_gmu.get_media_url(web_url)
         except Exception as e:
             common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
             raise
-
-        raise ResolverError('Unable to resolve openload.io link. Filelink not found.')
-
     """
         # Commented out because, by default, all openload videos no longer work with their API so it's a waste
         try:
