@@ -20,16 +20,14 @@
 """
 
 import re
-import json
-import urllib
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class MailRuResolver(UrlResolver):
-    name = "mail.ru"
-    domains = ['mail.ru', 'my.mail.ru', 'videoapi.my.mail.ru', 'api.video.mail.ru']
-    pattern = '(?://|\.)(mail\.ru)/.+?/(inbox|mail)/(.+?)/.+?/(\d*)\.html'
+class VideoRevResolver(UrlResolver):
+    name = "videorev"
+    domains = ['videorev.cc']
+    pattern = '(?://|\.)(videorev\.cc)/([a-zA-Z0-9]+)\.html'
 
     def __init__(self):
         self.net = common.Net()
@@ -40,33 +38,37 @@ class MailRuResolver(UrlResolver):
         html = response.content
 
         if html:
+            smil_id = re.search('([a-zA-Z0-9]+)(?=\|smil)', html).groups()[0]
+            smil_url = 'http://%s/%s.smil' % (host, smil_id)
+            result = self.net.http_GET(smil_url).content
+            
+            base = re.search('base="(.+?)"', result).groups()[0]
+            srcs = re.findall('src="(.+?)"', result)
             try:
-                js_data = json.loads(html)
-                headers = dict(response._response.info().items())
-                cookie = ''
-                if 'set-cookie' in headers: cookie = '|' + urllib.urlencode({'Cookie': headers['set-cookie']})
-
-                sources = [('%s' % video['key'], '%s%s' % (video['url'], cookie)) for video in js_data['videos']]
-                sources = sources[::-1]
-                source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-                source = source.encode('utf-8')
-
-                return source
-                
+                res = re.findall('width="(.+?)"', result)
             except:
-                raise ResolverError('No playable video found.')
+                res = res = re.findall('height="(.+?)"', result)
 
-        else: 
-            raise ResolverError('No playable video found.')
+            i = 0
+            sources = []
+            for src in srcs:
+                sources.append([str(res[i]), '%s playpath=%s' % (base, src)])
+                i += 1
+                
+            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            source = source.encode('utf-8')
+
+            return source
+
+        raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
-        location, user, media_id = media_id.split('|')
-        return 'http://videoapi.my.mail.ru/videos/%s/%s/_myvideo/%s.json?ver=0.2.60' % (location, user, media_id)
+        return 'http://%s/%s.html' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
         if r:
-            return (r.groups()[0], '%s|%s|%s' % (r.groups()[1], r.groups()[2], r.groups()[3]))
+            return r.groups()
         else:
             return False
 
@@ -75,3 +77,4 @@ class MailRuResolver(UrlResolver):
         xml = super(cls, cls).get_settings_xml()
         xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
         return xml
+            

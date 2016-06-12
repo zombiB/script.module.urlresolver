@@ -24,8 +24,8 @@ from urlresolver.resolver import UrlResolver, ResolverError
 MAX_TRIES = 3
 
 class VidUpMeResolver(UrlResolver):
-    name = "vidup"
-    domains = ["vidup.me","beta.vidup.me"]
+    name = "vidup.me"
+    domains = ["vidup.me", "beta.vidup.me", "vidup.org"]
     pattern = '(?://|\.)(vidup\.me)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -60,6 +60,3 @@ class VidUpMeResolver(UrlResolver):
             return r.groups()
         else:
             return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host

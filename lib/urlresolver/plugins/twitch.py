@@ -60,7 +60,7 @@ class TwitchResolver(UrlResolver):
     def valid_url(self, url, host):
         if common.has_addon('plugin.video.twitch'):
             if re.search(self.pattern, url, re.I):
-                return not re.match(self.exclusion_pattern, url, re.I) or self.name in host
+                return not re.match(self.exclusion_pattern, url, re.I) or any(host in domain.lower() for domain in self.domains)
         return False
 
     @classmethod

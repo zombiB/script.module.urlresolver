@@ -1,7 +1,10 @@
 """
+    OVERALL CREDIT TO:
+        t0mm0, Eldorado, VOINAGE, BSTRDMKR, tknorris, smokdpi, TheHighway
+
     urlresolver XBMC Addon
     Copyright (C) 2011 t0mm0
- 
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -17,32 +20,34 @@
 """
 
 import re
-from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class VidUpResolver(UrlResolver):
-    name = "vidup"
-    domains = ["vidup.org"]
-    pattern = '(?://|\.)(vidup\.org)/(?:embed\.php\?file=)?([0-9a-zA-Z]+)'
+class WatchersResolver(UrlResolver):
+    name = "watchers"
+    domains = ['watchers.to']
+    pattern = '(?://|\.)(watchers\.to)/(?:embed-)?([a-zA-Z0-9]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
-        
-        match = re.search("clip:\s+{\s+url:\s\"([^\"']+)", html)
-        if match:
-            stream_url = match.group(1)
-            return stream_url.replace(" ", "%20")
+        response = self.net.http_GET(web_url)
+        html = response.content
 
+        if html:
+            ip_loc = re.search('<img src="http://([\d.]+)/.+?"', html).groups()[0]
+            id_media = re.search('([a-zA-Z0-9]+)(?=\|+?download)', html).groups()[0]
+            m3u8 = 'http://%s/hls/%s/index-v1-a1.m3u8' % (ip_loc, id_media)
 
-        raise ResolverError('Unable to resolve vidup.org link. Filelink not found.')
+            if m3u8:
+                return m3u8
+
+        raise ResolverError('No playable video found.')
 
     def get_url(self, host, media_id):
-        return 'http://%s/embed.php?file=%s' % (host, media_id)
+        return 'http://%s/embed-%s.html' % (host, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
@@ -50,6 +55,4 @@ class VidUpResolver(UrlResolver):
             return r.groups()
         else:
             return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
+        
