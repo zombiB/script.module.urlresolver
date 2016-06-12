@@ -50,7 +50,8 @@ class OpenLoadResolver(UrlResolver):
             
     def get_media_url(self, host, media_id):
         try:
-            self.get_ol_code()
+            if self.get_setting('auto_update') == 'true':
+                self.get_ol_code()
             with open(OL_PATH, 'r') as f:
                 py_data = f.read()
             common.log_utils.log('ol_gmu hash: %s' % (hashlib.md5(py_data).hexdigest()))
@@ -105,3 +106,9 @@ class OpenLoadResolver(UrlResolver):
             return r.groups()
         else:
             return False
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_update" type="bool" label="Automatically update resolver" default="true"/>' % (cls.__name__))
+        return xml
