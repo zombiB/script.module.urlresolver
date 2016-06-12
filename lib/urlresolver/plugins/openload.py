@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
 import os
+import hashlib
 # import json
 # import urllib
 # import xbmc
@@ -50,6 +51,9 @@ class OpenLoadResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         try:
             self.get_ol_code()
+            with open(OL_PATH, 'r') as f:
+                py_data = f.read()
+            common.log_utils.log('ol_gmu hash: %s' % (hashlib.md5(py_data).hexdigest()))
             import ol_gmu
             web_url = self.get_url(host, media_id)
             return ol_gmu.get_media_url(web_url)
