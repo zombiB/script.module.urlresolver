@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
+import urllib
 from urlresolver import common
 from lib.aa_decoder import AADecoder
 from urlresolver.resolver import ResolverError
@@ -65,7 +66,7 @@ def get_media_url(url):
                 if len(dtext1) == 0:
                     dtext1 = re.findall('.*attr\(\"href\",\((.*)', dtext)
                 dtext = conv(dtext1[0])
-                return dtext.replace("https", "http") + '|User-Agent=%s' % common.FF_USER_AGENT
+                return dtext.replace("https", "http") + '|User-Agent=%s' % urllib.quote_plus(common.FF_USER_AGENT)
 
     except Exception as e:
         common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
