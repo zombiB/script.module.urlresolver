@@ -62,28 +62,30 @@ def get_media_url(url):
         html = net.http_GET(web_url, headers=headers).content.encode('utf-8')
 
         enc_index = re.search('welikekodi_ya_rly\s*=\s*([0-9/\*\-\+ ]+);', html)
-        enc_index = eval(enc_index.group(1))
-
-        aaencoded = re.findall('<script[^>]+>(ﾟωﾟﾉ[^<]+)<', html, re.DOTALL)
-        aaencoded = aaencoded[enc_index]
-
-        dtext = AADecoder(aaencoded).decode()
-
-        dtext1 = re.findall('window\..+?=(.*?);', dtext)
-        if len(dtext1) == 0:
-            dtext1 = re.findall('.*attr\(\"href\",\((.*)', dtext)
-
-        dtext = conv(dtext1[0])
-        dtext = dtext.replace('https', 'http')
-
-        request = urllib2.Request(dtext, None, headers)
-        response = urllib2.urlopen(request)
-        url = response.geturl()
-        response.close()
-
-        url += '|' + urllib.urlencode({'Referer': web_url, 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'})
-        return url
-
+        if enc_index:
+            enc_index = eval(enc_index.group(1))
+    
+            aaencoded = re.findall('<script[^>]+>(ﾟωﾟﾉ[^<]+)<', html, re.DOTALL)
+            if aaencoded:
+                aaencoded = aaencoded[enc_index]
+        
+                dtext = AADecoder(aaencoded).decode()
+        
+                dtext1 = re.findall('window\..+?=(.*?);', dtext)
+                if len(dtext1) == 0:
+                    dtext1 = re.findall('.*attr\(\"href\",\((.*)', dtext)
+        
+                dtext = conv(dtext1[0])
+                dtext = dtext.replace('https', 'http')
+        
+                request = urllib2.Request(dtext, None, headers)
+                response = urllib2.urlopen(request)
+                url = response.geturl()
+                response.close()
+        
+                url += '|' + urllib.urlencode({'Referer': web_url, 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'})
+                return url
+    
     except Exception as e:
         common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
         raise
