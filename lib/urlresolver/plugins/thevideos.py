@@ -32,7 +32,6 @@ class TheVideosResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT}
         html = self.net.http_GET(web_url, headers=headers).content
-        common.log_utils.log(html)
         sources = []
         match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
         if match:
