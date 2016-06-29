@@ -27,69 +27,75 @@ from urlresolver.resolver import ResolverError
 
 net = common.Net()
 
-def get_media_url(url):
-    def baseN(num, b, numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
-        return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
+def baseN(num, b, numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
+    return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
 
-    def conv(s, addfactor=None):
-        if 'function()' in s:
-            addfactor = s.split('b.toString(')[1].split(')')[0]
-            fname = re.findall('function\(\)\{function (.*?)\(', s)[0]
-            s = s.replace(fname, 'myfunc')
-            s = ''.join(s.split('}')[1:])
-        if '+' not in s:
-            if '.0.toString' in s:
-                ival, b = s.split('.0.toString(')
-                b = b.replace(')', '')
-                return baseN(int(ival), int(eval(b)))
-            elif 'myfunc' in s:
-                b, ival = s.split('myfunc(')[1].split(',')
-                ival = ival.replace(')', '').replace('(', '').replace(';', '')
-                b = b.replace(')', '').replace('(', '').replace(';', '')
-                b = eval(addfactor.replace('a', b))
-                return baseN(int(ival), int(b))
-            else:
-                return eval(s)
-        r = ''
-        for ss in s.split('+'):
-            r += conv(ss, addfactor)
-        return r
-
-    try:
-        web_url = url.replace('/embed/', '/f/')
-
-        headers = {'User-Agent': common.FF_USER_AGENT}
-        html = net.http_GET(web_url, headers=headers).content.encode('utf-8')
-
-        enc_index = re.search('welikekodi_ya_rly\s*=\s*([0-9/\*\-\+ ]+);', html)
-        if enc_index:
-            enc_index = eval(enc_index.group(1))
+def conv(s):
+    match = re.search('toString\([^\d]*(\d+)', s)
+    add = int(match.group(1)) if match else 0
     
-            aaencoded = re.findall('<script[^>]+>(ﾟωﾟﾉ[^<]+)<', html, re.DOTALL)
-            if aaencoded:
-                aaencoded = aaencoded[enc_index]
+    match = re.search('{function\s+(.*?)\(', s)
+    func_name = match.group(1) if match else 'unknown'
+    
+    common.log_utils.log('|%s| |%s|' % (add, func_name))
+    s = s.replace(' ', '')
+    match = re.search('}return(.*)', s)
+    if match:
+        s = match.group(1)
         
-                dtext = AADecoder(aaencoded).decode()
+    result = ''
+    for part in s.split('+'):
+        common.log_utils.log(part)
+        if part.startswith(func_name):
+            match = re.search('\(\s*(\d+)\s*,\s*(\d+)\s*\)', part)
+            if match:
+                a, b = match.groups()
+                a = int(a) + add
+                result += baseN(int(b), a)
+        elif part[0] == '"' and part[-1] == '"':
+            result += part[1:-1]
+        else:
+            common.log_utils.log('Unrecognized Part: %s' % (part))
+    
+    common.log_utils.log(result)
+    return result
+
+def get_media_url(url):
+    try:
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = net.http_GET(url, headers=headers).content.encode('utf-8')
+        decodes = [AADecoder(match.group(1)).decode() for match in re.finditer('<script[^>]+>(ﾟωﾟﾉ[^<]+)<', html, re.DOTALL)]
+        if not decodes:
+            raise ResolverError('No Encoded Section Found. Deleted?')
         
-                dtext1 = re.findall('window\..+?=(.*?);', dtext)
-                if len(dtext1) == 0:
-                    dtext1 = re.findall('.*attr\(\"href\",\((.*)', dtext)
+        common.log_utils.log(decodes)
+        enc_index = 0
+        for text in decodes:
+            match = re.search('welikekodi_ya_rly\s*=\s*(.*?)([0-9/\*\-\+ ]+)', text)
+            if match:
+                enc_index = eval(match.group(2))
+                if 'round' in match.group(1):
+                    enc_index = int(round(enc_index))
         
-                dtext = conv(dtext1[0])
-                dtext = dtext.replace('https', 'http')
+        common.log_utils.log('chosen encode: %s' % (decodes[enc_index]))
+        match = re.search('window\..+?=(.*?);', decodes[enc_index])
+        if not match:
+            match = re.search('.*attr\(\"href\",\((.*)', decodes[enc_index])
         
-                request = urllib2.Request(dtext, None, headers)
-                response = urllib2.urlopen(request)
-                url = response.geturl()
-                response.close()
-        
-                url += '|' + urllib.urlencode({'Referer': web_url, 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'})
-                return url
+        if match:
+            common.log_utils.log('to conv: %s' % (match.group(1)))
+            dtext = conv(match.group(1))
+            dtext = dtext.replace('https', 'http')
+            request = urllib2.Request(dtext, None, headers)
+            response = urllib2.urlopen(request)
+            url = response.geturl()
+            response.close()
+
+        url += '|' + urllib.urlencode({'Referer': url, 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'})
+        return url
     
     except Exception as e:
         common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
         raise
 
     raise ResolverError('Unable to resolve openload.io link. Filelink not found.')
-
-
