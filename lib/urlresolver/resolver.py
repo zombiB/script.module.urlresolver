@@ -82,7 +82,7 @@ class UrlResolver(object):
             host (str): the host the link is on
             media_id (str): the media_id the can be returned by get_host_and_id
         '''
-        r = re.search(self.pattern, url)
+        r = re.search(self.pattern, url, re.I)
         if r:
             return r.groups()
         else:

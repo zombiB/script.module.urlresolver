@@ -111,10 +111,10 @@ class HostedMediaFile:
         return resolvers
     
     def __top_domain(self, url):
-        regex = "(\w{2,}\.\w{2,3}\.\w{2}|\w{2,}\.\w{2,3})$"
         elements = urlparse.urlparse(url)
         domain = elements.netloc or elements.path
         domain = domain.split('@')[-1].split(':')[0]
+        regex = "(\w{2,}\.\w{2,3}\.\w{2}|\w{2,}\.\w{2,3})$"
         res = re.search(regex, domain)
         if res:
             return res.group(1)
