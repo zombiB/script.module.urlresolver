@@ -117,7 +117,8 @@ class HostedMediaFile:
         regex = "(\w{2,}\.\w{2,3}\.\w{2}|\w{2,}\.\w{2,3})$"
         res = re.search(regex, domain)
         if res:
-            return res.group(1)
+            domain = res.group(1)
+        domain = domain.lower()
         return domain
 
     def get_url(self):
