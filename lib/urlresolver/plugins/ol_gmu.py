@@ -63,7 +63,9 @@ def conv(s):
 def get_media_url(url):
     try:
         headers = {'User-Agent': common.FF_USER_AGENT}
-        html = net.http_GET(url, headers=headers).content.encode('utf-8')
+        html = net.http_GET(url, headers=headers).content
+        if isinstance(html, unicode):
+            html = html.encode('utf-8')
         decodes = [AADecoder(match.group(1)).decode() for match in re.finditer('<script[^>]+>(ﾟωﾟﾉ[^<]+)<', html, re.DOTALL)]
         if not decodes:
             raise ResolverError('No Encoded Section Found. Deleted?')
@@ -85,6 +87,8 @@ def get_media_url(url):
         if match:
             common.log_utils.log('to conv: %s' % (match.group(1)))
             dtext = conv(match.group(1))
+            if dtext.lower().startswith('//'):
+                dtext = 'http:' + dtext
             dtext = dtext.replace('https', 'http')
             request = urllib2.Request(dtext, None, headers)
             response = urllib2.urlopen(request)
