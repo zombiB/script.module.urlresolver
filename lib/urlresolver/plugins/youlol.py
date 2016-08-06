@@ -1,5 +1,5 @@
 '''
-    urlresolver XBMC Addon
+    urlresolver Kodi plugin
     Copyright (C) 2016 Gujal
 
     This program is free software: you can redistribute it and/or modify
@@ -20,11 +20,10 @@ import re
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class SpeedPlayResolver(UrlResolver):
-    name = "speedplay.xyz"
-    domains = ["speedplay.xyz", "speedplay.us", "speedplay1.site",
-               "speedplay.pw", "speedplay3.pw"]
-    pattern = '(?://|\.)(speedplay[0-9]?\.(?:us|xyz|pw|site))/(?:embed-)?([0-9a-zA-Z]+)'
+class YouLOLResolver(UrlResolver):
+    name = "youlol.biz"
+    domains = ["youlol.biz"]
+    pattern = '(?://|\.)(youlol\.biz)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -47,7 +46,7 @@ class SpeedPlayResolver(UrlResolver):
         if link:
             return link.group(1)
             
-        raise ResolverError('Unable to find speedplay video')
+        raise ResolverError('Unable to find youlol video')
 
     def get_url(self, host, media_id):
         return 'http://%s/%s.html' % (host, media_id)
