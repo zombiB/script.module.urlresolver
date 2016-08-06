@@ -78,7 +78,7 @@ def get_media_url(url):
 
         # get signature data
         # sts, data = self.cm.getPage('https://openload.co/assets/js/obfuscator/numbers.js', {'header': HTTP_HEADER})
-        data = net.http_GET('https://openload.co/assets/js/obfuscator/numbers.js', headers=HTTP_HEADER).content
+        data = net.http_GET('https://openload.co/assets/js/obfuscator/n.js', headers=HTTP_HEADER).content
 
         signStr = re.search('''['"]([^"^']+?)['"]''', data, re.IGNORECASE).group(1)
 
