@@ -48,7 +48,7 @@ class TheVideoResolver(UrlResolver):
                     best_stream_url = stream_url
                     max_quality = int(quality)
             if best_stream_url:
-                return best_stream_url
+                return '%s%s' % (best_stream_url, '?direct=false&ua=1&vt=1')
             else:
                 raise ResolverError('Unable to locate link')
 
