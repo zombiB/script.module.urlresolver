@@ -51,7 +51,7 @@ class NowvideoResolver(UrlResolver):
             else:
                 raise ResolverError('File Not Found or removed')
 
-        return stream_url
+        return '%s%s%s' % (stream_url, '?client=FLASH', '|referer=http://embed.nowvideo.sx/player/cloudplayer.swf')
 
     def get_url(self, host, media_id):
         return 'http://embed.nowvideo.sx/embed/?v=%s' % media_id
