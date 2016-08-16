@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import re
 from lib import helpers
+from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -43,17 +44,24 @@ class TheVideoResolver(UrlResolver):
             raise ResolverError('Unable to locate link')
         else:
             for match in re.finditer('<script[^>]*src\s*=\s*"([^"]+)', html):
+                common.log_utils.log(match.group(1))
                 if media_id in match.group(1):
-                    html = self.net.http_GET(match.group(1), headers=headers).content
-                    r = re.search('vt\s*=\s*([^"]+)', html)
+                    js_data = self.net.http_GET(match.group(1), headers=headers).content
+                    common.log_utils.log(js_data)
+                    match = re.search('(eval\(function.*?)(?:$|</script>)', js_data, re.DOTALL)
+                    if match:
+                        common.log_utils.log(match.group(1))
+                        js_data = jsunpack.unpack(match.group(1))
+                    common.log_utils.log(js_data)
+                    
+                    r = re.search('vt\s*=\s*([^"]+)', js_data)
                     if r:
                         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
                         return '%s?direct=false&ua=1&vt=%s|User-Agent=%s' % (source, r.group(1), common.IE_USER_AGENT)
-                    else:
-                        raise ResolverError('Unable to locate js')
-            else:
-                raise ResolverError('Unable to locate link')
 
+            else:
+                raise ResolverError('Unable to locate js')
+            
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
 
