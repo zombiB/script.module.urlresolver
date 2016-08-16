@@ -17,6 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -37,20 +38,27 @@ class TheVideoResolver(UrlResolver):
             'Referer': web_url
         }
         html = self.net.http_GET(web_url, headers=headers).content
-        r = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
-        if not r:
+        sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
+        if not sources:
             raise ResolverError('Unable to locate link')
         else:
-            max_quality = 0
-            best_stream_url = None
-            for quality, stream_url in r:
-                if int(quality) >= max_quality:
-                    best_stream_url = stream_url
-                    max_quality = int(quality)
-            if best_stream_url:
-                return '%s%s' % (best_stream_url, '?direct=false&ua=1&vt=1')
+            for match in re.finditer('<script[^>]*src\s*=\s*"([^"]+)', html):
+                if media_id in match.group(1):
+                    html = self.net.http_GET(match.group(1), headers=headers).content
+                    r = re.search('vt\s*=\s*([^"]+)', html)
+                    if r:
+                        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+                        return '%s?direct=false&ua=1&vt=%s|User-Agent=%s' % (source, r.group(1), common.IE_USER_AGENT)
+                    else:
+                        raise ResolverError('Unable to locate js')
             else:
                 raise ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
