@@ -18,6 +18,7 @@
 """
 
 import re, json
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -33,23 +34,30 @@ class IndavideoResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
 
         html = self.net.http_GET(web_url).content
-        
+
         hash = re.search('emb_hash.+?value="(.+?)"', html)
         if not hash:
             raise ResolverError('File not found')
-            
+
         url = 'http://amfphp.indavideo.hu/SYm0json.php/player.playerHandler.getVideoData/' + hash.group(1)
-            
+
         html = self.net.http_GET(url).content
         if '"success":"1"' in html:
             html = json.loads(html)['data']
-            flv_files = html['flv_files']
-            video_file = html['video_file']
-            direct_url = video_file.rsplit('/', 1)[0] + '/' + flv_files[-1]
-                
-            return(direct_url)
+            flv_files = list(set(html['flv_files']))
+            sources = [(html['video_file'].rsplit('/', 1)[0] + '/' + i) for i in flv_files]
+            sources = [(i.rsplit('.', 2)[1], i) for i in sources]
+            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+
+            return source
         
         raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'http://indavideo.hu/video/%s' % (media_id)
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
