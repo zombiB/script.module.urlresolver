@@ -17,7 +17,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import re
-from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -51,18 +50,20 @@ class TheVideoResolver(UrlResolver):
         try: vt = [i for i in vt if len(i) > 200][0]
         except: raise ResolverError('Unable to locate link')
         
-        sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
-        if not sources:
+        r = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
+        if not r:
             raise ResolverError('Unable to locate link')
         else:
-            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-            return '%s?direct=false&ua=1&vt=%s' % (source, vt)
+            max_quality = 0
+            best_stream_url = None
+            for quality, stream_url in r:
+                if int(quality) >= max_quality:
+                    best_stream_url = stream_url
+                    max_quality = int(quality)
+            if best_stream_url:
+                return '%s%s%s' % (best_stream_url, '?direct=false&ua=1&vt=', vt)
+            else:
+                raise ResolverError('Unable to locate link')
 
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml
