@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import re
+import re, time, urllib
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -36,7 +36,20 @@ class TheVideoResolver(UrlResolver):
             'User-Agent': common.IE_USER_AGENT,
             'Referer': web_url
         }
+        
         html = self.net.http_GET(web_url, headers=headers).content
+        
+        vt_url = re.search('(https://thevideo.me/jwjsv/[a-z0-9]*)', html)
+        try: vt_url = vt_url.group(1)
+        except: vt_url = 'https://thevideo.me/jwjsv/%s' % media_id
+        
+        vt_link = self.net.http_GET(vt_url, headers=headers).content
+        vt = re.compile('\|([a-z0-9]*)\|').findall(vt_link)
+        if not vt:
+            raise ResolverError('Unable to locate link')
+        try: vt = [i for i in vt if len(i) > 200][0]
+        except: raise ResolverError('Unable to locate link')
+        
         r = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
         if not r:
             raise ResolverError('Unable to locate link')
@@ -48,7 +61,7 @@ class TheVideoResolver(UrlResolver):
                     best_stream_url = stream_url
                     max_quality = int(quality)
             if best_stream_url:
-                return '%s%s' % (best_stream_url, '?direct=false&ua=1&vt=1')
+                return '%s%s%s' % (best_stream_url, '?direct=false&ua=1&vt=', vt)
             else:
                 raise ResolverError('Unable to locate link')
 
