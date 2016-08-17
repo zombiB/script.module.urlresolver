@@ -17,13 +17,14 @@
 '''
 
 import re
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class YouLOLResolver(UrlResolver):
     name = "youlol.biz"
-    domains = ["youlol.biz"]
-    pattern = '(?://|\.)(youlol\.biz)/(?:embed-)?([0-9a-zA-Z]+)'
+    domains = ["youlol.biz", "shitmovie.com"]
+    pattern = '(?://|\.)(youlol\.biz|shitmovie\.com)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -38,16 +39,19 @@ class YouLOLResolver(UrlResolver):
         if 'Video is processing' in html:
             raise ResolverError('File still being processed')
 
-        link = re.search('(?:m3u8").*?"(.*?)"', html)
-        if link:
-            return link.group(1)
+        match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
+        if match:
+            sources = re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^{,]*(?:,['"]?label['"]?\s*:\s*['"]([^'"]*))?''', match.group(1))
+            sources = [(s[1], s[0]) for s in sources]
+            return helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
 
-        link = re.search('file:"(.*?)",', html)
-        if link:
-            return link.group(1)
-            
         raise ResolverError('Unable to find youlol video')
 
     def get_url(self, host, media_id):
         return 'http://%s/%s.html' % (host, media_id)
 
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
