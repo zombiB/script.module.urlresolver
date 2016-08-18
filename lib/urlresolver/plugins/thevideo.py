@@ -44,16 +44,15 @@ class TheVideoResolver(UrlResolver):
             raise ResolverError('Unable to locate link')
         else:
             for match in re.finditer('<script[^>]*src\s*=\s*"([^"]+)', html):
-                if 'jwjsv' in match.group(1):
-                    js_data = self.net.http_GET(match.group(1), headers=headers).content
-                    match = re.search('(eval\(function.*?)(?:$|</script>)', js_data, re.DOTALL)
-                    if match:
-                        js_data = jsunpack.unpack(match.group(1))
-                    
-                    r = re.search('vt\s*=\s*([^"]+)', js_data)
-                    if r:
-                        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-                        return '%s?direct=false&ua=1&vt=%s|User-Agent=%s' % (source, r.group(1), common.IE_USER_AGENT)
+                js_data = self.net.http_GET(match.group(1), headers=headers).content
+                match = re.search('(eval\(function.*?)(?:$|</script>)', js_data, re.DOTALL)
+                if match:
+                    js_data = jsunpack.unpack(match.group(1))
+                
+                r = re.search('vt\s*=\s*([^"]+)', js_data)
+                if r:
+                    source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+                    return '%s?direct=false&ua=1&vt=%s|User-Agent=%s' % (source, r.group(1), common.IE_USER_AGENT)
 
             else:
                 raise ResolverError('Unable to locate js')
