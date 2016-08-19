@@ -15,8 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
-
 import re
+import urlparse
+from urllib2 import HTTPError
 from lib import helpers
 from lib import jsunpack
 from urlresolver import common
@@ -39,12 +40,21 @@ class TheVideoResolver(UrlResolver):
             'Referer': web_url
         }
         html = self.net.http_GET(web_url, headers=headers).content
-        sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html)
+        sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html, re.I)
         if not sources:
             raise ResolverError('Unable to locate link')
         else:
-            for match in re.finditer('(https?://thevideo.me[^"]+)', html):
-                js_data = self.net.http_GET(match.group(1), headers=headers).content
+            for match in re.finditer('"((?:https?://thevideo\.me)?/[^"]+)', html, re.I):
+                js_url = match.group(1)
+                if not js_url.lower().startswith('http'):
+                    js_url = urlparse.urljoin('https://' + host, js_url)
+
+                if host not in js_url.lower(): continue
+                try:
+                    js_data = self.net.http_GET(js_url, headers=headers).content
+                except HTTPError:
+                    js_data = ''
+                
                 match = re.search('(eval\(function.*?)(?:$|</script>)', js_data, re.DOTALL)
                 if match:
                     js_data = jsunpack.unpack(match.group(1))
