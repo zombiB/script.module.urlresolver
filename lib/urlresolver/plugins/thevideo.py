@@ -43,7 +43,7 @@ class TheVideoResolver(UrlResolver):
         if not sources:
             raise ResolverError('Unable to locate link')
         else:
-            for match in re.finditer('<script[^>]*src\s*=\s*"([^"]+)', html):
+            for match in re.finditer('(https?://thevideo.me[^"]+)', html):
                 js_data = self.net.http_GET(match.group(1), headers=headers).content
                 match = re.search('(eval\(function.*?)(?:$|</script>)', js_data, re.DOTALL)
                 if match:
