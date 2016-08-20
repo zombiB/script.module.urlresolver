@@ -40,6 +40,7 @@ class TheVideoResolver(UrlResolver):
             'Referer': web_url
         }
         html = self.net.http_GET(web_url, headers=headers).content
+        html = html.replace("'+'", '')
         sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html, re.I)
         if not sources:
             raise ResolverError('Unable to locate link')
