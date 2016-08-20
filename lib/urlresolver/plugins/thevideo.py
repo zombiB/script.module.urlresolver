@@ -15,15 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
-import re
-import urlparse
-from urllib2 import HTTPError
-from lib import helpers
-from lib import jsunpack
+import os
+import hashlib
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 MAX_TRIES = 3
+PY_SOURCE = 'https://offshoregit.com/tvaresolvers/thevideo_gmu.py'
+PY_PATH = os.path.join(common.plugins_path, 'thevideo_gmu.py')
 
 class TheVideoResolver(UrlResolver):
     name = "thevideo"
@@ -33,40 +32,29 @@ class TheVideoResolver(UrlResolver):
     def __init__(self):
         self.net = common.Net()
 
+    @common.cache.cache_method(cache_limit=3)
+    def get_gmu_code(self):
+        try:
+            new_py = self.net.http_GET(PY_SOURCE).content
+            if new_py:
+                with open(PY_PATH, 'w') as f:
+                    f.write(new_py)
+        except Exception as e:
+            common.log_utils.log_warning('Exception during thevideo code retrieve: %s' % e)
+            
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-        headers = {
-            'User-Agent': common.IE_USER_AGENT,
-            'Referer': web_url
-        }
-        html = self.net.http_GET(web_url, headers=headers).content
-        html = html.replace("'+'", '')
-        sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html, re.I)
-        if not sources:
-            raise ResolverError('Unable to locate link')
-        else:
-            for match in re.finditer('"((?:https?://thevideo\.me)?/[^"]+)', html, re.I):
-                js_url = match.group(1)
-                if not js_url.lower().startswith('http'):
-                    js_url = urlparse.urljoin('https://' + host, js_url)
-
-                if host not in js_url.lower(): continue
-                try:
-                    js_data = self.net.http_GET(js_url, headers=headers).content
-                except HTTPError:
-                    js_data = ''
-                
-                match = re.search('(eval\(function.*?)(?:$|</script>)', js_data, re.DOTALL)
-                if match:
-                    js_data = jsunpack.unpack(match.group(1))
-                
-                r = re.search('vt\s*=\s*([^"]+)', js_data)
-                if r:
-                    source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-                    return '%s?direct=false&ua=1&vt=%s|User-Agent=%s' % (source, r.group(1), common.IE_USER_AGENT)
-
-            else:
-                raise ResolverError('Unable to locate js')
+        try:
+            if self.get_setting('auto_update') == 'true':
+                self.get_gmu_code()
+            with open(PY_PATH, 'r') as f:
+                py_data = f.read()
+            common.log_utils.log('thevideo_gmu hash: %s' % (hashlib.md5(py_data).hexdigest()))
+            import thevideo_gmu
+            web_url = self.get_url(host, media_id)
+            return thevideo_gmu.get_media_url(web_url, host, self.get_setting('auto_pick') == 'true')
+        except Exception as e:
+            common.log_utils.log_debug('Exception during thevideo resolve parse: %s' % e)
+            raise
             
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
@@ -75,4 +63,5 @@ class TheVideoResolver(UrlResolver):
     def get_settings_xml(cls):
         xml = super(cls, cls).get_settings_xml()
         xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        xml.append('<setting id="%s_auto_update" type="bool" label="Automatically update resolver" default="true"/>' % (cls.__name__))
         return xml
