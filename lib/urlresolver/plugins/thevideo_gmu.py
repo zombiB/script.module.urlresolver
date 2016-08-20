@@ -33,6 +33,9 @@ def get_media_url(url, host, auto_pick=False):
         }
         html = net.http_GET(url, headers=headers).content
         html = re.sub("'\s*\+\s*'", '', html)
+        html = re.sub("'\s*\.concat\(\s*'", '', html)
+        # it'll work great once it's deployed. Contact us at forums.tvaddons.ag once you are tired of this.
+        # We've made deals with other hosters in the past, but we can keep this up as long as you can
         sources = re.findall(r"'?label'?\s*:\s*'([^']+)p'\s*,\s*'?file'?\s*:\s*'([^']+)", html, re.I)
         if not sources:
             raise ResolverError('Unable to locate link')
