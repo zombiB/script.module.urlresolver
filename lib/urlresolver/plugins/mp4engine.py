@@ -22,7 +22,7 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 
-class VidUpMeResolver(UrlResolver):
+class Mp4EngineResolver(UrlResolver):
     name = "mp4engine"
     domains = ["mp4engine.com"]
     pattern = '(?://|\.)(mp4engine\.com)/(?:embed-)?([0-9a-zA-Z]+)(?:-[0-9]x[0-9].html)?'
