@@ -53,10 +53,10 @@ class TheVideoResolver(UrlResolver):
         vt = self.__check_auth(media_id)
         if vt: return vt
         
-        header = 'TheVideo.me IP Authorization'
-        line1 = 'To play this video you must authorize your IP'
-        line2 = 'Visit URL: [B][COLOR blue]https://thevideo.me/pair[/COLOR][/B]'
-        line3 = 'on [B]ANY DEVICE[/B] on the same network'
+        header = 'TheVideo.me Stream Authorization'
+        line1 = 'To play this video you must authorize your system'
+        line2 = 'Visit URL: [B][COLOR blue]https://thevideo.me/pair[/COLOR][/B] and "Activate Streaming"'
+        line3 = 'using [B]ANY DEVICE[/B] on the same network as Kodi'
         with common.kodi.ProgressDialog(header, line1=line1, line2=line2, line3=line3) as pd:
             pd.update(100)
             start = time.time()
