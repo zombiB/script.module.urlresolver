@@ -22,7 +22,6 @@ from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-MAX_TRIES = 3
 INTERVALS = 5
 
 class TheVideoResolver(UrlResolver):
@@ -51,21 +50,21 @@ class TheVideoResolver(UrlResolver):
             raise ResolverError('Unable to locate links')
 
     def __auth_ip(self, media_id):
+        vt = self.__check_auth(media_id)
+        if vt: return vt
+        
         header = 'TheVideo.me IP Authorization'
-        line1 = 'In order to stream this video you must authorize your IP'
-        line2 = 'Visit URL: https://thevideo.me/pair '
+        line1 = 'To play this video you must authorize your IP'
+        line2 = 'Visit URL: [B][COLOR blue]https://thevideo.me/pair[/COLOR][/B]'
         line3 = 'on [B]ANY DEVICE[/B] on the same network'
         with common.kodi.ProgressDialog(header, line1=line1, line2=line2, line3=line3) as pd:
             pd.update(100)
-            expires = time_left = 300  # give user 5 minutes
             start = time.time()
+            expires = time_left = 300  # give user 5 minutes
             interval = 5  # check url every 5 seconds
-            while time_left:
-                url = 'https://thevideo.me/pair?file_code=%s&check' % (media_id)
-                try: js_result = json.loads(self.net.http_GET(url, headers=self.headers).content)
-                except ValueError: raise ResolverError('Unusable Authorization Response')
-                if js_result.get('status'):
-                    return js_result.get('response', {}).get('vt')
+            while time_left > 0:
+                vt = self.__check_auth(media_id)
+                if vt: return vt
                 
                 time_left = expires - int(time.time() - start)
                 progress = time_left * 100 / expires
@@ -73,6 +72,13 @@ class TheVideoResolver(UrlResolver):
                 for _ in range(INTERVALS):
                     common.kodi.sleep(interval * 1000 / INTERVALS)
                     if pd.is_canceled(): return
+        
+    def __check_auth(self, media_id):
+        url = 'https://thevideo.me/pair?file_code=%s&check' % (media_id)
+        try: js_result = json.loads(self.net.http_GET(url, headers=self.headers).content)
+        except ValueError: raise ResolverError('Unusable Authorization Response')
+        if js_result.get('status'):
+            return js_result.get('response', {}).get('vt')
         
     def get_url(self, host, media_id):
         return 'http://%s/embed-%s.html' % (host, media_id)
