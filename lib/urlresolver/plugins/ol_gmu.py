@@ -47,8 +47,8 @@ def get_media_url(url):
                 s.append(chr(33 + ((j + 14) % 94)))
             else:
                 s.append(chr(j))
-        s[len(s) - 1] = chr(ord(s[len(s) - 1]) + 2)
         res = ''.join(s)
+        res = res[0:-1] + chr(ord(res[-1]) + 2)
         videoUrl = 'https://openload.co/stream/{0}?mime=true'.format(res)
         dtext = videoUrl.replace('https', 'http')
         headers = {'User-Agent': HTTP_HEADER['User-Agent']}
