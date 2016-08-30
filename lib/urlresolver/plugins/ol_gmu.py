@@ -46,7 +46,7 @@ def get_media_url(url):
             if (j >= 33 & j <= 126):
                 j = 33 + ((j + 14) % 94)
             if idx == len(hiddenurl) - 1:
-                j += 1
+                j += 2
             s.append(chr(j))
         res = ''.join(s)
         videoUrl = 'https://openload.co/stream/{0}?mime=true'.format(res)
@@ -56,6 +56,9 @@ def get_media_url(url):
         res = urllib2.urlopen(req)
         videourl = res.geturl()
         res.close()
+        if 'pigeons.mp4' in videourl.lower():
+            raise ResolverError('Openload.co resolve failed')
+        
         return videourl
     except Exception as e:
         common.log_utils.log_debug('Exception during openload resolve parse: %s' % e)
