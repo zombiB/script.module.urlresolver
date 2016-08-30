@@ -45,8 +45,9 @@ def get_media_url(url):
             j = ord(i)
             if (j >= 33 & j <= 126):
                 j = 33 + ((j + 14) % 94)
+                
             if idx == len(hiddenurl) - 1:
-                j += 2
+                j += 3
             s.append(chr(j))
         res = ''.join(s)
         videoUrl = 'https://openload.co/stream/{0}?mime=true'.format(res)
