@@ -54,7 +54,7 @@ class TheVideoResolver(UrlResolver):
         line1 = 'To play this video, authorization is required'
         line2 = 'Visit the link below to authorize the devices on your network:'
         line3 = '[B][COLOR blue]https://thevideo.me/pair[/COLOR][/B] then "Activate Streaming"'
-        with common.kodi.CountdownDialog(header, line1, line2, line3, interval=10) as cd:
+        with common.kodi.CountdownDialog(header, line1, line2, line3) as cd:
             return cd.start(self.__check_auth, [media_id])
         
     def __check_auth(self, media_id):
