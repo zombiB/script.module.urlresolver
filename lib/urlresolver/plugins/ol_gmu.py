@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 import urllib2
 from lib.aa_decoder import AADecoder
+from lib.jjdecode import JJDecoder
 from HTMLParser import HTMLParser
 from urlresolver import common
 from urlresolver.resolver import ResolverError
@@ -41,7 +42,18 @@ def get_media_url(url):
         try: html = html.encode('utf-8')
         except: pass
         hiddenurl = HTMLParser().unescape(re.search('hiddenurl">(.+?)<\/span>', html, re.IGNORECASE).group(1))
-        decodes = [AADecoder(match.group(1)).decode() for match in re.finditer('<script[^>]+>(ﾟωﾟﾉ[^<]+)<', html, re.DOTALL)]
+        
+        decodes = []
+        for match in re.finditer('<script[^>]*>(.*?)</script>', html, re.DOTALL):
+            encoded = match.group(1)
+            match = re.search("(ﾟωﾟﾉ.*?('_');)", encoded, re.DOTALL)
+            if match:
+                decodes.append(AADecoder(match.group(1)).decode())
+                
+            match = re.search('(.=~\[\].*\(\);)', encoded, re.DOTALL)
+            if match:
+                decodes.append(JJDecoder(match.group(1)).decode())
+            
         if not decodes:
             raise ResolverError('No Encoded Section Found. Deleted?')
         
