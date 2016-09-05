@@ -41,7 +41,11 @@ def get_media_url(url):
         html = net.http_GET(url, headers=HTTP_HEADER).content
         try: html = html.encode('utf-8')
         except: pass
-        hiddenurl = HTMLParser().unescape(re.search('hiddenurl">(.+?)<\/span>', html, re.IGNORECASE).group(1))
+        match = re.search('hiddenurl">(.+?)<\/span>', html, re.IGNORECASE)
+        if not match:
+            raise ResolverError('Stream Url Not Found. Deleted?')
+        
+        hiddenurl = HTMLParser().unescape(match.group(1))
         
         decodes = []
         for match in re.finditer('<script[^>]*>(.*?)</script>', html, re.DOTALL):
