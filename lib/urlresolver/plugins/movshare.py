@@ -17,6 +17,7 @@
 """
 
 import re
+import urllib
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -36,11 +37,9 @@ class MovshareResolver(UrlResolver):
             r = re.search('flashvars.filekey=(.+?);', html)
             if r:
                 r = r.group(1)
-
-                try: filekey = re.compile('\s+%s="(.+?)"' % r).findall(html)[-1]
+                try: filekey = re.search('var\s+%s\s*=\s*"([^"]+)' % (r), html).group(1)
                 except: filekey = r
-
-                player_url = 'http://www.wholecloud.net/api/player.api.php?key=%s&file=%s' % (filekey, media_id)
+                player_url = 'http://www.wholecloud.net/api/player.api.php?key=%s&file=%s' % (urllib.quote(filekey), media_id)
 
                 html = self.net.http_GET(player_url).content
 
