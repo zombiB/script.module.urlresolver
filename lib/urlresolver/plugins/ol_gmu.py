@@ -50,7 +50,7 @@ def get_media_url(url):
         decodes = []
         for match in re.finditer('<script[^>]*>(.*?)</script>', html, re.DOTALL):
             encoded = match.group(1)
-            match = re.search("(ﾟωﾟﾉ.*?('_');)", encoded, re.DOTALL)
+            match = re.search("(ﾟωﾟﾉ.*?\('_'\);)", encoded, re.DOTALL)
             if match:
                 decodes.append(AADecoder(match.group(1)).decode())
                 
