@@ -31,8 +31,8 @@ class VodlockerResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         link = self.net.http_GET(web_url).content
-        if link.find('404 Not Found') >= 0:
-            raise ResolverError('The requested video was not found.')
+        if 'FILE WAS DELETED' in link:
+            raise ResolverError('File deleted.')
 
         video_link = str(re.compile('file[: ]*"(.+?)"').findall(link)[0])
 

@@ -21,10 +21,10 @@ from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class PromptfileResolver(UrlResolver):
-    name = "promptfile"
-    domains = ["promptfile.com"]
-    pattern = '(?://|\.)(promptfile\.com)/(?:l|e)/([0-9A-Za-z\-]+)'
+class BriskfileResolver(UrlResolver):
+    name = "briskfile"
+    domains = ["briskfile.com"]
+    pattern = '(?://|\.)(briskfile\.com)/(?:l|e)/([0-9A-Za-z\-]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -35,13 +35,15 @@ class PromptfileResolver(UrlResolver):
         html = self.net.http_GET(web_url, headers=headers).content
         match = re.search('''val\(\)\s*\+\s*['"]([^"']+)''', html)
         suffix = match.group(1) if match else ''
+        common.log_utils.log(html)
         data = helpers.get_hidden(html)
         for name in data:
             data[name] = data[name] + suffix
         
+        common.log_utils.log(data)
         headers['Referer'] = web_url
         html = self.net.http_POST(web_url, form_data=data, headers=headers).content
-        html = re.compile(r'clip\s*:\s*\{.*?url\s*:\s*[\"\'](.+?)[\"\']', re.DOTALL).search(html)
+        html = re.compile(r'clip\s*:\s*\{.*?(?:url|src)\s*:\s*[\"\'](.+?)[\"\']', re.DOTALL).search(html)
         if not html:
             raise ResolverError('File Not Found or removed')
         stream_url = html.group(1)
@@ -52,4 +54,4 @@ class PromptfileResolver(UrlResolver):
         return stream_url + '|User-Agent=%s&Referer=%s' % (common.FF_USER_AGENT, web_url)
 
     def get_url(self, host, media_id):
-        return 'http://www.promptfile.com/l/%s' % (media_id)
+        return 'http://www.briskfile.com/l/%s' % (media_id)

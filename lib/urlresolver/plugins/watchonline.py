@@ -1,6 +1,7 @@
-'''
-    urlresolver XBMC Addon
-    Copyright (C) 2016 Gujal
+# -*- coding: UTF-8 -*-
+"""
+    Kodi urlresolver plugin
+    Copyright (C) 2016  alifrezser
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,42 +15,39 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
 import re
 from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class MegaMP4Resolver(UrlResolver):
-    name = "megamp4.net"
-    domains = ["megamp4.net"]
-    pattern = '(?://|\.)(megamp4\.net)/(?:embed-|emb\.html\?|)([0-9a-zA-Z]+)'
+class WatchonlineResolver(UrlResolver):
+    name = "watchonline"
+    domains = ["watchonline.to"]
+    pattern = '(?://|\.)(watchonline\.to)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
+        self.user_agent = common.IE_USER_AGENT
+        self.net.set_user_agent(self.user_agent)
+        self.headers = {'User-Agent': self.user_agent}
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
 
         html = self.net.http_GET(web_url).content
 
-        if 'was deleted' in html:
-            raise ResolverError('File Removed')
+        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+            js_data = jsunpack.unpack(match.group(1))
+            js_data = js_data.replace('\\\'', '\'')
 
+        r = re.search('{\s*file\s*:\s*["\']([^{}]+\.mp4)["\']', js_data)
 
-        js_data = re.findall('(eval\(function.*?)</script>', html.replace('\n', ''))
-
-        for i in js_data:
-            try: html += jsunpack.unpack(i)
-            except: pass
-
-
-        link = re.search('file:"(.*?)",', html)
-        if link:
-            return link.group(1)
-            
-        raise ResolverError('Unable to find megamp4 video')
+        if r:
+            return r.group(1)
+        else:
+            raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
-        return 'http://megamp4.net/embed-%s.html' % (media_id)
+        return 'http://www.%s/embed-%s.html' % (host, media_id)
