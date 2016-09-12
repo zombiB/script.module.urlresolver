@@ -16,8 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
-
+import urllib
+import string
 import re
 import urllib2
 from lib.aa_decoder import AADecoder
@@ -27,6 +27,29 @@ from urlresolver import common
 from urlresolver.resolver import ResolverError
 
 net = common.Net()
+def caesar_shift(s, shift=13):
+    s2 = ''
+    for c in s:
+        if c.isalpha():
+            limit = 90 if c <= 'Z' else 122
+            new_code = ord(c) + shift
+            if new_code > limit:
+                new_code -= 26
+            s2 += chr(new_code)
+        else:
+            s2 += c
+    return s2
+
+def unpack(html):
+    strings = re.findall('{\s*var\s+a\s*=\s*"([^"]+)', html)
+    shifts = re.findall('\)\);}\((\d+)\)', html)
+    for s, shift in zip(strings, shifts):
+        s = caesar_shift(s, int(shift))
+        s = urllib.unquote(s)
+        for i, replace in enumerate(['j', '_', '__', '___']):
+            s = s.replace(str(i), replace)
+        html += '<script>%s</script>' % (s)
+    return html
 
 def get_media_url(url):
     try:
@@ -41,6 +64,7 @@ def get_media_url(url):
         html = net.http_GET(url, headers=HTTP_HEADER).content
         try: html = html.encode('utf-8')
         except: pass
+        html = unpack(html)
         match = re.search('hiddenurl">(.+?)<\/span>', html, re.IGNORECASE)
         if not match:
             raise ResolverError('Stream Url Not Found. Deleted?')
@@ -86,7 +110,7 @@ def get_media_url(url):
         res = urllib2.urlopen(req)
         videourl = res.geturl()
         res.close()
-        if 'pigeons.mp4' in videourl.lower():
+        if 'pigeons.mp4' in videourl.lower() or '/.mp4' in videourl.lower():
             raise ResolverError('Openload.co resolve failed')
         
         return videourl
