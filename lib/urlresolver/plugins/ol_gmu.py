@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import urllib
-import string
 import re
 import urllib2
 from lib.aa_decoder import AADecoder
@@ -27,6 +26,8 @@ from urlresolver import common
 from urlresolver.resolver import ResolverError
 
 net = common.Net()
+SIZE_LIMIT = 32 * 1024 * 1024
+
 def caesar_shift(s, shift=13):
     s2 = ''
     for c in s:
@@ -65,7 +66,7 @@ def get_media_url(url):
         try: html = html.encode('utf-8')
         except: pass
         html = unpack(html)
-        match = re.search('hiddenurl">(.+?)<\/span>', html, re.IGNORECASE)
+        match = re.search('''>([^<]+)</span>\s*<span\s+id="streamurl"''', html, re.DOTALL | re.IGNORECASE)
         if not match:
             raise ResolverError('Stream Url Not Found. Deleted?')
         
@@ -109,9 +110,9 @@ def get_media_url(url):
         req = urllib2.Request(dtext, None, headers)
         res = urllib2.urlopen(req)
         videourl = res.geturl()
+        if int(res.headers['Content-Length']) < SIZE_LIMIT:
+            raise ResolverError('Openload.co resolve failed. Pigeons?')
         res.close()
-        if 'pigeons.mp4' in videourl.lower() or '/.mp4' in videourl.lower():
-            raise ResolverError('Openload.co resolve failed')
         
         return videourl
     except Exception as e:
