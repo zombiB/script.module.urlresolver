@@ -32,16 +32,36 @@ class OpenLoadResolver(UrlResolver):
     def __init__(self):
         self.net = common.Net()
 
-    @common.cache.cache_method(cache_limit=8)
+    @common.cache.cache_method(cache_limit=1)
     def get_ol_code(self):
         try:
-            new_py = self.net.http_GET(OL_SOURCE).content
-            if new_py:
-                with open(OL_PATH, 'w') as f:
-                    f.write(new_py)
+            headers = self.net.http_HEAD(OL_SOURCE).get_headers(as_dict=True)
+            common.log_utils.log(headers)
+            old_etag = self.get_setting('etag')
+            new_etag = headers.get('Etag', '')
+            old_len = self.__old_length()
+            new_len = int(headers.get('Content-Length', 0))
+            if old_etag != new_etag or old_len != new_len:
+                common.log_utils.log('Updating ol_gmu: |%s|%s|%s|%s|' % (old_etag, new_etag, old_len, new_len))
+                self.set_setting('etag', new_etag)
+                new_py = self.net.http_GET(OL_SOURCE).content
+                if new_py:
+                    with open(OL_PATH, 'w') as f:
+                        f.write(new_py)
+            else:
+                common.log_utils.log('Reusing existing ol_gmu.py: |%s|%s|%s|%s|' % (old_etag, new_etag, old_len, new_len))
         except Exception as e:
             common.log_utils.log_warning('Exception during openload code retrieve: %s' % e)
             
+    def __old_length(self):
+        try:
+            with open(OL_PATH, 'r') as f:
+                old_py = f.read()
+            old_len = len(old_py)
+        except:
+            old_len = 0
+        return old_len
+
     def get_media_url(self, host, media_id):
         try:
             if self.get_setting('auto_update') == 'true':
@@ -57,12 +77,13 @@ class OpenLoadResolver(UrlResolver):
             raise
 
     def get_url(self, host, media_id):
-        return 'http://openload.io/embed/%s' % media_id
+        return 'http://openload.co/embed/%s' % media_id
 
     @classmethod
     def get_settings_xml(cls):
         xml = super(cls, cls).get_settings_xml()
         xml.append('<setting id="%s_auto_update" type="bool" label="Automatically update resolver" default="true"/>' % (cls.__name__))
+        xml.append('<setting id="%s_etag" type="text" default="" visible="false"/>' % (cls.__name__))
         return xml
 
 """
