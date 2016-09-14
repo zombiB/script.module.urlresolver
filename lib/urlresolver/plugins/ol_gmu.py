@@ -26,7 +26,8 @@ from urlresolver import common
 from urlresolver.resolver import ResolverError
 
 net = common.Net()
-SIZE_LIMIT = 32 * 1024 * 1024
+MAX_SIZE = 33 * 1024 * 1024
+MIN_SIZE = 30 * 1024 * 1024
 
 def caesar_shift(s, shift=13):
     s2 = ''
@@ -110,8 +111,8 @@ def get_media_url(url):
         req = urllib2.Request(dtext, None, headers)
         res = urllib2.urlopen(req)
         videourl = res.geturl()
-        if int(res.headers['Content-Length']) < SIZE_LIMIT:
-            raise ResolverError('Openload.co resolve failed. Pigeons?')
+        if MIN_SIZE < int(res.headers['Content-Length']) < MAX_SIZE:
+            raise ResolverError('Openload.co resolve failed. Pigeons? (%s)' % (res.headers['Content-Length']))
         res.close()
         
         return videourl
