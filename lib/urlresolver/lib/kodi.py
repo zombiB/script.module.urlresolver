@@ -27,6 +27,7 @@ import os
 import re
 import time
 import log_utils
+import CustomProgressDialog
 
 addon = xbmcaddon.Addon('script.module.urlresolver')
 get_setting = addon.getSetting
@@ -207,7 +208,10 @@ class CountdownDialog(object):
         self.interval = interval
         self.line3 = line3
         if active:
-            pd = xbmcgui.DialogProgress()
+            if not xbmc.getCondVisibility('Window.IsVisible(progressdialog)'):
+                pd = CustomProgressDialog.ProgressDialog()
+            else:
+                pd = xbmcgui.DialogProgress()
             if not self.line3: line3 = 'Expires in: %s seconds' % (countdown)
             pd.create(self.heading, line1, line2, line3)
             pd.update(100)
