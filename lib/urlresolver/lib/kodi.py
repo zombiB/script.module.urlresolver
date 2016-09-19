@@ -208,7 +208,7 @@ class CountdownDialog(object):
         self.interval = interval
         self.line3 = line3
         if active:
-            if not xbmc.getCondVisibility('Window.IsVisible(progressdialog)'):
+            if xbmc.getCondVisibility('Window.IsVisible(progressdialog)'):
                 pd = CustomProgressDialog.ProgressDialog()
             else:
                 pd = xbmcgui.DialogProgress()
