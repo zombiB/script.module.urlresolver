@@ -50,9 +50,6 @@ class ProgressDialog(object):
             
         def onInit(self):
             self.cancel = False
-            self.setLine1(self.line1)
-            self.setLine2(self.line2)
-            self.setLine3(self.line3)
             
         def onAction(self, action):
             # log_utils.log('Action: %s' % (action.getId()), log_utils.LOGDEBUG, COMPONENT)
