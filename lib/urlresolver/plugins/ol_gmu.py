@@ -67,27 +67,39 @@ def get_media_url(url):
         try: html = html.encode('utf-8')
         except: pass
         html = unpack(html)
-        hiddenid = re.compile(r'=\s*?\$\("#([^"]+)"', re.DOTALL | re.IGNORECASE).findall(html)[0]
-        match = re.compile(r'<span id="'+hiddenid+'">([^<]+)</span', re.DOTALL | re.IGNORECASE).findall(html)
-        if not match:
-            raise ResolverError('Stream Url Not Found. Deleted?')
-        
-        hiddenurl = HTMLParser().unescape(match[0])
-        
+
         decodes = []
+        hidden_id = ''
         for match in re.finditer('<script[^>]*>(.*?)</script>', html, re.DOTALL):
+            decode = ''
             encoded = match.group(1)
             match = re.search("(ﾟωﾟﾉ.*?\('_'\);)", encoded, re.DOTALL)
             if match:
-                decodes.append(AADecoder(match.group(1)).decode())
+                decode = AADecoder(match.group(1)).decode()
+                decodes.append(decode)
                 
             match = re.search('(.=~\[\].*\(\);)', encoded, re.DOTALL)
             if match:
-                decodes.append(JJDecoder(match.group(1)).decode())
+                decode = JJDecoder(match.group(1)).decode()
+                decodes.append(decode)
             
+            match = re.search(r'=\s*\$\("#([^"]+)"', decode, re.DOTALL | re.IGNORECASE)
+            if match:
+                hidden_id = match.group(1)
+
+        if not hidden_id:
+            raise ResolverError('Hidden ID Not Found. Deleted?')
+        
+        match = re.search(r'<span[^>]+id\s*="%s"[^>]*>([^<]+)' % (hidden_id), html, re.DOTALL | re.IGNORECASE)
+        if match:
+            hidden_url = match.group(1)
+        else:
+            raise ResolverError('Stream Url Not Found. Deleted?')
+
         if not decodes:
             raise ResolverError('No Encoded Section Found. Deleted?')
         
+        hiddenurl = HTMLParser().unescape(hidden_url)
         magic_number = 0
         for decode in decodes:
             match = re.search('charCodeAt\(\d+\)\s*\+\s*(\d+)\)', decode, re.DOTALL | re.I)
