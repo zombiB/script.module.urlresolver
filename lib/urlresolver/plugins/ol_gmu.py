@@ -67,11 +67,12 @@ def get_media_url(url):
         try: html = html.encode('utf-8')
         except: pass
         html = unpack(html)
-        match = re.search('''>([^<]+)</span>\s*<span\s+id="streamurl"''', html, re.DOTALL | re.IGNORECASE)
+        hiddenid = re.compile(r'=\s*?\$\("#([^"]+)"', re.DOTALL | re.IGNORECASE).findall(html)[0]
+        match = re.compile(r'<span id="'+hiddenid+'">([^<]+)</span', re.DOTALL | re.IGNORECASE).findall(html)
         if not match:
             raise ResolverError('Stream Url Not Found. Deleted?')
         
-        hiddenurl = HTMLParser().unescape(match.group(1))
+        hiddenurl = HTMLParser().unescape(match[0])
         
         decodes = []
         for match in re.finditer('<script[^>]*>(.*?)</script>', html, re.DOTALL):
