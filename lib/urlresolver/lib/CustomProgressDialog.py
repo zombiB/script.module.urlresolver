@@ -19,24 +19,44 @@ import xbmcgui
 import kodi
 import log_utils
 
+DIALOG_XML = 'ProgressDialog.xml'
+
 class ProgressDialog(object):
+    dialog = None
+
     def create(self, heading, line1='', line2='', line3=''):
-        self.dialog = ProgressDialog.Window('ProgressDialog.xml', kodi.get_path())
+        path_setting = kodi.get_setting('xml_folder')
+        addon_path = kodi.get_path()
+        # if a path is set, try to use it and fallback to the default if it fails
+        if path_setting:
+            try: self.dialog = ProgressDialog.Window(DIALOG_XML, path_setting)
+            except: self.dialog = ProgressDialog.Window(DIALOG_XML, addon_path)
+        # otherwise use the default
+        else:
+            self.dialog = ProgressDialog.Window(DIALOG_XML, addon_path)
         self.dialog.show()
         self.dialog.setHeading(heading)
-        self.update(0, line1, line2, line3)
+        self.dialog.setLine1(line1)
+        self.dialog.setLine2(line2)
+        self.dialog.setLine3(line3)
     
     def update(self, percent, line1='', line2='', line3=''):
-        self.dialog.setProgress(percent)
-        if line1: self.dialog.setLine1(line1)
-        if line2: self.dialog.setLine2(line2)
-        if line3: self.dialog.setLine3(line3)
+        if self.dialog is not None:
+            self.dialog.setProgress(percent)
+            if line1: self.dialog.setLine1(line1)
+            if line2: self.dialog.setLine2(line2)
+            if line3: self.dialog.setLine3(line3)
     
     def iscanceled(self):
-        return self.dialog.cancel
+        if self.dialog is not None:
+            return self.dialog.cancel
+        else:
+            return False
     
     def close(self):
-        self.dialog.close()
+        if self.dialog is not None:
+            self.dialog.close()
+            del self.dialog
 
     class Window(xbmcgui.WindowXMLDialog):
         HEADING_CTRL = 100
@@ -47,9 +67,10 @@ class ProgressDialog(object):
         ACTION_PREVIOUS_MENU = 10
         ACTION_BACK = 92
         CANCEL_BUTTON = 200
+        cancel = False
             
         def onInit(self):
-            self.cancel = False
+            pass
             
         def onAction(self, action):
             # log_utils.log('Action: %s' % (action.getId()), log_utils.LOGDEBUG, COMPONENT)
