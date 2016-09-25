@@ -25,15 +25,8 @@ class ProgressDialog(object):
     dialog = None
 
     def create(self, heading, line1='', line2='', line3=''):
-        path_setting = kodi.get_setting('xml_folder')
-        addon_path = kodi.get_path()
-        # if a path is set, try to use it and fallback to the default if it fails
-        if path_setting:
-            try: self.dialog = ProgressDialog.Window(DIALOG_XML, path_setting)
-            except: self.dialog = ProgressDialog.Window(DIALOG_XML, addon_path)
-        # otherwise use the default
-        else:
-            self.dialog = ProgressDialog.Window(DIALOG_XML, addon_path)
+        try: self.dialog = ProgressDialog.Window(DIALOG_XML, kodi.get_setting('xml_folder'))
+        except: self.dialog = ProgressDialog.Window(DIALOG_XML, kodi.get_path())
         self.dialog.show()
         self.dialog.setHeading(heading)
         self.dialog.setLine1(line1)
