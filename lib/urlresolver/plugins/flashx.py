@@ -18,7 +18,6 @@
 """
 
 import re
-import time
 from lib import jsunpack
 from lib import helpers
 from urlresolver import common
