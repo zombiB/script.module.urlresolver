@@ -35,7 +35,6 @@ class RapidVideoResolver(UrlResolver):
         html = self.net.http_GET(web_url).content
 
         for match in re.finditer('(eval\(function\(.*?)</script>', html, re.DOTALL):
-            common.log_utils.log(match.group(1))
             js_data = jsunpack.unpack(match.group(1))
             js_data = js_data.replace('\\\'', '\'')
 
