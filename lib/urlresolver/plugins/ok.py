@@ -2,7 +2,7 @@
 OK urlresolver XBMC Addon
 Copyright (C) 2016 Seberoth
 
-Version 0.0.1
+Version 0.0.2
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,6 +54,10 @@ class OKResolver(UrlResolver):
         url = "http://www.ok.ru/dk?cmd=videoPlayerMetadata&mid=" + media_id
         html = self.net.http_GET(url, headers=self.header).content
         json_data = json.loads(html)
+
+        if 'error' in json_data:
+            raise ResolverError('File Not Found or removed')
+
         info = dict()
         info['urls'] = []
         for entry in json_data['videos']:
