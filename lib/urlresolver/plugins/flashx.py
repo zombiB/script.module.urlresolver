@@ -35,6 +35,8 @@ class FlashxResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT}
         html = self.net.http_GET(web_url, headers=headers).content
+        if 'File Not Found' in html:
+            raise ResolverError('File got deleted?')
         cookies = self.__get_cookies(html)
 
         self.net.http_GET('http://www.flashx.tv/coding.js?cd=%s' % (cookies.get('file_id', media_id)), headers=headers)
