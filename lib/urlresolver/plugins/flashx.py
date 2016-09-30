@@ -42,7 +42,6 @@ class FlashxResolver(UrlResolver):
         
         common.kodi.sleep(5000)
         html = self.net.http_POST(url=furl, form_data=data, headers=headers).content
-        common.log_utils.log(html)
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
