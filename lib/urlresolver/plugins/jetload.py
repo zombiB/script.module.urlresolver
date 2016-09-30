@@ -40,4 +40,4 @@ class JetloadResolver(UrlResolver):
         raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return 'http://%s/plugins/mediaplayer/site/_embed.php?u=%s' % (host, media_id)
+        return self._default_get_url(host, media_id, 'http://{host}/plugins/mediaplayer/site/_embed.php?u={media_id}')

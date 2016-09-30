@@ -45,7 +45,7 @@ class TheVideosResolver(UrlResolver):
         return source + '|User-Agent=%s' % (common.FF_USER_AGENT)
 
     def get_url(self, host, media_id):
-        return 'http://thevideos.tv/embed-%s.html' % media_id
+        return self._default_get_url(host, media_id)
 
     @classmethod
     def get_settings_xml(cls):

@@ -77,7 +77,7 @@ class TheVideoResolver(UrlResolver):
             return js_result.get('response', {}).get('vt')
         
     def get_url(self, host, media_id):
-        return 'http://%s/embed-%s.html' % (host, media_id)
+        return self._default_get_url(host, media_id)
 
     @classmethod
     def get_settings_xml(cls):

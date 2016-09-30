@@ -62,6 +62,7 @@ class MovshareResolver(UrlResolver):
 
     def get_url(self, host, media_id):
         if 'vidgg' in host:
-            return 'http://%s/embed/?id=%s' % (host, media_id)
+            template = 'http://{host}/embed/?id={media_id}'
         else:
-            return 'http://%s/embed/?v=%s' % (host, media_id)
+            template = 'http://{host}/embed/?v={media_id}'
+        return self._default_get_url(host, media_id, template)
