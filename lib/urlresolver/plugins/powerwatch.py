@@ -1,8 +1,6 @@
 """
-Watchpass urlresolver XBMC Addon
+powerwatch urlresolver plugin based on StreamcloudResolver
 Copyright (C) 2016 Seberoth
-
-Version 0.0.1
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,14 +15,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
+
 import re
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class WatchpassResolver(UrlResolver):
-    name = "everplay.watchpass.net"
-    domains = ['everplay.watchpass.net']
-    pattern = '(?://|\.)(everplay\.watchpass\.net)/se/rapidme\.php\?url=(.+)'
+class PowerwatchResolver(UrlResolver):
+    name = "powerwatch"
+    domains = ["powerwatch.pw"]
+    pattern = '(?://|\.)(powerwatch\.pw)/([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -33,12 +33,21 @@ class WatchpassResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         resp = self.net.http_GET(web_url)
         html = resp.content
+        post_url = resp.get_url()
 
-        r = re.search('file: "(.+?)",', html)
+        if re.search('>(File Not Found)<', html):
+            raise ResolverError('File Not Found or removed')
+
+        common.kodi.sleep(5000)
+
+        data = helpers.get_hidden(html)
+        html = self.net.http_POST(post_url, data).content
+
+        r = re.search('file:"(.+?)",', html)
         if r:
             return r.group(1)
         else:
             raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return self._default_get_url(host, media_id, 'http://{host}/se/rapidme.php?url={media_id}')
+        return self._default_get_url(host, media_id, 'http://{host}/{media_id}')
