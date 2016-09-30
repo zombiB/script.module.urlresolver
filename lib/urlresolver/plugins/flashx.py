@@ -33,16 +33,17 @@ class FlashxResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
-
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = self.net.http_GET(web_url, headers=headers).content
         cookies = self.__get_cookies(html)
-        self.net.http_GET('http://www.flashx.tv/coding.js?cd=%s' % cookies['file_id'])
 
+        self.net.http_GET('http://www.flashx.tv/coding.js?cd=%s' % (cookies.get('file_id', media_id)), headers=headers)
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
-
         common.kodi.sleep(5000)
-        html = self.net.http_POST('http://www.flashx.tv/dl', data).content
+        headers.update({'Referer': web_url, 'Cookie': '; '.join(cookies)})
+
+        html = self.net.http_POST('http://www.flashx.tv/dl', data, headers=headers).content
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
@@ -51,7 +52,7 @@ class FlashxResolver(UrlResolver):
         return source
 
     def __get_cookies(self, html):
-        cookies = {}
+        cookies = {'ref_url': 'http://www.flashx.tv/'}
         for match in re.finditer("\$\.cookie\(\s*'([^']+)'\s*,\s*'([^']+)", html):
             key, value = match.groups()
             cookies[key] = value
