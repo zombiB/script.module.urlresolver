@@ -33,14 +33,16 @@ class FlashxResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = self.net.http_GET(web_url, headers=headers).content
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed+to+video'
         furl = 'http://www.flashx.tv/dl?%s' % (media_id)
-        headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url, 'Cookie': self.__get_cookies(html)}
+        headers.update({'Referer': web_url, 'Cookie': self.__get_cookies(html)})
         
         common.kodi.sleep(5000)
         html = self.net.http_POST(url=furl, form_data=data, headers=headers).content
+        common.log_utils.log(html)
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
