@@ -25,8 +25,6 @@ class WatchpassResolver(UrlResolver):
     name = "everplay.watchpass.net"
     domains = ['everplay.watchpass.net']
     pattern = '(?://|\.)(everplay\.watchpass\.net)/se/rapidme\.php\?url=(.+)'
-    header = {"User-Agent": common.OPERA_USER_AGENT}
-    qual_map = {'full': '1080', 'hd': '720', 'sd': '480', 'low': '360', 'lowest': '240', 'mobile': '144'}
 
     def __init__(self):
         self.net = common.Net()
@@ -43,4 +41,4 @@ class WatchpassResolver(UrlResolver):
             raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return 'http://everplay.watchpass.net/se/rapidme.php?url=%s' % (media_id)
+        return self._default_get_url(host, media_id, 'http://{host}/se/rapidme.php?url={media_id}')
