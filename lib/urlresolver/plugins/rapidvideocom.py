@@ -34,6 +34,7 @@ class RapidVideoResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        common.log_utils.log(web_url)
 
         headers = {'User-Agent': common.FF_USER_AGENT}
 
@@ -48,6 +49,7 @@ class RapidVideoResolver(UrlResolver):
         post_url = web_url + '#'
 
         html = self.net.http_POST(post_url, form_data=data, headers=headers).content.encode('utf-8')
+        common.log_utils.log(html)
 
         match = re.findall('''["']?sources['"]?\s*:\s*\[(.*?)\]''', html)
 
@@ -61,4 +63,4 @@ class RapidVideoResolver(UrlResolver):
         raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return 'https://www.rapidvideo.com/embed/%s' % media_id
+        return self._default_get_url(host, media_id, 'https://www.rapidvideo.com/embed/{media_id}')
