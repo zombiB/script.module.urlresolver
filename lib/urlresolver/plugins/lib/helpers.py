@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re
+import urllib
 import xbmcgui
 from urlresolver import common
 from urlresolver.resolver import ResolverError
@@ -51,3 +52,6 @@ def pick_source(sources, auto_pick=False):
                 return sources[result][1]
     else:
         raise ResolverError('No Video Link Found')
+
+def append_headers(headers):
+    return '|%s' % '&'.join(['%s=%s' % (key, urllib.quote_plus(headers[key])) for key in headers])

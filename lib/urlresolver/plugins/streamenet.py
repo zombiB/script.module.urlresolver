@@ -19,43 +19,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re,urllib
-from lib import jsunpack
+import re
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class EstreamResolver(UrlResolver):
-    name = "estream"
-    domains = ['estream.to']
-    pattern = '(?://|\.)(estream\.to)/([a-zA-Z0-9]+)'
+    name = "streame.net"
+    domains = ['streame.net']
+    pattern = '(?://|\.)(streame\.net)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        response = self.net.http_GET(web_url)
-        html = response.content
+        headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
+        html = self.net.http_GET(web_url, headers=headers).content
+        sources = self.__parse_sources_list(html)
+        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        return source + helpers.append_headers(headers)
 
-        if html:
-            packed = re.search('(eval\(function.*?)</script>', html, re.DOTALL).groups()[0]
-            packed_data = jsunpack.unpack(packed)
-            sources = []
-            sources = self.__parse_sources_list(packed_data)
-            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-            headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url, 'Cookie': self.__get_cookies(html)}
-            return source + helpers.append_headers(headers)
-
-        raise ResolverError('No playable video found.')
-
-    def __get_cookies(self, html):
-        cookies = ['lang=1', 'ref_url=https://www.estream.to/']
-        for match in re.finditer("\$\.cookie\(\s*'([^']+)'\s*,\s*'([^']+)", html):
-            key, value = match.groups()
-            cookies.append('%s=%s' % (key, value))
-        return '; '.join(cookies)
-    
     def __parse_sources_list(self, html):
         sources = []
         match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
@@ -67,7 +51,7 @@ class EstreamResolver(UrlResolver):
         return sources
     
     def get_url(self, host, media_id):
-        return self._default_get_url(host, media_id, 'https://{host}/{media_id}.html')
+        return self._default_get_url(host, media_id)
         
     @classmethod
     def get_settings_xml(cls):
