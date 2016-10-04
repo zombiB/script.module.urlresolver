@@ -17,11 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-import re
 import json
-import urllib
-from lib import helpers
 from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class OKResolver(UrlResolver):
@@ -41,10 +39,10 @@ class OKResolver(UrlResolver):
             quality = self.__replaceQuality(entry['name'])
             sources.append((quality, entry['url']))
 
-        try: sources.sort(key=lambda x:int(x[0]), reverse=True)
+        try: sources.sort(key=lambda x: int(x[0]), reverse=True)
         except: pass
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-        source = source.encode('utf-8') + '|' + urllib.urlencode(self.header)
+        source = source.encode('utf-8') + helpers.append_headers(self.header)
         return source
 
     def __replaceQuality(self, qual):

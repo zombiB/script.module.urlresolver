@@ -53,7 +53,7 @@ class UploadXResolver(UrlResolver):
             if 'File Download Link Generated' in html:
                 r = re.search('href="([^"]+)[^>]>Download<', html, re.I)
                 if r:
-                    return r.group(1) + '|' + urllib.urlencode({'User-Agent': common.IE_USER_AGENT})
+                    return r.group(1) + helpers.append_headers({'User-Agent': common.IE_USER_AGENT})
 
             tries = tries + 1
 

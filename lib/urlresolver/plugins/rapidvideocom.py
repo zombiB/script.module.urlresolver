@@ -49,7 +49,7 @@ class RapidVideoResolver(UrlResolver):
             stream_url = re.findall('''['"]?file['"]?\s*:\s*['"]?([^'"]+)''', match[0])
             if stream_url:
                 stream_url = stream_url[0].replace('\/', '/')
-                stream_url += '|' + urllib.urlencode({'User-Agent': common.FF_USER_AGENT, 'Referer': web_url})
+                stream_url += helpers.append_headers(headers)
                 return stream_url
 
         raise ResolverError('File Not Found or removed')

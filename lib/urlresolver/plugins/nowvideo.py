@@ -19,6 +19,7 @@
 
 import re
 from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class NowvideoResolver(UrlResolver):
@@ -63,7 +64,7 @@ class NowvideoResolver(UrlResolver):
             print "no embedded urls found using second method"
 
         if stream_url:
-            return '%s%s' % (stream_url, '|Referer=' + web_url)
+            return stream_url + helpers.append_headers({'Referer': web_url})
         else:
             raise ResolverError('File Not Found or removed')
         

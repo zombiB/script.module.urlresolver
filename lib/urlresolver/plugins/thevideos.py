@@ -42,7 +42,7 @@ class TheVideosResolver(UrlResolver):
         try: sources.sort(key=lambda x: int(x[0][:-1]), reverse=True)
         except: pass
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-        return source + '|User-Agent=%s' % (common.FF_USER_AGENT)
+        return source + helpers.append_headers({'User-Agent': common.FF_USER_AGENT})
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)

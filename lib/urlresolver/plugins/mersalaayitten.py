@@ -18,6 +18,7 @@
 
 import re
 from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class MersalaResolver(UrlResolver):
@@ -40,8 +41,7 @@ class MersalaResolver(UrlResolver):
             response = self.net.http_GET(stream_xml, headers=referer)
             xmlhtml = response.content
             r2 = re.search('<file>(.*?)</file>', xmlhtml)
-            stream_url = r2.group(1) + '|Cookie=' + headers['set-cookie']
-
+            stream_url = r2.group(1) + helpers.append_headers({'Cookie': headers['set-cookie']})
         else:
             raise ResolverError('no file located')
 

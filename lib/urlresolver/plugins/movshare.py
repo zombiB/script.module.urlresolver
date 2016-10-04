@@ -19,6 +19,7 @@
 import re
 import urllib
 from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class MovshareResolver(UrlResolver):
@@ -56,7 +57,7 @@ class MovshareResolver(UrlResolver):
             print "no embedded urls found using second method"
 
         if stream_url:
-            return '%s|Referer=%s' % (stream_url, web_url)
+            return stream_url + helpers.append_headers({'Referer': web_url})
         else:
             raise ResolverError('File Not Found or removed')
 

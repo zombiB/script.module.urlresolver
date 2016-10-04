@@ -19,6 +19,7 @@
 import re
 import urllib
 from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 
@@ -35,11 +36,10 @@ class PlayHDResolver(UrlResolver):
         resp = self.net.http_GET(web_url)
         html = resp.content
         headers = dict(self.net.get_cookies())
-        encoded_headers = urllib.urlencode({'Cookie': headers['www.playhd.video']['/']['AVS'], 
-                                            'Referer': 'http://www.playhd.video/embed.php'})
+        headers = {'Cookie': headers['www.playhd.video']['/']['AVS'], 'Referer': 'http://www.playhd.video/embed.php'}
         r = re.search('"content_video".*\n.*?src="(.*?)"', html)
         if r:
-            stream_url = r.group(1) + '|' + encoded_headers
+            stream_url = r.group(1) + helpers.append_headers(headers)
         else:
             raise ResolverError('no file located')
 
