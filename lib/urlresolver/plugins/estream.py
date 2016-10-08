@@ -28,13 +28,14 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class EstreamResolver(UrlResolver):
     name = "estream"
     domains = ['estream.to']
-    pattern = '(?://|\.)(estream\.to)/([a-zA-Z0-9]+)'
+    pattern = '(?://|\.)(estream\.to)/(?:embed-)?([a-zA-Z0-9]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        common.log_utils.log(web_url)
         response = self.net.http_GET(web_url)
         html = response.content
 
@@ -67,7 +68,7 @@ class EstreamResolver(UrlResolver):
         return sources
     
     def get_url(self, host, media_id):
-        return self._default_get_url(host, media_id, 'https://{host}/{media_id}.html')
+        return self._default_get_url(host, media_id)
         
     @classmethod
     def get_settings_xml(cls):
