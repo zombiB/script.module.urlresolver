@@ -35,18 +35,15 @@ class EstreamResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        common.log_utils.log(web_url)
-        response = self.net.http_GET(web_url)
-        html = response.content
-
-        if html:
-            packed = re.search('(eval\(function.*?)</script>', html, re.DOTALL).groups()[0]
-            packed_data = jsunpack.unpack(packed)
-            sources = []
-            sources = self.__parse_sources_list(packed_data)
-            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-            headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url, 'Cookie': self.__get_cookies(html)}
-            return source + helpers.append_headers(headers)
+        html = self.net.http_GET(web_url).content
+        sources = []
+        for packed in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+            packed_data = jsunpack.unpack(packed.group(1))
+            sources += self.__parse_sources_list(packed_data)
+            
+        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url, 'Cookie': self.__get_cookies(html)}
+        return source + helpers.append_headers(headers)
 
         raise ResolverError('No playable video found.')
 
