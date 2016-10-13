@@ -55,8 +55,6 @@ class FlashxResolver(UrlResolver):
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
             sources += self.__parse_sources_list(packed_data)
-        print 'FXDe:'
-        print html
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
         return source
 
