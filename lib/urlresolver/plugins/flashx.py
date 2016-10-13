@@ -34,12 +34,18 @@ class FlashxResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT}
+        self.net.set_proxy('127.0.0.1:8888')
         html = self.net.http_GET(web_url, headers=headers).content
         if 'File Not Found' in html:
             raise ResolverError('File got deleted?')
         cookies = self.__get_cookies(html)
 
-        self.net.http_GET('http://www.flashx.tv/coding.js?cd=%s' % (cookies.get('file_id', media_id)), headers=headers)
+        match = re.compile('\'([^\']+counter\.cgi[^\']+)\'', re.DOTALL).findall(html)
+
+        if not match:
+            raise ResolverError('Site structure changed!')
+
+        self.net.http_GET(match[0], headers=headers)
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
         common.kodi.sleep(5000)
@@ -50,6 +56,8 @@ class FlashxResolver(UrlResolver):
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
             sources += self.__parse_sources_list(packed_data)
+        print 'FXDe:'
+        print html
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
         return source
 
