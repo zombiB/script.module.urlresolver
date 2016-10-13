@@ -34,7 +34,6 @@ class FlashxResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT}
-        self.net.set_proxy('127.0.0.1:8888')
         html = self.net.http_GET(web_url, headers=headers).content
         if 'File Not Found' in html:
             raise ResolverError('File got deleted?')
