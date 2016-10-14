@@ -47,7 +47,7 @@ class FlashxResolver(UrlResolver):
         self.net.http_GET(match[0], headers=headers)
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
-        common.kodi.sleep(5000)
+        common.kodi.sleep(5500)
         headers.update({'Referer': web_url, 'Cookie': '; '.join(cookies)})
 
         html = self.net.http_POST('http://www.flashx.tv/dl', data, headers=headers).content
