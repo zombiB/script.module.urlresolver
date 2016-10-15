@@ -47,15 +47,15 @@ class GoogleResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT}
         response = self.net.http_GET(web_url)
-        html = response.content
         res_headers = response.get_headers(as_dict=True)
         if 'Set-Cookie' in res_headers:
             headers['Cookie'] = res_headers['Set-Cookie']
         
-        video_urls = self._parse_google(web_url, html)
         video = None
+        video_urls = self._parse_google(web_url, response.content)
         if video_urls:
             video = helpers.pick_source(video_urls, self.get_setting('auto_pick') == 'true')
+
         if not video:
             if ('redirector.' in web_url) or ('googleusercontent' in web_url):
                 video = urllib2.urlopen(web_url).geturl()
