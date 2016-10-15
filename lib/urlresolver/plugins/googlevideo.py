@@ -45,8 +45,15 @@ class GoogleResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        response = self.net.http_GET(web_url)
+        html = response.content
+        res_headers = response.get_headers(as_dict=True)
+        if 'Set-Cookie' in res_headers:
+            headers['Cookie'] = res_headers['Set-Cookie']
+        
+        video_urls = self._parse_google(web_url, html)
         video = None
-        video_urls = self._parse_google(web_url)
         if video_urls:
             video = helpers.pick_source(video_urls, self.get_setting('auto_pick') == 'true')
         if not video:
@@ -60,7 +67,7 @@ class GoogleResolver(UrlResolver):
             if 'plugin://' in video:  # google plus embedded videos may result in this
                 return video
             else:
-                return video + helpers.append_headers({'User-Agent': common.FF_USER_AGENT})
+                return video + helpers.append_headers(headers)
 
         raise ResolverError('File not found')
 
@@ -73,9 +80,8 @@ class GoogleResolver(UrlResolver):
         xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
         return xml
 
-    def _parse_google(self, link):
+    def _parse_google(self, link, html):
         sources = []
-        html = self.net.http_GET(link).content
         if 'get.' in link:
             match = re.compile('request\s*:\s*\["([^"]+?)".*?\]').findall(html, re.DOTALL)
             if match:
