@@ -129,14 +129,16 @@ class GoogleResolver(UrlResolver):
                                 if isinstance(item3, list):
                                     for item4 in item3:
                                         if isinstance(item4, unicode):
-                                            s = urllib2.unquote(item4).encode('utf-8').decode('unicode_escape')
-                                            for match in re.finditer('url=(?P<link>[^&]+).*?&itag=(?P<itag>[^&]+)', s):
-                                                link = match.group('link')
-                                                itag = match.group('itag')
-                                                quality = self.itag_map.get(itag, 'Unknown Quality [%s]' % itag)
-                                                sources.append((quality, link))
-                                            if sources:
-                                                return sources
+                                            item4 = urllib2.unquote(item4).encode('utf-8')
+                                            
+                                        item4 = item4.decode('unicode_escape')
+                                        for match in re.finditer('url=(?P<link>[^&]+).*?&itag=(?P<itag>[^&]+)', item4):
+                                            link = match.group('link')
+                                            itag = match.group('itag')
+                                            quality = self.itag_map.get(itag, 'Unknown Quality [%s]' % itag)
+                                            sources.append((quality, link))
+                                        if sources:
+                                            return sources
         return sources
 
     def _parse_gdocs(self, link):
@@ -149,7 +151,9 @@ class GoogleResolver(UrlResolver):
                 for item in items:
                     _source_itag, source_url = item.split('|')
                     if isinstance(source_url, unicode):
-                        source_url = source_url.encode('utf-8').decode('unicode_escape')
+                        source_url = source_url.encode('utf-8')
+                        
+                    source_url = source_url.decode('unicode_escape')
                     quality = self.itag_map.get(_source_itag, 'Unknown Quality [%s]' % _source_itag)
                     source_url = urllib2.unquote(source_url)
                     urls.append((quality, source_url))
