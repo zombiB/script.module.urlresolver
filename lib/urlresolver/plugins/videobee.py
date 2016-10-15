@@ -31,7 +31,6 @@ class VideoBeeResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        print web_url
         html = self.net.http_GET(web_url).content
 
         js_data = re.findall('(eval\(function.*?)</script>', html.replace('\n', ''))
