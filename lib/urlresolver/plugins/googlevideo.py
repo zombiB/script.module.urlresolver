@@ -131,14 +131,15 @@ class GoogleResolver(UrlResolver):
                                         if isinstance(item4, unicode):
                                             item4 = item4.encode('utf-8')
                                             
-                                        item4 = urllib2.unquote(item4).decode('unicode_escape')
-                                        for match in re.finditer('url=(?P<link>[^&]+).*?&itag=(?P<itag>[^&]+)', item4):
-                                            link = match.group('link')
-                                            itag = match.group('itag')
-                                            quality = self.itag_map.get(itag, 'Unknown Quality [%s]' % itag)
-                                            sources.append((quality, link))
-                                        if sources:
-                                            return sources
+                                        if isinstance(item4, basestring):
+                                            item4 = urllib2.unquote(item4).decode('unicode_escape')
+                                            for match in re.finditer('url=(?P<link>[^&]+).*?&itag=(?P<itag>[^&]+)', item4):
+                                                link = match.group('link')
+                                                itag = match.group('itag')
+                                                quality = self.itag_map.get(itag, 'Unknown Quality [%s]' % itag)
+                                                sources.append((quality, link))
+                                            if sources:
+                                                return sources
         return sources
 
     def _parse_gdocs(self, link):
