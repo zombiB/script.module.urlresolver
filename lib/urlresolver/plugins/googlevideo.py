@@ -129,9 +129,9 @@ class GoogleResolver(UrlResolver):
                                 if isinstance(item3, list):
                                     for item4 in item3:
                                         if isinstance(item4, unicode):
-                                            item4 = urllib2.unquote(item4).encode('utf-8')
+                                            item4 = item4.encode('utf-8')
                                             
-                                        item4 = item4.decode('unicode_escape')
+                                        item4 = urllib2.unquote(item4).decode('unicode_escape')
                                         for match in re.finditer('url=(?P<link>[^&]+).*?&itag=(?P<itag>[^&]+)', item4):
                                             link = match.group('link')
                                             itag = match.group('itag')
