@@ -33,37 +33,18 @@ class DailymotionResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
+        html = html.replace('\\', '')
 
-        html = re.search('({"context".+?)\);\n', html, re.DOTALL)
-        if html:
-            html = json.loads(html.group(1))
-            if 'metadata' in html: html = html['metadata']
-            else: return
+        auto = re.findall('"auto"\s*:\s*.+?"url"\s*:\s*"(.+?)"', html)
+        qualities = re.findall('"(\d+?)"\s*:\s*.+?"url"\s*:\s*"(.+?)"', html)
 
-        if 'error' in html:
-            err_title = html['error']
-            if 'title' in err_title:
-                err_title = err_title['title']
-            else:
-                err_title = 'Content not available.'
-            raise ResolverError(err_title)
+        if auto and not qualities:
+            return urllib2.urlopen(urllib2.Request(auto[0])).geturl()
 
-        if 'qualities' in html:
-            html = html['qualities']
+        qualities = [(int(i[0]), i[1]) for i in qualities]
+        qualities = sorted(qualities, key=lambda x: x[0])[::-1]
 
-        videoUrl = []
-        try: videoUrl.append(html['1080'][0]['url'])
-        except: pass
-        try: videoUrl.append(html['720'][0]['url'])
-        except: pass
-        try: videoUrl.append(html['480'][0]['url'])
-        except: pass
-        try: videoUrl.append(html['380'][0]['url'])
-        except: pass
-        try: videoUrl.append(html['240'][0]['url'])
-        except: pass
-        try: videoUrl.append(html['auto'][0]['url'])
-        except: pass
+        videoUrl = [i[1] for i in qualities]
 
         vUrl = ''
         vUrlsCount = len(videoUrl)

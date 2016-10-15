@@ -35,11 +35,13 @@ class PlayHDResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         resp = self.net.http_GET(web_url)
         html = resp.content
-        headers = dict(self.net.get_cookies())
-        headers = {'Cookie': headers['www.playhd.video']['/']['AVS'], 'Referer': 'http://www.playhd.video/embed.php'}
-        r = re.search('"content_video".*\n.*?src="(.*?)"', html)
+
+        headers = dict(resp._response.info().items())
+
+        r = re.findall('<source\s+src="(.*?)"', html)
+
         if r:
-            stream_url = r.group(1) + helpers.append_headers(headers)
+            stream_url = r[0] + helpers.append_headers({'Cookie': headers['set-cookie']})
         else:
             raise ResolverError('no file located')
 
