@@ -28,7 +28,7 @@ class GoogleResolver(UrlResolver):
     name = "googlevideo"
     domains = ["googlevideo.com", "googleusercontent.com", "get.google.com",
                "plus.google.com", "googledrive.com", "drive.google.com", "docs.google.com"]
-    pattern = 'http[s]*://(.*?(?:\.googlevideo|(?:plus|drive|get|docs)\.google|google(?:usercontent|drive))\.com)/(.*?(?:videoplayback\?|[\?&]authkey|host/)*.+)'
+    pattern = 'https?://(.*?(?:\.googlevideo|(?:plus|drive|get|docs)\.google|google(?:usercontent|drive))\.com)/(.*?(?:videoplayback\?|[\?&]authkey|host/)*.+)'
 
     def __init__(self):
         self.net = common.Net()
