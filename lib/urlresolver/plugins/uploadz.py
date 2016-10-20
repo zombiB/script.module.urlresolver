@@ -1,5 +1,5 @@
-'''
-clicknupload urlresolver plugin
+"""
+grifthost urlresolver plugin
 Copyright (C) 2015 tknorris
 
 This program is free software: you can redistribute it and/or modify
@@ -14,46 +14,41 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
 import re
-import urllib
 from lib import captcha_lib
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
-import xbmc
 
 MAX_TRIES = 3
 
-class UploadXResolver(UrlResolver):
-    name = "uploadx"
-    domains = ["uploadx.org"]
-    pattern = '(?://|\.)(uploadx\.org)/([0-9a-zA-Z/]+)'
+class UploadzResolver(UrlResolver):
+    name = "uploadz.co"
+    domains = ["uploadz.co"]
+    pattern = '(?://|\.)(uploadz\.co)/([0-9a-zA-Z/]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
-        html = self.net.http_GET(web_url, headers=headers).content
+        html = self.net.http_GET(web_url).content
+
         tries = 0
         while tries < MAX_TRIES:
             data = helpers.get_hidden(html, index=0)
-            data['method_free'] = urllib.quote_plus('Free Download >>')
+            data['method_free'] = 'Free Download >>'
             data.update(captcha_lib.do_captcha(html))
-            common.log_utils.log_debug(data)
-            html = self.net.http_POST(web_url, data, headers=headers).content
 
-            if 'File Download Link Generated' in html:
-                r = re.search('href="([^"]+)[^>]>Download<', html, re.I)
-                if r:
-                    return r.group(1) + helpers.append_headers({'User-Agent': common.IE_USER_AGENT})
+            html = self.net.http_POST(web_url, form_data=data).content
+            match = re.search('href="([^"]+)[^>]*>Download<', html, re.DOTALL)
+            if match:
+                return match.group(1)
+            tries += 1
 
-            tries = tries + 1
-
-        raise ResolverError('Unable to locate link')
+        raise ResolverError('Unable to resolve uploadz.co link. Filelink not found.')
 
     def get_url(self, host, media_id):
-        return 'https://uploadx.org/%s' % media_id
+        return 'https://uploadz.co/%s' % (media_id)
