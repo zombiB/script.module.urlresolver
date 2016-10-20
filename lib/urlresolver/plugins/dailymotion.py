@@ -23,8 +23,8 @@ from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class DailymotionResolver(UrlResolver):
-    name = "dailymotion"
-    domains = ["dailymotion.com"]
+    name = 'dailymotion'
+    domains = ['dailymotion.com']
     pattern = '(?://|\.)(dailymotion\.com)/(?:video|embed|sequence|swf)(?:/video)?/([0-9a-zA-Z]+)'
 
     def __init__(self):
@@ -39,7 +39,7 @@ class DailymotionResolver(UrlResolver):
         qualities = re.findall('"(\d+?)"\s*:\s*.+?"url"\s*:\s*"(.+?)"', html)
 
         if auto and not qualities:
-            return urllib2.urlopen(urllib2.Request(auto[0])).geturl()
+            return auto[0]
 
         qualities = [(int(i[0]), i[1]) for i in qualities]
         qualities = sorted(qualities, key=lambda x: x[0])[::-1]
@@ -60,7 +60,11 @@ class DailymotionResolver(UrlResolver):
                 # Lowest Quality
                 vUrl = videoUrl[vUrlsCount - 1]
 
-        vUrl = urllib2.urlopen(urllib2.Request(vUrl)).geturl()
+
+        if not '.m3u8' in vUrl: return
+        vUrl = self.net.http_GET(vUrl).content
+        vUrl = re.findall('(http(?:s|)://.+?)\n', vUrl)
+        vUrl = [i for i in vUrl if '.m3u8' in i][0]
         return vUrl
 
     def get_url(self, host, media_id):

@@ -52,9 +52,10 @@ class GoogleResolver(UrlResolver):
             video = None
 
         headers = {'User-Agent': common.FF_USER_AGENT}
-        res_headers = response.get_headers(as_dict=True)
-        if 'Set-Cookie' in res_headers:
-            headers['Cookie'] = res_headers['Set-Cookie']
+        if response is not None:
+            res_headers = response.get_headers(as_dict=True)
+            if 'Set-Cookie' in res_headers:
+                headers['Cookie'] = res_headers['Set-Cookie']
 
         if not video:
             if ('redirector.' in web_url) or ('googleusercontent' in web_url):
@@ -83,14 +84,12 @@ class GoogleResolver(UrlResolver):
     def _parse_google(self, link):
         sources = []
         response = None
-        if 'get.' in link:
+        if re.match('https?://get[.]', link):
+            if link.endswith('/'): link = link[:-1]
+            vid_id = link.split('/')[-1]
             response = self.net.http_GET(link)
-            html = response.content
-            match = re.compile('request\s*:\s*\["([^"]+?)".*?\]').findall(html, re.DOTALL)
-            if match:
-                vid_id = match[-1]
-                sources = self.__parse_gget(vid_id, html)
-        elif 'plus.' in link:
+            sources = self.__parse_gget(vid_id, response.content)
+        elif re.match('https?://plus[.]', link):
             response = self.net.http_GET(link)
             sources = self.__parse_gplus(response.content)
         elif 'drive.google' in link or 'docs.google' in link:
