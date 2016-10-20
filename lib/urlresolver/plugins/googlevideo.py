@@ -45,16 +45,16 @@ class GoogleResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        response, video_urls = self._parse_google(web_url)
+        if video_urls:
+            video = helpers.pick_source(video_urls, self.get_setting('auto_pick') == 'true')
+        else:
+            video = None
+
         headers = {'User-Agent': common.FF_USER_AGENT}
-        response = self.net.http_GET(web_url)
         res_headers = response.get_headers(as_dict=True)
         if 'Set-Cookie' in res_headers:
             headers['Cookie'] = res_headers['Set-Cookie']
-        
-        video = None
-        video_urls = self._parse_google(web_url, response.content)
-        if video_urls:
-            video = helpers.pick_source(video_urls, self.get_setting('auto_pick') == 'true')
 
         if not video:
             if ('redirector.' in web_url) or ('googleusercontent' in web_url):
@@ -80,18 +80,23 @@ class GoogleResolver(UrlResolver):
         xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
         return xml
 
-    def _parse_google(self, link, html):
+    def _parse_google(self, link):
         sources = []
+        response = None
         if 'get.' in link:
+            response = self.net.http_GET(link)
+            html = response.content
             match = re.compile('request\s*:\s*\["([^"]+?)".*?\]').findall(html, re.DOTALL)
             if match:
                 vid_id = match[-1]
                 sources = self.__parse_gget(vid_id, html)
         elif 'plus.' in link:
-            sources = self.__parse_gplus(html)
+            response = self.net.http_GET(link)
+            sources = self.__parse_gplus(response.content)
         elif 'drive.google' in link or 'docs.google' in link:
-            sources = self._parse_gdocs(link)
-        return sources
+            response = self.net.http_GET(link)
+            sources = self._parse_gdocs(response.content)
+        return response, sources
 
     def __parse_gplus(self, html):
         sources = []
@@ -148,9 +153,8 @@ class GoogleResolver(UrlResolver):
                                                 return sources
         return sources
 
-    def _parse_gdocs(self, link):
+    def _parse_gdocs(self, html):
         urls = []
-        html = self.net.http_GET(link).content
         for match in re.finditer('\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\]', html):
             key, value = match.groups()
             if key == 'fmt_stream_map':
