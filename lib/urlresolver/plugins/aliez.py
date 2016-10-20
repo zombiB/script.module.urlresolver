@@ -20,31 +20,41 @@
 """
 
 import re
-import json
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class RuTubeResolver(UrlResolver):
-    name = "rutube.ru"
-    domains = ['rutube.ru']
-    pattern = '(?://|\.)(rutube\.ru)/(?:play/embed/)?(\d*)'
+class AliezResolver(UrlResolver):
+    name = "aliez"
+    domains = ['aliez.me']
+    pattern = '(?://|\.)(aliez\.me)/(?:(?:player/video\.php\?id=([0-9]+)&s=([A-Za-z0-9]+))|(?:video/([0-9]+)/([A-Za-z0-9]+)))'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        response = self.net.http_GET(web_url)
+        html = response.content
 
-        json_url = 'http://rutube.ru/api/play/options/%s/?format=json&no_404=true' % media_id
-
-        json_data = self.net.http_GET(json_url).content
-
-        try: return json.loads(json_data)['video_balancer']['m3u8']
-        except: pass
+        if html:
+            try:
+                stream_url = re.search(r"file:\s'(.+?)'", html).groups()[0]
+                return stream_url
+                
+            except:
+                pass
 
         raise ResolverError('No playable video found.')
 
+    def get_host_and_id(self, url):
+        r = re.search(self.pattern, url, re.I)
+        if r:
+            r = filter(None, r.groups())
+            r = [r[0], '%s|%s' % (r[1], r[2])]
+            return r
+        else:
+            return False
+    
     def get_url(self, host, media_id):
-        return 'http://rutube.ru/play/embed/%s' % media_id
-
-
+        media_id = media_id.split("|")
+        return self._default_get_url(host, media_id, 'http://emb.%s/player/video.php?id=%s&s=%s&w=590&h=332' % (host, media_id[0], media_id[1]))
