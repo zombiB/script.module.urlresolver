@@ -60,6 +60,8 @@ class GoogleResolver(UrlResolver):
         if not video:
             if ('redirector.' in web_url) or ('googleusercontent' in web_url):
                 video = urllib2.urlopen(web_url).geturl()
+            elif 'googlevideo.' in web_url:
+                video = web_url + helpers.append_headers(headers)
         else:
             if ('redirector.' in video) or ('googleusercontent' in video):
                 video = urllib2.urlopen(video).geturl()
