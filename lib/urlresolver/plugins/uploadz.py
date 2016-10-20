@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-
+import urllib
 import re
 from lib import captcha_lib
 from lib import helpers
@@ -39,7 +39,7 @@ class UploadzResolver(UrlResolver):
         tries = 0
         while tries < MAX_TRIES:
             data = helpers.get_hidden(html, index=0)
-            data['method_free'] = 'Free Download >>'
+            data['method_free'] = urllib.quote_plus('Free Download >>')
             data.update(captcha_lib.do_captcha(html))
 
             html = self.net.http_POST(web_url, form_data=data).content

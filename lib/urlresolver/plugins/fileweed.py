@@ -16,9 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import re
+import urllib
 from lib import helpers
+from lib import captcha_lib
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
+
+MAX_TRIES = 3
 
 class FileWeedResolver(UrlResolver):
     name = "FileWeed"
@@ -30,12 +34,24 @@ class FileWeedResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
-        match = re.search('<source[^>]+src="([^"]+)', html)
-        if match:
-            return match.group(1) + helpers.append_headers({'User-Agent': common.FF_USER_AGENT, 'Referer': web_url})
+        headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
+        html = self.net.http_GET(web_url, headers=headers).content
+        tries = 0
+        while tries < MAX_TRIES:
+            data = helpers.get_hidden(html, index=1)
+            data['method_free'] = urllib.quote_plus('Click Here >>')
+            data.update(captcha_lib.do_captcha(html))
+            common.log_utils.log_debug(data)
+            html = self.net.http_POST(web_url, data, headers=headers).content
 
-        raise ResolverError('No playable video found.')
+            if 'downloadbtn222' in html:
+                r = re.search('class="downloadbtn222".*?href="([^"]+)', html, re.I | re.DOTALL)
+                if r:
+                    return r.group(1) + helpers.append_headers({'User-Agent': common.IE_USER_AGENT})
+
+            tries = tries + 1
+
+        raise ResolverError('Unable to locate link')
     
     def get_url(self, host, media_id):
-        return self._default_get_url(host, media_id, template='https://{host}/embed-{media_id}.html')
+        return self._default_get_url(host, media_id, template='https://{host}/{media_id}')
