@@ -39,15 +39,15 @@ class FlashxResolver(UrlResolver):
             raise ResolverError('File got deleted?')
         cookies = self.__get_cookies(html)
 
-        match = re.compile('"([^"]+counter\.cgi[^"]+)"', re.DOTALL).findall(html)
+        match = re.search('"([^"]+counter\.cgi[^"]+)".*?<span id="cxc">(\d+)<', html, re.DOTALL)
 
         if not match:
             raise ResolverError('Site structure changed!')
 
-        self.net.http_GET(match[0], headers=headers)
+        self.net.http_GET(match.group(1), headers=headers)
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
-        common.kodi.sleep(6000)
+        common.kodi.sleep(int(match.group(2))*1000)
         headers.update({'Referer': web_url, 'Cookie': '; '.join(cookies)})
 
         html = self.net.http_POST('http://www.flashx.tv/dl', data, headers=headers).content
