@@ -56,3 +56,11 @@ def pick_source(sources, auto_pick=False):
 
 def append_headers(headers):
     return '|%s' % '&'.join(['%s=%s' % (key, urllib.quote_plus(headers[key])) for key in headers])
+
+def parse_sources_list(html):
+    sources = []
+    match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
+    if match:
+        sources = [(match[1], match[0].replace('\/', '/')) for match in re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^}]*['"]?label['"]?\s*:\s*['"]([^'"]*)''', match.group(1), re.DOTALL)]
+        
+    return sources
