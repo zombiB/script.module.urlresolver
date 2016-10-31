@@ -17,6 +17,7 @@
 
 import re
 from lib import jsunpack
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -36,17 +37,26 @@ class VidtoResolver(UrlResolver):
         if jsunpack.detect(html):
             js_data = jsunpack.unpack(html)
 
-            max_label = 0
+            sources = []
             stream_url = ''
-            for match in re.finditer('label:\s*"(\d+)p"\s*,\s*file:\s*"([^"]+)', js_data):
-                label, link = match.groups()
-                if int(label) > max_label:
-                    stream_url = link
-                    max_label = int(label)
-            if stream_url:
-                return stream_url
-            else:
-                raise ResolverError("File Link Not Found")
+            for match in re.finditer('label:\s*"([^"]+)"\s*,\s*file:\s*"([^"]+)', js_data):
+                label, stream_url = match.groups()
+                sources.append((label, stream_url))
+
+            if sources:
+                sources = sorted(sources, key=lambda x: x[0])[::-1]
+                source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            
+            if source:
+                return source
+   
+        raise ResolverError("File Link Not Found")
 
     def get_url(self, host, media_id):
-        return 'http://vidto.me/embed-%s.html' % media_id
+        return self._default_get_url(host, media_id)
+    
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
