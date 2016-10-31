@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import random
 import re
 import urllib
 from urlresolver import common
@@ -33,31 +33,15 @@ class MovshareResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
-        try:
-            stream_url = ''
-            r = re.search('flashvars.filekey=(.+?);', html)
-            if r:
-                r = r.group(1)
-                try: filekey = re.search('var\s+%s\s*=\s*"([^"]+)' % (r), html).group(1)
-                except: filekey = r
-                player_url = 'http://%s/api/player.api.php?key=%s&file=%s' % (host, urllib.quote(filekey), media_id)
-                html = self.net.http_GET(player_url).content
-                r = re.search('url=(.+?)&', html)
-                if r:
-                    stream_url = r.group(1)
-        except:
-            common.log_utils.log("no embedded urls found using first method")
-            
-        try:
-            r = re.search('id="player"[^>]+src="([^"]+)', html, re.DOTALL)
-            if r:
-                stream_url = r.group(1)
-            
-        except:
-            print "no embedded urls found using second method"
+        stream_url = ''
+        match = re.search('<video.*?</video>', html, re.DOTALL)
+        if match:
+            links = re.findall('<source[^>]+src="([^"]+)', match.group(0), re.DOTALL)
+            if links:
+                stream_url = random.choice(links)
 
         if stream_url:
-            return stream_url + helpers.append_headers({'Referer': web_url})
+            return stream_url + helpers.append_headers({'Referer': web_url, 'User-Agent': common.FF_USER_AGENT})
         else:
             raise ResolverError('File Not Found or removed')
 
