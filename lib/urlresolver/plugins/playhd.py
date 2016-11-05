@@ -17,7 +17,6 @@
 """
 
 import re
-import urllib
 from urlresolver import common
 from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
@@ -33,26 +32,18 @@ class PlayHDResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        url = 'http://www.%s/'%host
+        url = 'http://www.%s/' % (host)
         resp = self.net.http_GET(url)
-        headers = dict(resp._response.info().items())
-
-        headers = {'Cookie': headers['set-cookie']}
-        
-        resp = self.net.http_GET(web_url, headers=headers)
-        html = resp.content
-
-        headers['User-Agent'] = common.FF_USER_AGENT
-        headers['Referer'] = web_url
-
-        r = re.findall('<source\s+src="(.*?)"', html)
-
+        headers = resp.get_headers(as_dict=True)
+        headers = {'Cookie': headers.get('set-cookie', ''), 'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
+        html = self.net.http_GET(web_url, headers=headers).content
+        r = re.search('<source[^>]+src="([^"]+)', html)
         if r:
-            stream_url = r[0] + helpers.append_headers(headers)
+            stream_url = r.group(1) + helpers.append_headers(headers)
         else:
             raise ResolverError('no file located')
 
         return stream_url
 
     def get_url(self, host, media_id):
-        return 'http://www.playhd.video/embed.php?vid=%s' % media_id
+        return 'http://www.playhd.video/embed.php?vid=%s' % (media_id)
