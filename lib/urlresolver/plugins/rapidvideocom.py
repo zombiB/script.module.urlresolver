@@ -18,11 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import re
-import urllib
 import random
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
+
 
 class RapidVideoResolver(UrlResolver):
     name = "rapidvideo.com"
@@ -46,13 +46,24 @@ class RapidVideoResolver(UrlResolver):
 
         match = re.findall('''["']?sources['"]?\s*:\s*\[(.*?)\]''', html)
         if match:
-            stream_url = re.findall('''['"]?file['"]?\s*:\s*['"]?([^'"]+)''', match[0])
-            if stream_url:
-                stream_url = stream_url[0].replace('\/', '/')
-                stream_url += helpers.append_headers(headers)
-                return stream_url
+            stream_urls = re.findall('''['"]?file['"]?\s*:\s*['"]?([^'"]+)['"]\s*,\s*['"]?label['"]?\s*:\s*['"]?([^'"p]+)''', match[0])
+            if stream_urls:
+                if len(stream_urls) == 1:
+                    return stream_urls[0][0].replace('\/', '/') + helpers.append_headers(headers)
+                elif len(stream_urls) > 1:
+                    stream_urls = [(i[1], i[0]) for i in stream_urls]
+                    stream_urls.sort(key=lambda i: int(i[0]), reverse=True)
+                    stream_url = helpers.pick_source(stream_urls, self.get_setting('auto_pick') == 'true')
+                    stream_url = stream_url.replace('\/', '/') + helpers.append_headers(headers)
+                    return stream_url
 
         raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'https://www.rapidvideo.com/embed/{media_id}')
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
