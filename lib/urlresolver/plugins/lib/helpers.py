@@ -59,7 +59,7 @@ def append_headers(headers):
 
 def parse_sources_list(html):
     sources = []
-    match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
+    match = re.search('''['"]?sources['"]?\s*:\s*\[(.*?)\]''', html, re.DOTALL)
     if match:
         sources = [(match[1], match[0].replace('\/', '/')) for match in re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^}]*['"]?label['"]?\s*:\s*['"]([^'"]*)''', match.group(1), re.DOTALL)]
         
