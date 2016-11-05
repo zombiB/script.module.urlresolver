@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import re
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -35,11 +35,15 @@ class VidbullResolver(UrlResolver):
 
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url, headers=headers).content
-        match = re.search('<source\s+src="([^"]+)', html)
-        if match:
-            return match.group(1)
-        else:
-            raise ResolverError('File Link Not Found')
+        sources = helpers.parse_html5_source_list(html)
+        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        return source + helpers.append_headers(headers)
 
     def get_url(self, host, media_id):
         return 'http://www.vidbull.com/%s' % media_id
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
