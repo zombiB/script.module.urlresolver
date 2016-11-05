@@ -37,13 +37,15 @@ class PlayHDResolver(UrlResolver):
         headers = resp.get_headers(as_dict=True)
         headers = {'Cookie': headers.get('set-cookie', ''), 'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
         html = self.net.http_GET(web_url, headers=headers).content
-        r = re.search('<source[^>]+src="([^"]+)', html)
-        if r:
-            stream_url = r.group(1) + helpers.append_headers(headers)
-        else:
-            raise ResolverError('no file located')
-
-        return stream_url
+        sources = helpers.parse_html5_source_list(html)
+        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        return source + helpers.append_headers(headers)
 
     def get_url(self, host, media_id):
         return 'http://www.playhd.video/embed.php?vid=%s' % (media_id)
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
