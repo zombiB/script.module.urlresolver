@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import re
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -35,12 +35,15 @@ class PutLoadResolver(UrlResolver):
         if 'File was deleted' in html:
             raise ResolverError('File was deleted')
 
-        link = re.search('source\ssrc="(.*?)"', html)
-        if link:
-            return link.group(1)
+        sources = helpers.parse_html5_source_list(html)
+        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        return source + helpers.append_headers({'User-Agent': common.FF_USER_AGENT})
            
-        raise ResolverError('Unable to find putload video')
-
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://{host}/embed-{media_id}.html')
 
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml

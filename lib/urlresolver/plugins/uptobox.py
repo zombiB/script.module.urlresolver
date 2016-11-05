@@ -78,15 +78,14 @@ class UpToBoxResolver(UrlResolver):
                 raise Exception()
             '''
 
-            sources = re.compile('<source.+?src\s*=\s*[\'"](.+?)[\'"].+?data-res\s*=\s*[\'"](.+?)[\'"].*?/>').findall(html)
-            sources = [(i[0], int(re.sub('[^0-9]', '', i[1]))) for i in sources]
-            sources = sorted(sources, key=lambda k: k[1])
+            sources = helpers.parse_html5_source_list(html)
+            try: sources.sort(key=lambda x: x[0], reverse=True)
+            except: pass
+            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            if source.startswith('//'):
+                source = 'http:' + source
 
-            stream_url = sources[-1][0]
-            if stream_url.startswith('//'):
-                stream_url = 'http:' + stream_url
-
-            return stream_url
+            return source
         except:
             pass
 
@@ -97,3 +96,9 @@ class UpToBoxResolver(UrlResolver):
 
     def get_stream_url(self, host, media_id):
         return 'http://uptostream.com/%s' % media_id
+
+    @classmethod
+    def get_settings_xml(cls):
+        xml = super(cls, cls).get_settings_xml()
+        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
+        return xml
