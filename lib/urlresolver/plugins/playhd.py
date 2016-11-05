@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re, xbmc
+import re
 import urllib
 from urlresolver import common
 from lib import helpers
@@ -36,7 +36,7 @@ class PlayHDResolver(UrlResolver):
         url = 'http://www.%s/'%host
         resp = self.net.http_GET(url)
         headers = dict(resp._response.info().items())
-        xbmc.log(msg = 'headers : %s'%headers['set-cookie'], level = xbmc.LOGNOTICE)
+
         headers = {'Cookie': headers['set-cookie']}
         
         resp = self.net.http_GET(web_url, headers=headers)
