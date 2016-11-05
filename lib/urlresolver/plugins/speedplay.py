@@ -23,8 +23,8 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class SpeedPlayResolver(UrlResolver):
     name = "speedplay.xyz"
     domains = ["speedplay.xyz", "speedplay.us", "speedplay1.site",
-               "speedplay.pw", "speedplay3.pw"]
-    pattern = '(?://|\.)(speedplay[0-9]?\.(?:us|xyz|pw|site))/(?:embed-)?([0-9a-zA-Z]+)'
+               "speedplay.pw", "speedplay3.pw", "speedplayy.site"]
+    pattern = '(?://|\.)(speedplay[0-9a-z]?\.(?:us|xyz|pw|site))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -33,8 +33,8 @@ class SpeedPlayResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
 
-        if 'Not Found' in html:
-            raise ResolverError('File Removed')
+        if 'File was deleted' in html:
+            raise ResolverError('File was deleted')
 
         if 'Video is processing' in html:
             raise ResolverError('File still being processed')
