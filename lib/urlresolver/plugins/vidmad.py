@@ -18,6 +18,7 @@
 
 import re
 from lib import helpers
+from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -39,7 +40,13 @@ class VidMadResolver(UrlResolver):
         if 'Video is processing' in html:
             raise ResolverError('File still being processed')
 
-        match = re.search('sources\s*:\s*\[(.*?)\]', html, re.DOTALL)
+        packed = re.search('(eval\(function.*?)\s*</script>', html, re.DOTALL)
+        if packed:
+            js = jsunpack.unpack(packed.group(1))
+        else:
+            js = html
+
+        match = re.search('sources\s*:\s*\[(.*?)\]', js, re.DOTALL)
         if match:
             sources = eval(match.group(1).replace('file','"file"').replace('label','"label"'))
             if 'label' not in sources[0]:

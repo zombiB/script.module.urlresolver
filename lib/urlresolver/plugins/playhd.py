@@ -33,15 +33,22 @@ class PlayHDResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        resp = self.net.http_GET(web_url)
+        url = 'http://www.%s/'%host
+        resp = self.net.http_GET(url)
+        headers = dict(resp._response.info().items())
+
+        headers = {'Cookie': headers['set-cookie']}
+        
+        resp = self.net.http_GET(web_url, headers=headers)
         html = resp.content
 
-        headers = dict(resp._response.info().items())
+        headers['User-Agent'] = common.FF_USER_AGENT
+        headers['Referer'] = web_url
 
         r = re.findall('<source\s+src="(.*?)"', html)
 
         if r:
-            stream_url = r[0] + helpers.append_headers({'Cookie': headers['set-cookie']})
+            stream_url = r[0] + helpers.append_headers(headers)
         else:
             raise ResolverError('no file located')
 
