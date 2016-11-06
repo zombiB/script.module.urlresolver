@@ -39,15 +39,15 @@ class FlashxResolver(UrlResolver):
             raise ResolverError('File got deleted?')
         cookies = self.__get_cookies(html)
 
-        pattern = '"([^"]+(?:\d+|)\.\w{1,3}\?cd=[^"]+)".*?' # cgi
+        pattern = '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host # cgi
         pattern += 'action=[\'"]([^\'"]+).*?' # post-url
-        pattern += '<span id="\w+(?:\d+|)">(\d+)<' # countdown
-        match = re.search(pattern, html, re.DOTALL)
+        pattern += '<span[^>]*id="\w+(?:\d+|)"[^>]*>(\d+)<' # countdown
+        match = re.search(pattern, html, re.DOTALL | re.I)
 
         if not match:
             raise ResolverError('Site structure changed!')
 
-        self.net.http_GET('http://www.flashx.tv/flashx.php?fxabi=1', headers=headers)
+        self.net.http_GET('http://www.%s/flashx.php?fxmember=1' % host, headers=headers)
         self.net.http_GET(match.group(1), headers=headers)
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
