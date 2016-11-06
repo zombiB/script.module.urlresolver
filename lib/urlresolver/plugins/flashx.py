@@ -39,22 +39,30 @@ class FlashxResolver(UrlResolver):
             raise ResolverError('File got deleted?')
         cookies = self.__get_cookies(html)
 
-        pattern = '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host # cgi
+        pattern = '[^"]+"\.\/(\w+\/\w+\.js).*?' # api-js
+        pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host # cgi
         pattern += 'action=[\'"]([^\'"]+).*?' # post-url
-        pattern += '<span[^>]*id="\w+(?:\d+|)"[^>]*>(\d+)<' # countdown
+        pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<' # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
 
         if not match:
             raise ResolverError('Site structure changed!')
 
-        self.net.http_GET('http://www.%s/flashx.php?fxmember=1' % host, headers=headers)
-        self.net.http_GET(match.group(1), headers=headers)
+        jscontent = self.net.http_GET('http://%s/%s' % (host, match.group(1)), headers=headers).content
+        matchjs = re.search("\$\.adblock\s+!=\s+null.*?\$.get\('.+/(.+)'[^\'].+{(\w+).+'(.+)'", jscontent, re.DOTALL | re.I)
+
+        if not matchjs:
+            raise ResolverError('Site structure changed!')
+
+        self.net.http_GET('http://www.%s/%s?%s=%s' % (host, matchjs.group(1), matchjs.group(2), matchjs.group(3)), headers=headers)
+
+        self.net.http_GET(match.group(2), headers=headers)
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
-        common.kodi.sleep(int(match.group(3))*1000+500)
+        common.kodi.sleep(int(match.group(4))*1000+500)
         headers.update({'Referer': web_url, 'Cookie': '; '.join(cookies)})
 
-        html = self.net.http_POST(match.group(2), data, headers=headers).content
+        html = self.net.http_POST(match.group(3), data, headers=headers).content
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
