@@ -22,8 +22,8 @@ from urlresolver.resolver import UrlResolver, ResolverError
 
 class PutLoadResolver(UrlResolver):
     name = "putload.tv"
-    domains = ["putload.tv", "youlolx.site"]
-    pattern = '(?://|\.)((?:putload|youlolx)\.(?:tv|site))/(?:embed-)?([0-9a-zA-Z]+)'
+    domains = ["putload.tv", "youlolx.site", "youlol.biz"]
+    pattern = '(?://|\.)((?:putload\.tv|youlol[x]?\.(?:site|biz)))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
