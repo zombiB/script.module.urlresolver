@@ -18,6 +18,8 @@
 import re
 import urllib
 import xbmcgui
+import jsunpack
+from urlparse import urlparse
 from urlresolver import common
 from urlresolver.resolver import ResolverError
 
@@ -70,3 +72,44 @@ def parse_html5_source_list(html):
     sources = [(match[1], match[0].replace('\/', '/')) for match in re.findall('''<source\s+src\s*=\s*['"]([^'"]+)['"](?:.*?''' + label_attrib + '''\s*=\s*['"](?:video/)?([^'"]+)['"])''', html, re.DOTALL)]
 
     return sources
+
+
+def get_media_url(url, auto_pick=False):
+    def _parse_to_list(_html, regex):
+        matches = []
+        for i in re.finditer(regex, _html, re.DOTALL):
+            match = i.group(1)
+            parsed_match = urlparse(match)
+            sub_label = parsed_match.path.split('.')[-1]
+            matches.append(('%s[%s]' % (parsed_match.hostname, sub_label), match))
+        return matches
+
+    net = common.Net()
+    parsed_url = urlparse(url)
+    headers = {'User-Agent': common.FF_USER_AGENT,
+               'Referer': '%s://%s' % (parsed_url.scheme, parsed_url.hostname)}
+
+    response = net.http_GET(url, headers=headers)
+    response_headers = response.get_headers(as_dict=True)
+    cookie = response_headers.get('Set-Cookie', None)
+    if cookie:
+        headers.update({'Cookie': cookie})
+    html = response.content
+
+    unpacked = ''
+    for packed in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+        try:
+            unpacked_data = jsunpack.unpack(packed.group(1))
+            unpacked_data = unpacked_data.replace('\\\'', '\'')
+            unpacked += unpacked_data
+        except:
+            pass
+
+    html += unpacked
+    source_list = _parse_to_list(html, '''video\s+src\s*=\s*['"]([^'"]+)''')
+    source_list += _parse_to_list(html, '''source\s+src\s*=\s*['"]([^'"]+)''')
+    source_list += _parse_to_list(html, '''["']?\s*file\s*["']?\s*[:=]\s*["']([^"']+)''')
+    source_list += _parse_to_list(html, '''["']?\s*url\s*["']?\s*[:=]\s*["']([^"']+)''')
+
+    source = pick_source(source_list, auto_pick)
+    return source + append_headers(headers)
