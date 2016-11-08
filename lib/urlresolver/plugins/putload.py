@@ -22,23 +22,15 @@ from urlresolver.resolver import UrlResolver, ResolverError
 
 class PutLoadResolver(UrlResolver):
     name = "putload.tv"
-    domains = ["putload.tv", "youlolx.site", "youlol.biz"]
-    pattern = '(?://|\.)((?:putload\.tv|youlol[x]?\.(?:site|biz)))/(?:embed-)?([0-9a-zA-Z]+)'
+    domains = ["putload.tv", "youlolx.site", "youlol.biz", "shitmovie.com"]
+    pattern = '(?://|\.)((?:putload\.tv|youlol[x]?\.(?:site|biz)|shitmovie\.com))/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
+        return helpers.get_media_url(self.get_url(host, media_id), self.get_setting('auto_pick') == 'true')
 
-        if 'File was deleted' in html:
-            raise ResolverError('File was deleted')
-
-        sources = helpers.parse_html5_source_list(html)
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-        return source + helpers.append_headers({'User-Agent': common.FF_USER_AGENT})
-           
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://{host}/embed-{media_id}.html')
 
