@@ -41,7 +41,10 @@ def get_hidden(html, form_id=None, index=None):
     common.log_utils.log_debug('Hidden fields are: %s' % (hidden))
     return hidden
 
-def pick_source(sources, auto_pick=False):
+def pick_source(sources, auto_pick=None):
+    if auto_pick is None:
+        auto_pick = common.get_setting('auto_pick') == 'true'
+        
     if len(sources) == 1:
         return sources[0][1]
     elif len(sources) > 1:
@@ -64,17 +67,14 @@ def parse_sources_list(html):
     match = re.search('''['"]?sources['"]?\s*:\s*\[(.*?)\]''', html, re.DOTALL)
     if match:
         sources = [(match[1], match[0].replace('\/', '/')) for match in re.findall('''['"]?file['"]?\s*:\s*['"]([^'"]+)['"][^}]*['"]?label['"]?\s*:\s*['"]([^'"]*)''', match.group(1), re.DOTALL)]
-        
     return sources
 
 def parse_html5_source_list(html):
     label_attrib = 'type' if not re.search('''<source\s+src\s*=.*?data-res\s*=.*?/\s*>''', html) else 'data-res'
     sources = [(match[1], match[0].replace('\/', '/')) for match in re.findall('''<source\s+src\s*=\s*['"]([^'"]+)['"](?:.*?''' + label_attrib + '''\s*=\s*['"](?:video/)?([^'"]+)['"])''', html, re.DOTALL)]
-
     return sources
 
-
-def get_media_url(url, auto_pick=False):
+def get_media_url(url):
     def _parse_to_list(_html, regex):
         matches = []
         for i in re.finditer(regex, _html, re.DOTALL):
@@ -111,5 +111,5 @@ def get_media_url(url, auto_pick=False):
     source_list += _parse_to_list(html, '''["']?\s*file\s*["']?\s*[:=]\s*["']([^"']+)''')
     source_list += _parse_to_list(html, '''["']?\s*url\s*["']?\s*[:=]\s*["']([^"']+)''')
 
-    source = pick_source(source_list, auto_pick)
+    source = pick_source(source_list)
     return source + append_headers(headers)

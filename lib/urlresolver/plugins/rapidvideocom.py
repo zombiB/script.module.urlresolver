@@ -45,13 +45,7 @@ class RapidVideoResolver(UrlResolver):
         sources = helpers.parse_sources_list(html)
         try: sources.sort(key=lambda x: x[0], reverse=True)
         except: pass
-        return helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        return helpers.pick_source(sources)
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'https://www.rapidvideo.com/embed/{media_id}')
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

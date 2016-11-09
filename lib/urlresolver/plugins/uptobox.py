@@ -81,7 +81,7 @@ class UpToBoxResolver(UrlResolver):
             sources = helpers.parse_html5_source_list(html)
             try: sources.sort(key=lambda x: x[0], reverse=True)
             except: pass
-            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            source = helpers.pick_source(sources)
             if source.startswith('//'):
                 source = 'http:' + source
 
@@ -96,9 +96,3 @@ class UpToBoxResolver(UrlResolver):
 
     def get_stream_url(self, host, media_id):
         return 'http://uptostream.com/%s' % media_id
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

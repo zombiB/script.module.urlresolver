@@ -46,7 +46,7 @@ class DailymotionResolver(UrlResolver):
 
         sources = sorted(sources, key=lambda x: x[0])[::-1]
 
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         
         if not '.m3u8' in source:
             raise ResolverError('File not found')
@@ -61,9 +61,3 @@ class DailymotionResolver(UrlResolver):
     
     def get_url(self, host, media_id):
         return 'http://www.dailymotion.com/embed/video/%s' % media_id
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

@@ -45,7 +45,7 @@ class VidtoResolver(UrlResolver):
 
             if sources:
                 sources = sorted(sources, key=lambda x: x[0])[::-1]
-                source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+                source = helpers.pick_source(sources)
             
             if source:
                 return source
@@ -54,9 +54,3 @@ class VidtoResolver(UrlResolver):
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)
-    
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

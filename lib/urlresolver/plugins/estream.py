@@ -41,7 +41,7 @@ class EstreamResolver(UrlResolver):
             packed_data = jsunpack.unpack(packed.group(1))
             sources += self.__parse_sources_list(packed_data)
             
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url, 'Cookie': self.__get_cookies(html)}
         return source + helpers.append_headers(headers)
 
@@ -66,9 +66,3 @@ class EstreamResolver(UrlResolver):
     
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)
-        
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

@@ -29,13 +29,7 @@ class PutLoadResolver(UrlResolver):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id), self.get_setting('auto_pick') == 'true')
+        return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://{host}/embed-{media_id}.html')
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

@@ -50,16 +50,10 @@ class WatchonlineResolver(UrlResolver):
         if not sources:
             ResolverError('File Not Found or removed')
         else:
-            source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            source = helpers.pick_source(sources)
             return source
 
         raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
         return 'http://www.%s/embed-%s.html' % (host, media_id)
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

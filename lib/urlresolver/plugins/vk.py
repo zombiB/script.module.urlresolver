@@ -46,10 +46,9 @@ class VKResolver(UrlResolver):
         sources = self.__get_sources(oid, video_id)
         sources.sort(key=lambda x: int(x[0]), reverse=True)
 
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         return source + helpers.append_headers(headers)
         raise ResolverError('No video found')
-
 
     def __get_sources(self, oid, video_id):
         sources_url = 'http://vk.com/al_video.php?act=show_inline&al=1&video=%s_%s' % (oid, video_id)
@@ -65,13 +64,5 @@ class VKResolver(UrlResolver):
 
         return sources
 
-
     def get_url(self, host, media_id):
-        return 'http://vk.com/video_ext.php?%s' % media_id
-
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml
+        return 'http://vk.com/video_ext.php?%s' % (media_id)

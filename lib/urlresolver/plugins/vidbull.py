@@ -36,14 +36,8 @@ class VidbullResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url, headers=headers).content
         sources = helpers.parse_html5_source_list(html)
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         return source + helpers.append_headers(headers)
 
     def get_url(self, host, media_id):
         return 'http://www.vidbull.com/%s' % media_id
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

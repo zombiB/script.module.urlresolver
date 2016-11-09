@@ -48,19 +48,13 @@ class VidMadResolver(UrlResolver):
 
         match = re.search('sources\s*:\s*\[(.*?)\]', js, re.DOTALL)
         if match:
-            sources = eval(match.group(1).replace('file','"file"').replace('label','"label"'))
+            sources = eval(match.group(1).replace('file', '"file"').replace('label', '"label"'))
             if 'label' not in sources[0]:
-                sources[0]['label']='HLS'
+                sources[0]['label'] = 'HLS'
             sources = [(s['label'], s['file']) for s in sources]
-            return helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+            return helpers.pick_source(sources)
 
-        raise ResolverError('Unable to find %s video'%(host))
+        raise ResolverError('Unable to find %s video' % (host))
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

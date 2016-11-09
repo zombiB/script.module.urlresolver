@@ -67,7 +67,7 @@ class FlashxResolver(UrlResolver):
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
             sources += self.__parse_sources_list(packed_data)
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         return source
 
     def __get_cookies(self, html):
@@ -89,9 +89,3 @@ class FlashxResolver(UrlResolver):
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id, 'http://{host}/{media_id}')
-
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml

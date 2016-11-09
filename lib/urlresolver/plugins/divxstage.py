@@ -40,7 +40,7 @@ class DivxstageResolver(UrlResolver):
 
         if not sources:
             raise ResolverError('File not found')
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         return source
 
     def get_url(self, host, media_id):
