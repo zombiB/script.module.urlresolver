@@ -48,6 +48,9 @@ class FlashxResolver(UrlResolver):
         pattern += '<input[^>]*name=[\'"]imhuman[\'"][^>]*value="(.*?)"[^>]*>.*?'  # imhuman
         pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<'  # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
+        # FlashX: If you are tired of this cat and mouse game then we have a pairing solution that would still let you get revenue and still allow kodi users to view your streams
+        # Read more about it here: https://www.tvaddons.ag/rickroll-thevideo/
+        # We've used this solution with OpenLoad, thevideo.me, vidup.me and others to good effect. Contact tknorris via PM @ https://forums.tvaddons.ag/ to talk details
 
         if not match:
             raise ResolverError('Site structure changed!')
