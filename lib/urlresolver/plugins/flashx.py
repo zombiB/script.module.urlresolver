@@ -40,7 +40,7 @@ class FlashxResolver(UrlResolver):
 
         cookie = response.get_headers(as_dict=True).get('Set-Cookie', {})
         cookie.update(self.__get_cookies(html))
-        headers.update({'Cookie': cookie, 'Referer' : 'http://%s' % host})
+        headers.update({'Cookie': cookie, 'Referer': 'http://%s' % host})
 
         pattern = '[^"]+"\.\/(\w+\/\w+\.\w+).*?'  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
@@ -62,10 +62,14 @@ class FlashxResolver(UrlResolver):
 
         self.net.http_GET('http://www.%s/%s?%s=%s' % (host, matchjs.group(1), matchjs.group(2), matchjs.group(3)), headers=headers)
 
+        postUrl = match.group(3)
+        if not host in postUrl:
+            postUrl = 'http://%s/%s' % (host, match.group(3))
+
         self.net.http_GET(match.group(2).strip(), headers=headers)
         data = self.get_postvalues(html)
         common.kodi.sleep(int(match.group(4)) * 1000 + 500)
-        html = self.net.http_POST(match.group(3), data, headers=headers).content
+        html = self.net.http_POST(postUrl, data, headers=headers).content
 
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
@@ -82,8 +86,7 @@ class FlashxResolver(UrlResolver):
                 match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
                 if match and match1:
                     postvals[match.group(1)] = match1.group(1)
-            
-        common.log_utils.log_debug('Post fields are: %s' % (postvals))
+
         return postvals
 
     def __get_cookies(self, html):
