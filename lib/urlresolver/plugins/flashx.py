@@ -33,45 +33,47 @@ class FlashxResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        headers = {'User-Agent': common.FF_USER_AGENT}
-        html = self.net.http_GET(web_url, headers=headers).content
-        if 'File Not Found' in html:
-            raise ResolverError('File got deleted?')
-        cookies = self.__get_cookies(html)
 
-        pattern = '[^"]+"\.\/(\w+\/\w+\.js).*?' # api-js
-        pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host # cgi
-        pattern += 'action=[\'"]([^\'"]+).*?' # post-url
-        pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<' # countdown
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        response = self.net.http_GET(web_url, headers=headers)
+        html = response.content
+
+        cookie = response.get_headers(as_dict=True).get('Set-Cookie', {})
+        cookie.update(self.__get_cookies(html))
+        headers.update({'Cookie': cookie, 'Referer' : 'http://%s' % host})
+
+        pattern = '[^"]+"\.\/(\w+\/\w+\.\w+).*?'  # api-js
+        pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
+        pattern += 'action=[\'"]([^\'"]+).*?'  # post-url
+        pattern += '<input[^>]*name="imhuman"[^>]*value="(.*?)"[^>]*>.*?'  # imhuman
+        pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<'  # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
 
         if not match:
             raise ResolverError('Site structure changed!')
 
         jscontent = self.net.http_GET('http://%s/%s' % (host, match.group(1)), headers=headers).content
-        matchjs = re.search("\$\.adblock\s+!=\s+null.*?\$.get\('.+/(.+)'[^\'].+{(\w+).+'(.+)'", jscontent, re.DOTALL | re.I)
+        matchjs = re.search('\$\.adblock\s+!=\s+null.*?\$.get\(\'\.+\/(\w+\.\w+)\'[^{]+\{([^:]+).*?\'(.*?)\'', jscontent, re.DOTALL | re.I)
 
         if not matchjs:
             raise ResolverError('Site structure changed!')
 
         self.net.http_GET('http://www.%s/%s?%s=%s' % (host, matchjs.group(1), matchjs.group(2), matchjs.group(3)), headers=headers)
 
-        self.net.http_GET(match.group(2), headers=headers)
+        self.net.http_GET(match.group(2).strip(), headers=headers)
         data = helpers.get_hidden(html)
-        data['imhuman'] = 'Proceed to this video'
-        common.kodi.sleep(int(match.group(4))*1000+500)
-        headers.update({'Referer': web_url, 'Cookie': '; '.join(cookies)})
-
+        data[u'imhuman'] = match.group(4)
+        common.kodi.sleep(int(match.group(5)) * 1000 + 500)
         html = self.net.http_POST(match.group(3), data, headers=headers).content
+
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
             sources += self.__parse_sources_list(packed_data)
-        source = helpers.pick_source(sources)
-        return source
+        return helpers.pick_source(sources)
 
     def __get_cookies(self, html):
-        cookies = {'ref_url': 'http://www.flashx.tv/'}
+        cookies = {}
         for match in re.finditer("\$\.cookie\(\s*'([^']+)'\s*,\s*'([^']+)", html):
             key, value = match.groups()
             cookies[key] = value
