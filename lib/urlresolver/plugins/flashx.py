@@ -45,7 +45,7 @@ class FlashxResolver(UrlResolver):
         pattern = '[^"]+"\.\/(\w+\/\w+\.\w+).*?'  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
         pattern += 'action=[\'"]([^\'"]+).*?'  # post-url
-        pattern += '<input[^>]*name=[\'"]imhuman[\'"][^>]*value="(.*?)"[^>]*>.*?'  # imhuman
+        pattern += '<input[^>]*name=[\'"]imhuman[\'"][^>]*value=[\'"](.*?)[\'"][^>]*>.*?'  # imhuman
         pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<'  # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
         # FlashX: If you are tired of this cat and mouse game then we have a pairing solution that would still let you get revenue and still allow kodi users to view your streams
