@@ -45,7 +45,7 @@ class FlashxResolver(UrlResolver):
         pattern = '[^"]+"\.\/(\w+\/\w+\.\w+).*?'  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
         pattern += 'action=[\'"]([^\'"]+).*?'  # post-url
-        pattern += '<input[^>]*name="imhuman"[^>]*value="(.*?)"[^>]*>.*?'  # imhuman
+        pattern += '<input[^>]*name=[\'"]imhuman[\'"][^>]*value="(.*?)"[^>]*>.*?'  # imhuman
         pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<'  # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
 
