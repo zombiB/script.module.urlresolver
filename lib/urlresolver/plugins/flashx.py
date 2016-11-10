@@ -59,13 +59,26 @@ class FlashxResolver(UrlResolver):
         if not matchjs:
             raise ResolverError('Site structure changed!')
 
-        self.net.http_GET('http://www.%s/flashx.php?%s=1' % (host, matchjs.group(1)), headers=headers)
+        postUrl = ''
+        for matchPff in re.finditer('var\s+s\s*=\s*["|\'](.*?)["|\']', html, re.DOTALL):
+            decStr = self.pff(matchPff.group(1))
+            print decStr
+            matchAct = re.search('action\s*=\s*[\'"]([^\'"]+)[\'"].*?', decStr)
+            if matchAct:
+                postUrl = matchAct.group(1)
+                if not host in postUrl:
+                     postUrl = 'http://%s/%s' % (host, matchAct.group(1))
+            else:
+                html += decStr
 
+        if not postUrl:
+            raise ResolverError('Site structure changed!')
+
+        self.net.http_GET('http://www.%s/flashx.php?%s=1' % (host, matchjs.group(1)), headers=headers)
         self.net.http_GET(match.group(2).strip(), headers=headers)
         data = self.get_postvalues(html)
-        data['op'] = 'download1'
         common.kodi.sleep(int(match.group(3)) * 1000 + 500)
-        html = self.net.http_POST('http://www.%s/dl?playit' % host, data, headers=headers).content
+        html = self.net.http_POST(postUrl, data, headers=headers).content
 
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
@@ -76,6 +89,18 @@ class FlashxResolver(UrlResolver):
             return helpers.pick_source(sources)
 
         raise ResolverError('Unable to find video')
+
+    @staticmethod
+    def pff(decStr):
+        m=""
+        for i in range(0, len(decStr)):
+            if ord(decStr[i]) == 28:
+                m += '&'
+            elif ord(decStr[i]) == 23:
+                m += '!'
+            else:
+                m += chr(ord(decStr[i]) - 1)
+        return m
 
     def get_postvalues(self, html):
         postvals = {}
