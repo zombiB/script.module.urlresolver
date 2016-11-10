@@ -42,8 +42,6 @@ class FlashxResolver(UrlResolver):
         cookie.update(self.__get_cookies(html))
         headers.update({'Cookie': cookie, 'Referer': 'http://%s' % host})
 
-        html = re.sub('<div[^>]*style\s*=\s*["|\']visibility\:(\s)?hidden["|\'][^>]*>.*?</div>', '', html, flags = re.MULTILINE | re.DOTALL | re.IGNORECASE)
-
         pattern = '<div[^>]*id\s*=\s*[\'"]main[\'"][^>]*>.*?[^"]+[\.|%s]\/(\w+\/\w+\.\w+).*?' % host  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
         pattern += '<span[^>]*id=["|\']\s*\w+(?:\d+|)\s*["|\'][^>]*>(\d+)<'  # countdown
@@ -60,6 +58,8 @@ class FlashxResolver(UrlResolver):
 
         if not matchjs:
             raise ResolverError('Site structure changed!')
+
+        html = re.sub('<div[^>]*style\s*=\s*["|\']visibility\:(\s)?hidden["|\'][^>]*>.*?</div>', '', html, flags=re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
         postUrl = ''
         for matchPff in re.finditer('var\s+s\s*=\s*["|\'](.*?)["|\']', html, re.DOTALL):
