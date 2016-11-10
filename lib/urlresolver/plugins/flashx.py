@@ -42,7 +42,7 @@ class FlashxResolver(UrlResolver):
         cookie.update(self.__get_cookies(html))
         headers.update({'Cookie': cookie, 'Referer': 'http://%s' % host})
 
-        pattern = 'ads.js.*?[^"]+[\.|%s]\/(\w+\/\w+\.\w+).*?' % host  # api-js
+        pattern = '<div[^>]*id\s*=\s*[\'"]main[\'"][^>]*>.*?[^"]+[\.|%s]\/(\w+\/\w+\.\w+).*?' % host  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
         pattern += 'action\s*=\s*[\'"]([^\'"]+)[\'"].*?'  # post-url
         pattern += '<span[^>]*id=["|\']\s*\w+(?:\d+|)\s*["|\'][^>]*>(\d+)<'  # countdown
