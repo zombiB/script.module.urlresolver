@@ -110,12 +110,13 @@ class FlashxResolver(UrlResolver):
 
     def get_postvalues(self, html):
         postvals = {}
+        valid_names = ['hash', 'imhuman', 'usr_login', 'referer', 'fname', 'id', 'op']
 
         for i, form in enumerate(re.finditer('''<form[^>|]+>(.*?)</form>''', html, re.DOTALL | re.I)):
             for field in re.finditer('''<input [^>]*type=['"]?[hidden|submit]['"]?[^>]*>''', form.group(1)):
                 match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
                 match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
-                if match and match1:
+                if match and match1 and match.group(1).lower() in valid_names:
                     postvals[match.group(1)] = match1.group(1)
 
         return postvals
