@@ -62,9 +62,9 @@ class FlashxResolver(UrlResolver):
         postUrl = ''
         for matchPff in re.finditer('var\s+s\s*=\s*["|\'](.*?)["|\']', html, re.DOTALL):
             decStr = self.pff(matchPff.group(1))
-            print decStr
             matchAct = re.search('action\s*=\s*[\'"]([^\'"]+)[\'"].*?', decStr)
             if matchAct:
+                html = html.replace(matchPff.group(1), decStr)
                 postUrl = matchAct.group(1)
             else:
                 html += decStr
@@ -75,7 +75,7 @@ class FlashxResolver(UrlResolver):
                 postUrl = matchAct.group(1)
 
         if postUrl and not host in postUrl:
-             postUrl = 'http://%s/%s' % (host, matchAct.group(1))
+             postUrl = 'http://%s/%s' % (host, postUrl)
 
         if not postUrl:
             raise ResolverError('Site structure changed!')
@@ -111,11 +111,12 @@ class FlashxResolver(UrlResolver):
     def get_postvalues(self, html):
         postvals = {}
 
-        for field in re.finditer('''<input [^>]*type=['"]?[hidden|submit]['"]?[^>]*>''', html):
-            match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
-            match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
-            if match and match1:
-                postvals[match.group(1)] = match1.group(1)
+        for i, form in enumerate(re.finditer('''<form[^>|]+>(.*?)</form>''', html, re.DOTALL | re.I)):
+            for field in re.finditer('''<input [^>]*type=['"]?[hidden|submit]['"]?[^>]*>''', form.group(1)):
+                match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
+                match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
+                if match and match1:
+                    postvals[match.group(1)] = match1.group(1)
 
         return postvals
 
