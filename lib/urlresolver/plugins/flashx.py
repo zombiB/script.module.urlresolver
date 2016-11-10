@@ -66,10 +66,16 @@ class FlashxResolver(UrlResolver):
             matchAct = re.search('action\s*=\s*[\'"]([^\'"]+)[\'"].*?', decStr)
             if matchAct:
                 postUrl = matchAct.group(1)
-                if not host in postUrl:
-                     postUrl = 'http://%s/%s' % (host, matchAct.group(1))
             else:
                 html += decStr
+
+        if not postUrl:
+            matchAct = re.search('<form[^>]*action\s*=\s*[\'"]([^\'"]+)[\'"].*?', html, re.DOTALL | re.I)
+            if matchAct:
+                postUrl = matchAct.group(1)
+
+        if postUrl and not host in postUrl:
+             postUrl = 'http://%s/%s' % (host, matchAct.group(1))
 
         if not postUrl:
             raise ResolverError('Site structure changed!')
