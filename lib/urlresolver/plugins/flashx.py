@@ -42,7 +42,7 @@ class FlashxResolver(UrlResolver):
         cookie.update(self.__get_cookies(html))
         headers.update({'Cookie': cookie, 'Referer': 'http://%s' % host})
 
-        pattern = '[^"]+"\.\/(\w+\/\w+\.\w+).*?'  # api-js
+        pattern = 'ads.js.*?[^"]+[\.|%s]\/(\w+\/\w+\.\w+).*?' % host  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
         pattern += 'action\s*=\s*[\'"]([^\'"]+)[\'"].*?'  # post-url
         pattern += '<span[^>]*id=["|\']\s*\w+(?:\d+|)\s*["|\'][^>]*>(\d+)<'  # countdown
@@ -55,12 +55,12 @@ class FlashxResolver(UrlResolver):
             raise ResolverError('Site structure changed!')
 
         jscontent = self.net.http_GET('http://%s/%s' % (host, match.group(1)), headers=headers).content
-        matchjs = re.search('\$\.adblock\s+!=\s+null.*?\$.get\(\'\.+\/(\w+\.\w+)\'[^{]+\{([^:]+).*?\'(.*?)\'', jscontent, re.DOTALL | re.I)
+        matchjs = re.search('!=\s*null.*?{(\w+):', jscontent, re.DOTALL | re.I)
 
         if not matchjs:
             raise ResolverError('Site structure changed!')
 
-        self.net.http_GET('http://www.%s/%s?%s=%s' % (host, matchjs.group(1), matchjs.group(2), matchjs.group(3)), headers=headers)
+        self.net.http_GET('http://www.%s/flashx.php?%s=1' % (host, matchjs.group(1)), headers=headers)
 
         postUrl = match.group(3)
         if not host in postUrl:
