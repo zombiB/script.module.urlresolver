@@ -68,6 +68,7 @@ class FlashxResolver(UrlResolver):
 
         self.net.http_GET(match.group(2).strip(), headers=headers)
         data = self.get_postvalues(html)
+        data['op'] = 'download1'
         common.kodi.sleep(int(match.group(4)) * 1000 + 500)
         html = self.net.http_POST(postUrl, data, headers=headers).content
 
@@ -75,7 +76,11 @@ class FlashxResolver(UrlResolver):
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
             sources += self.__parse_sources_list(packed_data)
-        return helpers.pick_source(sources)
+
+        if len(sources) > 0:
+            return helpers.pick_source(sources)
+
+        raise ResolverError('Unable to find video')
 
     def get_postvalues(self, html):
         postvals = {}
