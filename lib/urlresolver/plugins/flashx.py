@@ -40,13 +40,12 @@ class FlashxResolver(UrlResolver):
 
         cookie = response.get_headers(as_dict=True).get('Set-Cookie', {})
         cookie.update(self.__get_cookies(html))
-        headers.update({'Cookie': cookie, 'Referer' : 'http://%s' % host})
+        headers.update({'Cookie': cookie, 'Referer': 'http://%s' % host})
 
         pattern = '[^"]+"\.\/(\w+\/\w+\.\w+).*?'  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
-        pattern += 'action=[\'"]([^\'"]+).*?'  # post-url
-        pattern += '<input[^>]*name=[\'"]imhuman[\'"][^>]*value=[\'"](.*?)[\'"][^>]*>.*?'  # imhuman
-        pattern += '<span[^>]*id=["|\']\w+(?:\d+|)["|\'][^>]*>(\d+)<'  # countdown
+        pattern += 'action\s*=\s*[\'"]([^\'"]+)[\'"].*?'  # post-url
+        pattern += '<span[^>]*id=["|\']\s*\w+(?:\d+|)\s*["|\'][^>]*>(\d+)<'  # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
         # FlashX: If you are tired of this cat and mouse game then we have a pairing solution that would still let you get revenue and still allow kodi users to view your streams
         # Read more about it here: https://www.tvaddons.ag/rickroll-thevideo/
@@ -63,17 +62,32 @@ class FlashxResolver(UrlResolver):
 
         self.net.http_GET('http://www.%s/%s?%s=%s' % (host, matchjs.group(1), matchjs.group(2), matchjs.group(3)), headers=headers)
 
+        postUrl = match.group(3)
+        if not host in postUrl:
+            postUrl = 'http://%s/%s' % (host, match.group(3))
+
         self.net.http_GET(match.group(2).strip(), headers=headers)
-        data = helpers.get_hidden(html)
-        data[u'imhuman'] = match.group(4)
-        common.kodi.sleep(int(match.group(5)) * 1000 + 500)
-        html = self.net.http_POST(match.group(3), data, headers=headers).content
+        data = self.get_postvalues(html)
+        common.kodi.sleep(int(match.group(4)) * 1000 + 500)
+        html = self.net.http_POST(postUrl, data, headers=headers).content
 
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
             packed_data = jsunpack.unpack(match.group(1))
             sources += self.__parse_sources_list(packed_data)
         return helpers.pick_source(sources)
+
+    def get_postvalues(self, html):
+        postvals = {}
+
+        for i, form in enumerate(re.finditer('''<form[^>]*>(.*?)</form>''', html, re.DOTALL | re.I)):
+            for field in re.finditer('''<input [^>]*type=['"]?[hidden|submit]['"]?[^>]*>''', form.group(1)):
+                match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
+                match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
+                if match and match1:
+                    postvals[match.group(1)] = match1.group(1)
+
+        return postvals
 
     def __get_cookies(self, html):
         cookies = {}
