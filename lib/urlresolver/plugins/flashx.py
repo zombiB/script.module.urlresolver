@@ -65,7 +65,7 @@ class FlashxResolver(UrlResolver):
         data = self.get_postvalues(html)
         data['op'] = 'download1'
         common.kodi.sleep(int(match.group(3)) * 1000 + 500)
-        html = self.net.http_POST('http://www.%s/dl?show' % host, data, headers=headers).content
+        html = self.net.http_POST('http://www.%s/dl?playit' % host, data, headers=headers).content
 
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
