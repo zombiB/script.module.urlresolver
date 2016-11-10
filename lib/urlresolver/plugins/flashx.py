@@ -44,7 +44,6 @@ class FlashxResolver(UrlResolver):
 
         pattern = '<div[^>]*id\s*=\s*[\'"]main[\'"][^>]*>.*?[^"]+[\.|%s]\/(\w+\/\w+\.\w+).*?' % host  # api-js
         pattern += '"([^"]+%s[^"]+(?:\d+|)\.\w{1,3}\?\w+=[^"]+)".*?' % host  # cgi
-        pattern += 'action\s*=\s*[\'"]([^\'"]+)[\'"].*?'  # post-url
         pattern += '<span[^>]*id=["|\']\s*\w+(?:\d+|)\s*["|\'][^>]*>(\d+)<'  # countdown
         match = re.search(pattern, html, re.DOTALL | re.I)
         # FlashX: If you are tired of this cat and mouse game then we have a pairing solution that would still let you get revenue and still allow kodi users to view your streams
@@ -62,15 +61,11 @@ class FlashxResolver(UrlResolver):
 
         self.net.http_GET('http://www.%s/flashx.php?%s=1' % (host, matchjs.group(1)), headers=headers)
 
-        postUrl = match.group(3)
-        if not host in postUrl:
-            postUrl = 'http://%s/%s' % (host, match.group(3))
-
         self.net.http_GET(match.group(2).strip(), headers=headers)
         data = self.get_postvalues(html)
         data['op'] = 'download1'
-        common.kodi.sleep(int(match.group(4)) * 1000 + 500)
-        html = self.net.http_POST(postUrl, data, headers=headers).content
+        common.kodi.sleep(int(match.group(3)) * 1000 + 500)
+        html = self.net.http_POST('http://www.%s/dl?show' % host, data, headers=headers).content
 
         sources = []
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
@@ -85,12 +80,11 @@ class FlashxResolver(UrlResolver):
     def get_postvalues(self, html):
         postvals = {}
 
-        for i, form in enumerate(re.finditer('''<form[^>]*>(.*?)</form>''', html, re.DOTALL | re.I)):
-            for field in re.finditer('''<input [^>]*type=['"]?[hidden|submit]['"]?[^>]*>''', form.group(1)):
-                match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
-                match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
-                if match and match1:
-                    postvals[match.group(1)] = match1.group(1)
+        for field in re.finditer('''<input [^>]*type=['"]?[hidden|submit]['"]?[^>]*>''', html):
+            match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
+            match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
+            if match and match1:
+                postvals[match.group(1)] = match1.group(1)
 
         return postvals
 
