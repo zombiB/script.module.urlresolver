@@ -37,7 +37,6 @@ class HappyStreamsResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
         data = helpers.get_hidden(html)
-        data['imhuman'] = 'Proceed+to+video'
         furl = 'http://happystreams.net/dl'
         headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url, 'Cookie': self.__get_cookies(host, html)}
         

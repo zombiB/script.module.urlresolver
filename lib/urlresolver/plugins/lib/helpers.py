@@ -23,7 +23,7 @@ from urlparse import urlparse
 from urlresolver import common
 from urlresolver.resolver import ResolverError
 
-def get_hidden(html, form_id=None, index=None):
+def get_hidden(html, form_id=None, index=None, include_submit=True):
     hidden = {}
     if form_id:
         pattern = '''<form [^>]*id\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>''' % (form_id)
@@ -37,6 +37,14 @@ def get_hidden(html, form_id=None, index=None):
                 match1 = re.search('''value\s*=\s*['"]([^'"]*)''', field.group(0))
                 if match and match1:
                     hidden[match.group(1)] = match1.group(1)
+            
+            if include_submit:
+                match = re.search('''<input [^>]*type=['"]?submit['"]?[^>]*>''', form.group(1))
+                if match:
+                    name = re.search('''name\s*=\s*['"]([^'"]+)''', match.group(0))
+                    value = re.search('''value\s*=\s*['"]([^'"]*)''', match.group(0))
+                    if name and value:
+                        hidden[name.group(1)] = value.group(1)
             
     common.log_utils.log_debug('Hidden fields are: %s' % (hidden))
     return hidden

@@ -36,7 +36,6 @@ class GrifthostResolver(UrlResolver):
         html = self.net.http_GET(web_url).content
 
         data = helpers.get_hidden(html)
-        data['method_free'] = 'Proceed to Video'
         html = self.net.http_POST(web_url, form_data=data).content
         stream_url = ''
         for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):

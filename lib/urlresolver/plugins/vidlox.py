@@ -38,10 +38,9 @@ class VidloxResolver(UrlResolver):
         html = self.net.http_GET(web_url, headers=headers).content
         
         data = helpers.get_hidden(html)
-        data['imhuman'] = 'Proceed to this video'
         common.kodi.sleep(5000)
         cookies = self.__get_cookies(html, web_url)
-        headers.update({'Cookie': "; ".join("=".join((str(k),str(v))) for k,v in cookies.items())})
+        headers.update({'Cookie': "; ".join("=".join((str(k), str(v))) for k, v in cookies.items())})
 
         html = self.net.http_POST(web_url, data, headers=headers).content
         sources = self.__parse_sources_list(html)

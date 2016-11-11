@@ -34,8 +34,8 @@ class VshareEuResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
 
         headers = {
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': common.FF_USER_AGENT
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': common.FF_USER_AGENT
         }
 
         html = self.net.http_GET(web_url, headers=headers).content
@@ -44,7 +44,6 @@ class VshareEuResolver(UrlResolver):
             raise ResolverError('The requested video was not found.')
 
         data = helpers.get_hidden(html)
-        data['method_free'] = 'Proceed+to+video'
         headers['Referer'] = web_url
         html = self.net.http_POST(web_url, data, headers=headers).content
 

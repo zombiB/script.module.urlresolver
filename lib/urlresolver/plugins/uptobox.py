@@ -50,7 +50,7 @@ class UpToBoxResolver(UrlResolver):
                 raise ResolverError('Cooldown in effect')
 
             data = helpers.get_hidden(html)
-            for i in range(0, 3):
+            for _ in range(0, 3):
                 try:
                     html = self.net.http_POST(web_url, data, headers=self.headers).content
                     if isinstance(html, unicode):

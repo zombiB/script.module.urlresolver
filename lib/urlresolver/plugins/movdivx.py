@@ -34,7 +34,6 @@ class MovDivxResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
         data = helpers.get_hidden(html)
-        data['method_free'] = 'Continue to Stream >>'
         html = self.net.http_POST(web_url, data).content
 
         # get url from packed javascript
