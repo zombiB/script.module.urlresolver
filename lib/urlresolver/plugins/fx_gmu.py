@@ -29,10 +29,11 @@ def get_media_url(url):
         html = net.http_GET(url, headers=headers).content
         match = re.search('''href=['"]([^'"]+)''', html)
         if match:
-            html = net.http_GET(match.group(1), headers=headers).content
             headers.update({'Referer': url})
+            html = net.http_GET(match.group(1), headers=headers).content
             html = helpers.add_packed_data(html)
         
+        common.log_utils.log(html)
         sources = helpers.parse_sources_list(html)
         try: sources.sort(key=lambda x: SORT_KEY.get(x[0], 0), reverse=True)
         except: pass
