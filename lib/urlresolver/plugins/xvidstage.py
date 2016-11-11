@@ -32,26 +32,18 @@ class XvidstageResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
         html = self.net.http_GET(web_url).content
-
         data = helpers.get_hidden(html)
-        data['method_free'] = 'Kostenloser stream / Kostenloser Download'
-        html = self.net.http_POST(web_url, data).content
+        data['method_free'] = 'Continue to video / Continue to Free Download'
+        html = self.net.http_POST(web_url, form_data=data).content
 
-        js_data = re.findall('(eval\(function.*?)</script>', html.replace('\n', ''))
-
-        for i in js_data:
-            try: html += jsunpack.unpack(i)
-            except: pass
-
-        html = html.replace('\\\'', '\'')
-        html = html.replace('\\\'', '\'')
+        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+            html += jsunpack.unpack(match.group(1))
+        html = html.replace('\\', '')
 
         stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', html)
         stream_url += re.findall("'file'\s*,\s*'(.+?)'", html)
         stream_url = [i for i in stream_url if not i.endswith('.srt')]
-
         if stream_url:
             return stream_url[0]
 
