@@ -1,6 +1,6 @@
 """
-    urlresolver XBMC Addon
-    Copyright (C) 2015 tknorris
+    Kodi urlresolver plugin
+    Copyright (C) 2016  script.module.urlresolver
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,30 +15,18 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-import re
-from urlresolver import common
+
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class FilehootResolver(UrlResolver):
-    name = "filehoot"
-    domains = ['filehoot.com']
-    pattern = '(?://|\.)(filehoot\.com)/(?:embed-)?([0-9a-z]+)'
 
-    def __init__(self):
-        self.net = common.Net()
+class DownaceResolver(UrlResolver):
+    name = 'downace'
+    domains = ['downace.com']
+    pattern = '(?://|\.)(downace\.com)/(?:embed/)?([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
-        if '404 Not Found' in html:
-            raise ResolverError('The requested video was not found.')
-
-        pattern = "file\s*:\s*'([^']+)'\s*,\s*'provider'\s*:\s*'http"
-        match = re.search(pattern, html)
-        if match:
-            return match.group(1)
-
-        raise ResolverError('No video link found.')
+        return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
-        return self._default_get_url(host, media_id)
+        return 'https://www.downace.com/embed/%s' % media_id

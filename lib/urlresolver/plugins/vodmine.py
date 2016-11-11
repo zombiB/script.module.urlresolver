@@ -15,11 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-import re
-import urllib
-from urlresolver import common
-from urlresolver.resolver import UrlResolver, ResolverError
 
+from lib import helpers
+from urlresolver.resolver import UrlResolver, ResolverError
 
 
 class VodmineResolver(UrlResolver):
@@ -27,26 +25,8 @@ class VodmineResolver(UrlResolver):
     domains = ['vodmine.com']
     pattern = '(?://|\.)(vodmine\.com)/(?:video|embed)/([0-9a-zA-Z]+)'
 
-
-    def __init__(self):
-        self.net = common.Net()
-
-
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-
-        headers = {'User-Agent': common.FF_USER_AGENT}
-
-        html = self.net.http_GET(web_url, headers=headers).content
-
-        url = re.findall('<source\s+src\s*=\s*"(http.+?)"', html)[0]
-        url += '|%s' % urllib.urlencode(headers)
-        return url
-
-        raise ResolverError('Unable to locate link')
-
+        return helpers.get_media_url(self.get_url(host, media_id), result_blacklist=None)
 
     def get_url(self, host, media_id):
         return 'http://vodmine.com/embed/%s' % media_id
-
-

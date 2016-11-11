@@ -16,34 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re
 from lib import helpers
-from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
+
 
 class GorillavidResolver(UrlResolver):
     name = "gorillavid"
     domains = ["gorillavid.in", "gorillavid.com"]
     pattern = '(?://|\.)(gorillavid\.(?:in|com))/(?:embed-)?([0-9a-zA-Z]+)'
 
-    def __init__(self):
-        self.net = common.Net()
-
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-        resp = self.net.http_GET(web_url)
-        html = resp.content
-        r = re.findall(r"<title>404 - Not Found</title>", html)
-        if r:
-            raise ResolverError('File Not Found or removed')
-        post_url = resp.get_url()
-        form_values = helpers.get_hidden(html)
-        html = self.net.http_POST(post_url, form_data=form_values).content
-        r = re.search('file: "(.+?)"', html)
-        if r:
-            return r.group(1)
-        else:
-            raise ResolverError('Unable to resolve Gorillavid link')
+        return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
         return 'http://gorillavid.in/%s' % (media_id)
