@@ -32,16 +32,28 @@ class MovshareResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        html = self.net.http_GET(web_url).content
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = self.net.http_GET(web_url, headers=headers).content
         stream_url = ''
         match = re.search('<video.*?</video>', html, re.DOTALL)
         if match:
             links = re.findall('<source[^>]+src="([^"]+)', match.group(0), re.DOTALL)
             if links:
                 stream_url = random.choice(links)
+        
+        if not stream_url:
+            match = re.search('fkzd="([^"]+)', html)
+            if match:
+                query = {'pass': 'undefined', 'key': match.group(1), 'cid3': 'undefined', 'cid': 0, 'numOfErrors': 0, 'file': media_id, 'cid2': 'undefined', 'user': 'undefined'}
+                api_url = 'http://www.wholecloud.net//api/player.api.php?' + urllib.urlencode(query)
+                html = self.net.http_GET(api_url, headers=headers).content
+                match = re.search('url=([^&]+)', html)
+                if match:
+                    stream_url = match.group(1)
 
         if stream_url:
-            return stream_url + helpers.append_headers({'Referer': web_url, 'User-Agent': common.FF_USER_AGENT})
+            headers.update({'Referer': web_url, })
+            return stream_url + helpers.append_headers(headers)
         else:
             raise ResolverError('File Not Found or removed')
 
