@@ -16,10 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re
-import urllib
-from lib import jsunpack
-from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 
@@ -28,32 +25,8 @@ class BlazefileResolver(UrlResolver):
     domains = ['blazefile.co']
     pattern = '(?://|\.)(blazefile\.co)/(?:embed-)?([0-9a-zA-Z]+)'
 
-
-    def __init__(self):
-        self.net = common.Net()
-
-
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-
-        headers = {'User-Agent': common.FF_USER_AGENT}
-
-        html = self.net.http_GET(web_url, headers=headers).content
-
-        if jsunpack.detect(html):
-            html = jsunpack.unpack(html) + html
-
-        url = re.findall('<param\s+name="src"\s*value="([^"]+)', html)
-        url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', html)
-        url = [i for i in url if not i.endswith('.srt')]
-
-        if url:
-            return url[0] + '|%s' % urllib.urlencode(headers)
-
-        raise ResolverError('Unable to locate link')
-
+        return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
         return 'http://www.blazefile.co/embed-%s.html' % media_id
-
-

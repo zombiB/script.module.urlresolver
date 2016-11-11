@@ -32,11 +32,11 @@ class VidloxResolver(UrlResolver):
     def __init__(self):
         self.net = common.Net()
 
-    def get_media_url(self, host, media_id):
+    def get_media_url(self, host, media_id):  # needs fix
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
         html = self.net.http_GET(web_url, headers=headers).content
-        
+
         data = helpers.get_hidden(html)
         data['imhuman'] = 'Proceed to this video'
         common.kodi.sleep(5000)

@@ -21,6 +21,7 @@ from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
+
 class VidtoResolver(UrlResolver):
     name = "vidto"
     domains = ["vidto.me"]
@@ -31,25 +32,21 @@ class VidtoResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
-        html = self.net.http_GET(web_url).content
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = self.net.http_GET(web_url, headers=headers).content
 
         if jsunpack.detect(html):
             js_data = jsunpack.unpack(html)
 
             sources = []
-            stream_url = ''
             for match in re.finditer('label:\s*"([^"]+)"\s*,\s*file:\s*"([^"]+)', js_data):
                 label, stream_url = match.groups()
                 sources.append((label, stream_url))
 
             if sources:
                 sources = sorted(sources, key=lambda x: x[0])[::-1]
-                source = helpers.pick_source(sources)
-            
-            if source:
-                return source
-   
+                return helpers.pick_source(sources) + helpers.append_headers(headers)
+
         raise ResolverError("File Link Not Found")
 
     def get_url(self, host, media_id):

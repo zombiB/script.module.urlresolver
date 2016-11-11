@@ -17,16 +17,13 @@
 '''
 
 from lib import helpers
-from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
+
 
 class PutLoadResolver(UrlResolver):
     name = "putload.tv"
     domains = ["putload.tv", "youlolx.site", "youlol.biz", "shitmovie.com"]
     pattern = '(?://|\.)((?:putload\.tv|youlol[x]?\.(?:site|biz)|shitmovie\.com))/(?:embed-)?([0-9a-zA-Z]+)'
-
-    def __init__(self):
-        self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         return helpers.get_media_url(self.get_url(host, media_id))

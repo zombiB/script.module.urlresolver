@@ -16,11 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re
 from lib import helpers
-from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
+
 
 class VshareEuResolver(UrlResolver):
     name = "vshare.eu"
@@ -33,10 +32,8 @@ class VshareEuResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
 
-        headers = {
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': common.FF_USER_AGENT
-        }
+        headers = {'Upgrade-Insecure-Requests': '1',
+                   'User-Agent': common.FF_USER_AGENT}
 
         html = self.net.http_GET(web_url, headers=headers).content
 
@@ -46,20 +43,12 @@ class VshareEuResolver(UrlResolver):
         data = helpers.get_hidden(html)
         data['method_free'] = 'Proceed+to+video'
         headers['Referer'] = web_url
-        html = self.net.http_POST(web_url, data, headers=headers).content
-
-        match = re.search('file\s*:\s*"([^"]+)', html)
-
-        if match:
-            return match.group(1)
-        else:
-            for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
-                js_data = jsunpack.unpack(match.group(1))
-                match = re.search('''file\s*:\s*['"]([^"']+)''', js_data)
-                if match:
-                    return match.group(1)
-
-        raise ResolverError('No playable video found.')
+        response = self.net.http_POST(web_url, data, headers=headers)
+        html = response.content
+        headers = {'Cookie': response.get_headers(as_dict=True).get('Set-Cookie', ''),
+                   'User-Agent': common.FF_USER_AGENT}
+        sources = helpers.scrape_sources(html)
+        return helpers.pick_source(sources) + helpers.append_headers(headers)
 
     def get_url(self, host, media_id):
         return 'http://vshare.eu/%s' % (media_id)
