@@ -29,4 +29,4 @@ class VidCrazyResolver(UrlResolver):
         return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
-        return 'http://vidcrazy.net/embed.php?file=%s' % (media_id)
+        return self._default_get_url('uploadcrazy.net', media_id, template='http://{host}/embed.php?file={media_id}')
