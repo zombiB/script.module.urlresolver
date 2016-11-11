@@ -70,6 +70,17 @@ def pick_source(sources, auto_pick=None):
 def append_headers(headers):
     return '|%s' % '&'.join(['%s=%s' % (key, urllib.quote_plus(headers[key])) for key in headers])
 
+def add_packed_data(html):
+    for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+        try:
+            js_data = jsunpack.unpack(match.group(1))
+            js_data = js_data.replace('\\', '')
+            html += js_data
+        except:
+            pass
+        
+    return html
+
 def parse_sources_list(html):
     sources = []
     match = re.search('''['"]?sources['"]?\s*:\s*\[(.*?)\]''', html, re.DOTALL)
@@ -115,13 +126,7 @@ def scrape_sources(html, result_blacklist=None):
             common.log_utils.log_debug('Scrape sources |%s| found |%s|' % (regex, matches))
         return matches
 
-    for packed in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
-        try:
-            unpacked_data = jsunpack.unpack(packed.group(1))
-            unpacked_data = unpacked_data.replace('\\\'', '\'')
-            html += unpacked_data
-        except:
-            pass
+    html = add_packed_data(html)
 
     source_list = _parse_to_list(html, '''video[^><]+src\s*=\s*['"]([^'"]+)''')
     source_list += _parse_to_list(html, '''source\s+src\s*=\s*['"]([^'"]+)''')

@@ -16,7 +16,6 @@
 """
 
 import re
-from lib import jsunpack
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
@@ -34,18 +33,14 @@ class VidtoResolver(UrlResolver):
         web_url = self.get_url(host, media_id)
         headers = {'User-Agent': common.FF_USER_AGENT}
         html = self.net.http_GET(web_url, headers=headers).content
+        html = helpers.add_packed_data(html)
+        sources = []
+        for match in re.finditer('label:\s*"([^"]+)"\s*,\s*file:\s*"([^"]+)', html):
+            label, stream_url = match.groups()
+            sources.append((label, stream_url))
 
-        if jsunpack.detect(html):
-            js_data = jsunpack.unpack(html)
-
-            sources = []
-            for match in re.finditer('label:\s*"([^"]+)"\s*,\s*file:\s*"([^"]+)', js_data):
-                label, stream_url = match.groups()
-                sources.append((label, stream_url))
-
-            if sources:
-                sources = sorted(sources, key=lambda x: x[0])[::-1]
-                return helpers.pick_source(sources) + helpers.append_headers(headers)
+        sources = sorted(sources, key=lambda x: x[0])[::-1]
+        return helpers.pick_source(sources) + helpers.append_headers(headers)
 
         raise ResolverError("File Link Not Found")
 

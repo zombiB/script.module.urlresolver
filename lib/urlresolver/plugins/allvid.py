@@ -17,7 +17,7 @@
 """
 
 import re
-from lib import jsunpack
+from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -43,16 +43,10 @@ class AllVidResolver(UrlResolver):
             web_url = r.group(1)
             html = self.net.http_GET(web_url, headers=self.headers).content
 
-        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
-            js_data = jsunpack.unpack(match.group(1))
-            js_data = js_data.replace('\\\'', '\'')
-
-            r = re.search('sources\s*:\s*\[\s*\{\s*file\s*:\s*["\'](.+?)["\']', js_data)
-
-            if r:
-                return r.group(1)
-        else:
-            raise ResolverError('File not found')
+        html = helpers.add_packed_data(html)
+        r = re.search('sources\s*:\s*\[\s*\{\s*file\s*:\s*["\'](.+?)["\']', html)
+        if r:
+            return r.group(1)
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)

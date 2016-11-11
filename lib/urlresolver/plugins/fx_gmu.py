@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import re
-from lib import jsunpack
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import ResolverError
@@ -32,8 +31,7 @@ def get_media_url(url):
         if match:
             html = net.http_GET(match.group(1), headers=headers).content
             headers.update({'Referer': url})
-            for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
-                html += jsunpack.unpack(match.group(1))
+            html = helpers.add_packed_data(html)
         
         sources = helpers.parse_sources_list(html)
         try: sources.sort(key=lambda x: SORT_KEY.get(x[0], 0), reverse=True)
