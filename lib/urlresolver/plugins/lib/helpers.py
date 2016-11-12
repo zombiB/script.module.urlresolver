@@ -114,13 +114,15 @@ def scrape_sources(html, result_blacklist=None):
         labels = []
         for r in re.finditer(regex, _html, re.DOTALL):
             match = r.groupdict()
+            common.log_utils.log(match)
             stream_url = match['url']
-            trimmed_path = urlparse(stream_url).path.split('/')[-1]
-            blocked = not trimmed_path or any(item in trimmed_path.lower() for item in _blacklist)
+            file_name = urlparse(stream_url).path.split('/')[-1]
+            blocked = not file_name or any(item in file_name.lower() for item in _blacklist)
             if '://' not in stream_url or blocked or (stream_url in streams) or any(stream_url == t[1] for t in source_list):
                 continue
     
-            label = match.get('label', trimmed_path)
+            label = match.get('label', file_name)
+            if label is None: label = file_name
             labels.append(label)
             streams.append(stream_url)
             
