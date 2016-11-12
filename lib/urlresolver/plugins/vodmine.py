@@ -26,7 +26,7 @@ class VodmineResolver(UrlResolver):
     pattern = '(?://|\.)(vodmine\.com)/(?:video|embed)/([0-9a-zA-Z]+)'
 
     def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id), result_blacklist=None)
+        return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
         return 'http://vodmine.com/embed/%s' % media_id

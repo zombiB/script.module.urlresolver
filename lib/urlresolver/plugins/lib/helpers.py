@@ -116,20 +116,22 @@ def scrape_sources(html, result_blacklist=None):
     source_list = []
 
     def _parse_to_list(_html, regex):
-        _blacklist = ['', '.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
+        _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
         _blacklist = set(_blacklist + result_blacklist)
         streams = []
         labels = []
         for match in re.finditer(regex, _html, re.DOTALL):
             stream_url = match.group(1)
             trimmed_path = urlparse(stream_url).path.split('/')[-1]
-            if '://' not in stream_url or stream_url in streams or trimmed_path.lower() in _blacklist or any(stream_url == t[1] for t in source_list):
+            blocked = not trimmed_path or any(item in trimmed_path.lower() for item in _blacklist)
+            if '://' not in stream_url or blocked or (stream_url in streams) or any(stream_url == t[1] for t in source_list):
                 continue
             
             try: label = match.group(2)
-            except AttributeError: label = trimmed_path
-            labels.append(label)
-            streams.append(stream_url)
+            except IndexError: label = trimmed_path
+            if label:
+                labels.append(label)
+                streams.append(stream_url)
             
         matches = zip(labels, streams)
         if matches:
