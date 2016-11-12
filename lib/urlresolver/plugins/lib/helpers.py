@@ -29,6 +29,9 @@ def get_hidden(html, form_id=None, index=None, include_submit=True):
         pattern = '''<form [^>]*id\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>''' % (form_id)
     else:
         pattern = '''<form[^>]*>(.*?)</form>'''
+    
+    for match in re.finditer('<!--.*?(..)-->', html, re.DOTALL):
+        if match.group(1) != '//': html = html.replace(match.group(0), '')
         
     for i, form in enumerate(re.finditer(pattern, html, re.DOTALL | re.I)):
         if index is None or i == index:
@@ -105,13 +108,12 @@ def parse_smil_source_list(smil):
     return sources
 
 def scrape_sources(html, result_blacklist=None):
+    if result_blacklist is None: result_blacklist = []
     source_list = []
 
     def _parse_to_list(_html, regex):
-        _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php',
-                      '.srt', '.sub', '.xml', '.swf', '.vtt']
-        if isinstance(result_blacklist, list):
-            _blacklist = list(set(_blacklist + result_blacklist))
+        _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
+        _blacklist = list(set(_blacklist + result_blacklist))
         matches = []
         for i in re.finditer(regex, _html, re.DOTALL):
             match = i.group(1)
@@ -119,11 +121,11 @@ def scrape_sources(html, result_blacklist=None):
             if ('//' not in match) or (not trimmed_path) or (any(match == m[1] for m in matches)) or \
                     (any(bl in trimmed_path.lower() for bl in _blacklist)) or (any(match == t[1] for t in source_list)):
                 continue
-            label = trimmed_path
-            if len(i.groups()) > 1:
-                if i.group(2) is not None:
-                    label = i.group(2)
-            matches.append(('%s' % label, match))
+            
+            try: label = i.group(2)
+            except AttributeError: label = trimmed_path
+            matches.append((label, match))
+            
         if matches:
             common.log_utils.log_debug('Scrape sources |%s| found |%s|' % (regex, matches))
         return matches
