@@ -105,6 +105,8 @@ def parse_smil_source_list(smil):
     return sources
 
 def scrape_sources(html, result_blacklist=None):
+    source_list = []
+
     def _parse_to_list(_html, regex):
         _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php',
                       '.srt', '.sub', '.xml', '.swf', '.vtt']
@@ -114,8 +116,8 @@ def scrape_sources(html, result_blacklist=None):
         for i in re.finditer(regex, _html, re.DOTALL):
             match = i.group(1)
             trimmed_path = urlparse(match).path.split('/')[-1]
-            if ('://' not in match) or (not trimmed_path) or (any(match == m[1] for m in matches)) or \
-                    (any(bl in trimmed_path.lower() for bl in _blacklist)):
+            if ('//' not in match) or (not trimmed_path) or (any(match == m[1] for m in matches)) or \
+                    (any(bl in trimmed_path.lower() for bl in _blacklist)) or (any(match == t[1] for t in source_list)):
                 continue
             label = trimmed_path
             if len(i.groups()) > 1:
@@ -128,22 +130,19 @@ def scrape_sources(html, result_blacklist=None):
 
     html = add_packed_data(html)
 
-    source_list = _parse_to_list(html, '''video[^><]+src\s*=\s*['"]([^'"]+)''')
-    source_list += _parse_to_list(html, '''source\s+src\s*=\s*['"]([^'"]+)''')
     source_list += _parse_to_list(html, '''["']?\s*file\s*["']?\s*[:=,]?\s*["']([^"']+)(?:[^}>\],]?["',]?\s*label\s*["']?\s*[:=]?\s*["']([^"']+))?''')
+    source_list += _parse_to_list(html, '''video[^><]+src\s*=\s*['"]([^'"]+)''')
+    source_list += _parse_to_list(html, '''source\s+src\s*=\s*['"]([^'"]+)['"](?:.*?data-res\s*=\s*['"]([^'"]+))?''')
     source_list += _parse_to_list(html, '''["']?\s*url\s*["']?\s*[:=]\s*["']([^"']+)''')
     source_list += _parse_to_list(html, '''param\s+name\s*=\s*"src"\s*value\s*=\s*"([^"]+)''')
 
-    source_list = list(set(source_list))
-    try: source_list.sort(key=lambda x: int(x[0]), reverse=True)
-    except:
-        common.log_utils.log_debug('Scrape sources sort failed |int(x[0])|')
-        try: source_list.sort(key=lambda x: int(x[0][:-1]), reverse=True)
+    if len(source_list) > 1:
+        try: source_list.sort(key=lambda x: int(x[0]), reverse=True)
         except:
-            common.log_utils.log_debug('Scrape sources sort failed |int(x[0][:-1])|')
-            try: source_list.sort(key=lambda x: x[0], reverse=True)
+            common.log_utils.log_debug('Scrape sources sort failed |int(x[0])|')
+            try: source_list.sort(key=lambda x: int(x[0][:-1]), reverse=True)
             except:
-                common.log_utils.log_debug('Scrape sources sort failed |x[0]|')
+                common.log_utils.log_debug('Scrape sources sort failed |int(x[0][:-1])|')
 
     return source_list
 
