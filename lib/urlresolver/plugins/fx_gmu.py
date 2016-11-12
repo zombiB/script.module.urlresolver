@@ -41,7 +41,7 @@ def get_media_url(url):
             headers.update({'Referer': playvid_url})
             for match in re.finditer('''<script[^>]*src=["']([^'"]+)''', html):
                 js = get_js(match.group(1), headers, hostname)
-                match = re.search('===\s*undefined.*?get\([\'"]([^\'"]+).*?\{([^:]+)', js, re.DOTALL)
+                match = re.search('!=\s*null.*?get\([\'"]([^\'"]+).*?\{([^:]+)', js, re.DOTALL)
                 if match:
                     fx_url, fx_param = match.groups()
                     fx_url = resolve_url(urlparse.urljoin('http://www.flashx.tv', fx_url) + '?' + urllib.urlencode({fx_param: 1}))
