@@ -123,7 +123,7 @@ def scrape_sources(html, result_blacklist=None):
         for match in re.finditer(regex, _html, re.DOTALL):
             stream_url = match.group(1)
             trimmed_path = urlparse(stream_url).path.split('/')[-1]
-            if '://' not in stream_url or stream_url in streams or trimmed_path in _blacklist or any(stream_url == t[1] for t in source_list):
+            if '://' not in stream_url or stream_url in streams or trimmed_path.lower() in _blacklist or any(stream_url == t[1] for t in source_list):
                 continue
             
             try: label = match.group(2)
