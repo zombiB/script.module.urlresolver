@@ -107,29 +107,20 @@ def parse_smil_source_list(smil):
     return sources
 
 def scrape_sources(html, result_blacklist=None):
-    if result_blacklist is None:
-        result_blacklist = []
-    elif isinstance(result_blacklist, str):
-        result_blacklist = [result_blacklist]
-        
-    source_list = []
-
-    def _parse_to_list(_html, regex):
+    def __parse_to_list(_html, regex):
         _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
         _blacklist = set(_blacklist + result_blacklist)
         streams = []
         labels = []
-        for match in re.finditer(regex, _html, re.DOTALL):
-            stream_url = match.group(1)
+        for r in re.finditer(regex, _html, re.DOTALL):
+            match = r.groupdict()
+            stream_url = match['url']
             trimmed_path = urlparse(stream_url).path.split('/')[-1]
             blocked = not trimmed_path or any(item in trimmed_path.lower() for item in _blacklist)
             if '://' not in stream_url or blocked or (stream_url in streams) or any(stream_url == t[1] for t in source_list):
                 continue
-
-            label = trimmed_path
-            if (len(match.groups()) > 1) and (match.group(2) is not None):
-                label = match.group(2)
-
+    
+            label = match.get('label', trimmed_path)
             labels.append(label)
             streams.append(stream_url)
             
@@ -138,13 +129,19 @@ def scrape_sources(html, result_blacklist=None):
             common.log_utils.log_debug('Scrape sources |%s| found |%s|' % (regex, matches))
         return matches
 
+    if result_blacklist is None:
+        result_blacklist = []
+    elif isinstance(result_blacklist, str):
+        result_blacklist = [result_blacklist]
+        
     html = add_packed_data(html)
 
-    source_list += _parse_to_list(html, '''["']?\s*file\s*["']?\s*[:=,]?\s*["']([^"']+)(?:[^}>\],]?["',]?\s*label\s*["']?\s*[:=]?\s*["']([^"']+))?''')
-    source_list += _parse_to_list(html, '''video[^><]+src\s*=\s*['"]([^'"]+)''')
-    source_list += _parse_to_list(html, '''source\s+src\s*=\s*['"]([^'"]+)['"](?:.*?data-res\s*=\s*['"]([^'"]+))?''')
-    source_list += _parse_to_list(html, '''["']?\s*url\s*["']?\s*[:=]\s*["']([^"']+)''')
-    source_list += _parse_to_list(html, '''param\s+name\s*=\s*"src"\s*value\s*=\s*"([^"]+)''')
+    source_list = []
+    source_list += __parse_to_list(html, '''["']?\s*file\s*["']?\s*[:=,]?\s*["'](?P<url>[^"']+)(?:[^}>\],]?["',]?\s*label\s*["']?\s*[:=]?\s*["'](?P<label>[^"']+))?''')
+    source_list += __parse_to_list(html, '''video[^><]+src\s*=\s*['"](?P<url>[^'"]+)''')
+    source_list += __parse_to_list(html, '''source\s+src\s*=\s*['"](?P<url>[^'"]+)['"](?:.*?data-res\s*=\s*['"](?P<label>[^'"]+))?''')
+    source_list += __parse_to_list(html, '''["']?\s*url\s*["']?\s*[:=]\s*["'](?P<url>[^"']+)''')
+    source_list += __parse_to_list(html, '''param\s+name\s*=\s*"src"\s*value\s*=\s*"(?P<url>[^"]+)''')
 
     if len(source_list) > 1:
         try: source_list.sort(key=lambda x: int(x[0]), reverse=True)
@@ -155,6 +152,7 @@ def scrape_sources(html, result_blacklist=None):
                 common.log_utils.log_debug('Scrape sources sort failed |int(x[0][:-1])|')
 
     return source_list
+
 
 def get_media_url(url, result_blacklist=None):
     if result_blacklist is None:
