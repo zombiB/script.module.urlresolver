@@ -101,9 +101,8 @@ def parse_smil_source_list(smil):
     base = re.search('base\s*=\s*"([^"]+)', smil).groups()[0]
     for i in re.finditer('src\s*=\s*"([^"]+)(?:"\s*(?:width|height)\s*=\s*"([^"]+))?', smil):
         label = 'Unknown'
-        if len(i.groups()) > 1:
-            if i.group(2) is not None:
-                label = i.group(2)
+        if (len(i.groups()) > 1) and (i.group(2) is not None):
+            label = i.group(2)
         sources += [(label, '%s playpath=%s' % (base, i.group(1)))]
     return sources
 
@@ -126,12 +125,13 @@ def scrape_sources(html, result_blacklist=None):
             blocked = not trimmed_path or any(item in trimmed_path.lower() for item in _blacklist)
             if '://' not in stream_url or blocked or (stream_url in streams) or any(stream_url == t[1] for t in source_list):
                 continue
-            
-            try: label = match.group(2)
-            except IndexError: label = trimmed_path
-            if label:
-                labels.append(label)
-                streams.append(stream_url)
+
+            label = trimmed_path
+            if (len(match.groups()) > 1) and (match.group(2) is not None):
+                label = match.group(2)
+
+            labels.append(label)
+            streams.append(stream_url)
             
         matches = zip(labels, streams)
         if matches:
@@ -157,7 +157,11 @@ def scrape_sources(html, result_blacklist=None):
     return source_list
 
 def get_media_url(url, result_blacklist=None):
-    if not isinstance(result_blacklist, list): result_blacklist = []
+    if result_blacklist is None:
+        result_blacklist = []
+    elif isinstance(result_blacklist, str):
+        result_blacklist = [result_blacklist]
+
     result_blacklist = list(set(result_blacklist + ['.smil']))  # smil(not playable) contains potential sources, only blacklist when called from here
     net = common.Net()
     parsed_url = urlparse(url)
