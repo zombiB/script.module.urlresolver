@@ -108,24 +108,30 @@ def parse_smil_source_list(smil):
     return sources
 
 def scrape_sources(html, result_blacklist=None):
-    if result_blacklist is None: result_blacklist = []
+    if result_blacklist is None:
+        result_blacklist = []
+    elif isinstance(result_blacklist, str):
+        result_blacklist = [result_blacklist]
+        
     source_list = []
 
     def _parse_to_list(_html, regex):
-        _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
-        _blacklist = list(set(_blacklist + result_blacklist))
-        matches = []
-        for i in re.finditer(regex, _html, re.DOTALL):
-            match = i.group(1)
-            trimmed_path = urlparse(match).path.split('/')[-1]
-            if ('//' not in match) or (not trimmed_path) or (any(match == m[1] for m in matches)) or \
-                    (any(bl in trimmed_path.lower() for bl in _blacklist)) or (any(match == t[1] for t in source_list)):
+        _blacklist = ['', '.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
+        _blacklist = set(_blacklist + result_blacklist)
+        streams = []
+        labels = []
+        for match in re.finditer(regex, _html, re.DOTALL):
+            stream_url = match.group(1)
+            trimmed_path = urlparse(stream_url).path.split('/')[-1]
+            if '://' not in stream_url or stream_url in streams or trimmed_path in _blacklist or any(stream_url == t[1] for t in source_list):
                 continue
             
-            try: label = i.group(2)
+            try: label = match.group(2)
             except AttributeError: label = trimmed_path
-            matches.append((label, match))
+            labels.append(label)
+            streams.append(stream_url)
             
+        matches = zip(labels, streams)
         if matches:
             common.log_utils.log_debug('Scrape sources |%s| found |%s|' % (regex, matches))
         return matches
