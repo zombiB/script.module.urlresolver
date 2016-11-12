@@ -114,7 +114,6 @@ def scrape_sources(html, result_blacklist=None):
         labels = []
         for r in re.finditer(regex, _html, re.DOTALL):
             match = r.groupdict()
-            common.log_utils.log(match)
             stream_url = match['url']
             file_name = urlparse(stream_url).path.split('/')[-1]
             blocked = not file_name or any(item in file_name.lower() for item in _blacklist)
