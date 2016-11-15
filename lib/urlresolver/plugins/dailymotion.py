@@ -34,11 +34,16 @@ class DailymotionResolver(UrlResolver):
         html = self.net.http_GET(web_url).content
         html = html.replace('\\', '')
 
+        livesource = re.findall('"auto"\s*:\s*.+?"url"\s*:\s*"(.+?)"', html)
+
         sources = re.findall('"(\d+)"\s*:.+?"url"\s*:\s*"([^"]+)', html)
         
-        if not sources:
+        if not sources and not livesource:
             raise ResolverError('File not found')
-        
+
+        if livesource and not sources:
+            return self.net.http_HEAD(livesource[0]).get_url()
+
         sources = sorted(sources, key=lambda x: x[0])[::-1]
 
         source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')

@@ -16,10 +16,10 @@
 """
 
 import re
-from lib import jsunpack
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
+
 
 class VidtoResolver(UrlResolver):
     name = "vidto"
@@ -31,32 +31,18 @@ class VidtoResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = self.net.http_GET(web_url, headers=headers).content
+        html = helpers.add_packed_data(html)
+        sources = []
+        for match in re.finditer('label:\s*"([^"]+)"\s*,\s*file:\s*"([^"]+)', html):
+            label, stream_url = match.groups()
+            sources.append((label, stream_url))
 
-        html = self.net.http_GET(web_url).content
+        sources = sorted(sources, key=lambda x: x[0])[::-1]
+        return helpers.pick_source(sources) + helpers.append_headers(headers)
 
-        if jsunpack.detect(html):
-            js_data = jsunpack.unpack(html)
-
-            sources = []
-            stream_url = ''
-            for match in re.finditer('label:\s*"([^"]+)"\s*,\s*file:\s*"([^"]+)', js_data):
-                label, stream_url = match.groups()
-                sources.append((label, stream_url))
-
-            if sources:
-                sources = sorted(sources, key=lambda x: x[0])[::-1]
-                source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
-            
-            if source:
-                return source
-   
         raise ResolverError("File Link Not Found")
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)
-    
-    @classmethod
-    def get_settings_xml(cls):
-        xml = super(cls, cls).get_settings_xml()
-        xml.append('<setting id="%s_auto_pick" type="bool" label="Automatically pick best quality" default="false" visible="true"/>' % (cls.__name__))
-        return xml
