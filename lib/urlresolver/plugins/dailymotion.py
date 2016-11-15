@@ -46,7 +46,7 @@ class DailymotionResolver(UrlResolver):
 
         sources = sorted(sources, key=lambda x: x[0])[::-1]
 
-        source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
+        source = helpers.pick_source(sources)
         
         if not '.m3u8' in source:
             raise ResolverError('File not found')
