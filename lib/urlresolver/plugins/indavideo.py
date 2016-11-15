@@ -49,13 +49,13 @@ class IndavideoResolver(UrlResolver):
             data = json.loads(html)
 
         if data['success'] == '1':
-            video_file = data['data']['video_file'].rsplit('/', 1)[0] + '/'
-            sources = list(set(data['data']['flv_files']))
-            sources = [(i.rsplit('.', 2)[-2] + 'p', i.split('?')[0] + '?channel=main') for i in sources]
+            flv_files = list(set(data['data']['flv_files']))
+            sources = [(data['data']['video_file'].rsplit('/', 1)[0] + '/' + i) for i in flv_files]
+            sources = [(i.rsplit('.', 2)[1] + 'p', i) for i in sources]
             sources = sorted(sources, key=lambda x: x[0])[::-1]
             source = helpers.pick_source(sources, self.get_setting('auto_pick') == 'true')
 
-            return video_file + source
+            return source
         
         raise ResolverError('File not found')
 
