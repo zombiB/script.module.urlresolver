@@ -53,13 +53,8 @@ class IndavideoResolver(UrlResolver):
             sources = list(set(data['data']['flv_files']))
             sources = [(i.rsplit('.', 2)[-2] + 'p', i.split('?')[0] + '?channel=main') for i in sources]
             sources = sorted(sources, key=lambda x: x[0])[::-1]
-            return helpers.pick_source(sources)
+            return video_file + helpers.pick_source(sources)
 
-<<<<<<< HEAD
-=======
-            return video_file + source
-        
->>>>>>> parent of 12aa692... Revert "fix indavideo"
         raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
