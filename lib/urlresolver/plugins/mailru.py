@@ -42,17 +42,11 @@ class MailRuResolver(UrlResolver):
         if html:
             try:
                 js_data = json.loads(html)
-                headers = dict(response._response.info().items())
-                cookie = ''
-                if 'set-cookie' in headers: cookie = '|' + urllib.urlencode({'Cookie': headers['set-cookie']})
-
-                sources = [('%s' % video['key'], '%s%s' % (video['url'], cookie)) for video in js_data['videos']]
+                sources = [(video['key'], video['url']) for video in js_data['videos']]
                 sources = sources[::-1]
                 source = helpers.pick_source(sources)
                 source = source.encode('utf-8')
-
-                return source
-                
+                return source + helpers.append_headers({'Cookie': response.get_headers(as_dict=True).get('Set-Cookie', '')})
             except:
                 raise ResolverError('No playable video found.')
 
