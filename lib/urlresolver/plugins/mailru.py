@@ -29,7 +29,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class MailRuResolver(UrlResolver):
     name = "mail.ru"
     domains = ['mail.ru', 'my.mail.ru', 'videoapi.my.mail.ru', 'api.video.mail.ru']
-    pattern = '(?://|\.)(mail\.ru)/.+?/(inbox|mail)/(.+?)/.+?/(\d*)\.html'
+    pattern = '(?://|\.)(mail\.ru)/.+?/(inbox|mail|embed)/(?:(.+?)/.+?/)?(\d+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -61,7 +61,18 @@ class MailRuResolver(UrlResolver):
 
     def get_url(self, host, media_id):
         location, user, media_id = media_id.split('|')
-        return 'http://videoapi.my.mail.ru/videos/%s/%s/_myvideo/%s.json?ver=0.2.60' % (location, user, media_id)
+        if user == 'None':
+            try:
+                web_url = 'https://my.mail.ru/video/embed/%s' % media_id
+                response = self.net.http_GET(web_url)
+                html = response.content.encode('utf-8')
+                media_id = re.search(r'[\"\']movieSrc[\"\']\s?:\s?[\"\'](.*?)[\"\']', html).groups()[0]
+                return 'http://videoapi.my.mail.ru/videos/%s.json?ver=0.2.60' % (media_id)
+                
+            except:
+                raise ResolverError('No playable video found.')
+        
+        else: return 'http://videoapi.my.mail.ru/videos/%s/%s/_myvideo/%s.json?ver=0.2.60' % (location, user, media_id)
 
     def get_host_and_id(self, url):
         r = re.search(self.pattern, url)
