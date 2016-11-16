@@ -17,6 +17,7 @@
 """
 
 from lib import helpers
+from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
 
@@ -25,8 +26,21 @@ class GorillavidResolver(UrlResolver):
     domains = ["gorillavid.in", "gorillavid.com"]
     pattern = '(?://|\.)(gorillavid\.(?:in|com))/(?:embed-)?([0-9a-zA-Z]+)'
 
+    def __init__(self):
+        self.net = common.Net()
+
     def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id))
+        web_url = self.get_url(host, media_id)
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        response = self.net.http_GET(web_url, headers=headers)
+        html = response.content
+        sources = helpers.scrape_sources(html)
+        if not sources:
+            data = helpers.get_hidden(html)
+            headers['Cookie'] = response.get_headers(as_dict=True).get('Set-Cookie', '')
+            html = self.net.http_POST(response.get_url(), headers=headers, form_data=data).content
+            sources = helpers.scrape_sources(html)
+        return helpers.pick_source(sources) + helpers.append_headers(headers)
 
     def get_url(self, host, media_id):
         return 'http://gorillavid.in/%s' % (media_id)
