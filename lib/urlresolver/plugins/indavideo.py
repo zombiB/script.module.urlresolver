@@ -7,12 +7,10 @@
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
@@ -32,8 +30,8 @@ class IndavideoResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
-        html = self.net.http_GET(web_url).content
+        headers = {'User-Agent': common.FF_USER_AGENT}
+        html = self.net.http_GET(web_url, headers=headers).content
         data = json.loads(html)
 
         if data['success'] == '0': 
@@ -49,7 +47,11 @@ class IndavideoResolver(UrlResolver):
             data = json.loads(html)
 
         if data['success'] == '1':
-            video_file = data['data']['video_file'].rsplit('/', 1)[0] + '/'
+            video_file = data['data']['video_file']
+            if video_file == '':
+                raise ResolverError('File removed')
+            
+            video_file = video_file.rsplit('/', 1)[0] + '/'
             sources = list(set(data['data']['flv_files']))
             sources = [(i.rsplit('.', 2)[-2] + 'p', i.split('?')[0] + '?channel=main') for i in sources]
             sources = sorted(sources, key=lambda x: x[0])[::-1]
