@@ -33,7 +33,6 @@ import sys
 import os
 import xbmcgui
 import common
-import xml.dom.minidom
 from hmf import HostedMediaFile
 from urlresolver.resolver import UrlResolver
 from plugins import *
