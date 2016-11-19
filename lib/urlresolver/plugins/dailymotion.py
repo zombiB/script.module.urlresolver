@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 '''
 
-import re
+import re,urllib
 from lib import helpers
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
@@ -32,6 +32,12 @@ class DailymotionResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
+        if '"reason":"video attribute|explicit"' in html:
+            headers = {'User-Agent': common.FF_USER_AGENT, 'Referer': web_url}
+            url_back = '/embed/video/%s' % media_id
+            web_url = 'http://www.dailymotion.com/family_filter?enable=false&urlback=%s' % urllib.quote_plus(url_back)
+            html = self.net.http_GET(url=web_url, headers=headers).content
+            
         html = html.replace('\\', '')
 
         livesource = re.findall('"auto"\s*:\s*.+?"url"\s*:\s*"(.+?)"', html)
