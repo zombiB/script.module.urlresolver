@@ -48,6 +48,7 @@ class FlashxResolver(UrlResolver):
                 if new_py:
                     with open(FX_PATH, 'w') as f:
                         f.write(new_py)
+                    common.kodi.notify('Flashx Resolver Auto-Updated')
             else:
                 common.log_utils.log('Reusing existing fx_gmu.py: |%s|%s|%s|%s|' % (old_etag, new_etag, old_len, new_len))
         except Exception as e:
