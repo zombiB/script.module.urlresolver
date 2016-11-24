@@ -30,8 +30,6 @@ class AllVidResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        _html = self.net.http_GET(web_url).content
-        web_url = self.get_url2(host, media_id)
         self.headers['Referer'] = web_url
         html = self.net.http_GET(web_url, headers=self.headers).content
         r = re.search('src="/?(pcs\?code=[^"]+?)"', html, re.DOTALL)
@@ -46,7 +44,4 @@ class AllVidResolver(UrlResolver):
             raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
-        return "http://video.anyfiles.pl/videos.jsp?id=%s" % (media_id)
-
-    def get_url2(self, host, media_id):
         return "http://video.anyfiles.pl/w.jsp?id=%s&width=620&height=349&pos=&skin=0" % (media_id)
