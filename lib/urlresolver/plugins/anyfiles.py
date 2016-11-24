@@ -18,7 +18,7 @@ import re
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class AllVidResolver(UrlResolver):
+class AnyFilesResolver(UrlResolver):
     name = "anyfiles"
     domains = ["anyfiles.pl"]
     pattern = '(?://|\.)(anyfiles\.pl)/.*?(?:id=|v=|/)([0-9]+)'
