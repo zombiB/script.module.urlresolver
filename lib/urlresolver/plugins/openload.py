@@ -87,7 +87,7 @@ class OpenLoadResolver(UrlResolver):
                 old_py = f.read()
             old_len = len(old_py)
         except:
-            old_len = 0
+            old_len = -1
         return old_len
 
     def get_media_url(self, host, media_id):
