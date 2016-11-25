@@ -104,7 +104,6 @@ class OpenLoadResolver(UrlResolver):
             return ol_gmu.get_media_url(web_url)
         except Exception as e:
             common.log_utils.log_debug('Exception during openload resolve parse: %s' % (e))
-            raise
             try:
                 video_url = self.__check_auth(media_id)
                 if not video_url:
