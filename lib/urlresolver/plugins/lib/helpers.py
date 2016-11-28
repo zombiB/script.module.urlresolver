@@ -30,8 +30,7 @@ def get_hidden(html, form_id=None, index=None, include_submit=True):
     else:
         pattern = '''<form[^>]*>(.*?)</form>'''
     
-    for match in re.finditer('<!--.*?(..)-->', html, re.DOTALL):
-        if match.group(1) != '//': html = html.replace(match.group(0), '')
+    html = cleanse_html(html)
         
     for i, form in enumerate(re.finditer(pattern, html, re.DOTALL | re.I)):
         if index is None or i == index:
@@ -178,3 +177,42 @@ def get_media_url(url, result_blacklist=None):
     source_list = scrape_sources(html, result_blacklist)
     source = pick_source(source_list)
     return source + append_headers(headers)
+
+def cleanse_html(html):
+    for match in re.finditer('<!--.*?(..)-->', html, re.DOTALL):
+        if match.group(1) != '//': html = html.replace(match.group(0), '')
+    
+    html = re.sub('''<(div|span)[^>]+style=["'](visibility:\s*hidden|display:\s*none);?["']>.*?</\\1>''', '', html, re.I | re.DOTALL)
+    return html
+
+def get_dom(html, tag):
+    start_str = '<%s' % (tag.lower())
+    end_str = '</%s' % (tag.lower())
+    
+    results = []
+    html = html.lower()
+    while html:
+        start = html.find(start_str)
+        end = html.find(end_str, start)
+        pos = html.find(start_str, start + 1)
+        while pos < end and pos != -1:
+            tend = html.find(end_str, end + len(end_str))
+            if tend != -1: end = tend
+            pos = html.find(start_str, pos + 1)
+        
+        if start == -1 and end == -1:
+            break
+        elif start > -1 and end > -1:
+            result = html[start:end]
+        elif end > -1:
+            result = html[:end]
+        elif start > -1:
+            result = html[start:]
+        else:
+            break
+            
+        results.append(result)
+        html = html[start + len(start_str):]
+    
+    return results
+
