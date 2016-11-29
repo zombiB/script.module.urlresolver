@@ -29,13 +29,17 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class MailRuResolver(UrlResolver):
     name = "mail.ru"
     domains = ['mail.ru', 'my.mail.ru', 'videoapi.my.mail.ru', 'api.video.mail.ru']
-    pattern = '(?://|\.)(mail\.ru)/.+?/(inbox|mail|embed)/(?:(.+?)/.+?/)?(\d+)'
+    pattern = '(?://|\.)(mail\.ru)/.+?/(?:embed/|)(inbox|mail|embed)/(?:(.+?)/.+?/)?(\d+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+
+        print host
+        print media_id
+
         response = self.net.http_GET(web_url)
         html = response.content
 
