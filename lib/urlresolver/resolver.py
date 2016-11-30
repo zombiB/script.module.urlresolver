@@ -17,6 +17,7 @@
 This module defines the interfaces that you can implement when writing
 your URL resolving plugin.
 '''
+import os
 import re
 import abc
 from urlresolver import common
@@ -172,3 +173,32 @@ class UrlResolver(object):
         if template is None: template = 'http://{host}/embed-{media_id}.html'
         host = self._get_host(host)
         return template.format(host=host, media_id=media_id)
+
+    # @common.cache.cache_method(cache_limit=1)
+    def _auto_update(self, py_source, py_path, key=None):
+        try:
+            if self.get_setting('auto_update') == 'true' and py_source:
+                headers = self.net.http_HEAD(py_source).get_headers(as_dict=True)
+                common.log_utils.log(headers)
+                old_etag = self.get_setting('etag')
+                new_etag = headers.get('Etag', '')
+                old_len = common.file_length(py_path)
+                new_len = int(headers.get('Content-Length', 0))
+                py_name = os.path.basename(py_path)
+                
+                if old_etag != new_etag or old_len != new_len:
+                    common.log_utils.log('Updating %s: |%s|%s|%s|%s|' % (py_name, old_etag, new_etag, old_len, new_len))
+                    self.set_setting('etag', new_etag)
+                    new_py = self.net.http_GET(py_source).content
+                    if new_py:
+                        if key is not None:
+                            new_py = common.decrypt_py(new_py, key)
+                            
+                        if new_py:
+                            with open(py_path, 'w') as f:
+                                f.write(new_py)
+                            common.kodi.notify('%s Resolver Auto-Updated' % (self.name))
+                else:
+                    common.log_utils.log('Reusing existing %s: |%s|%s|%s|%s|' % (py_name, old_etag, new_etag, old_len, new_len))
+        except Exception as e:
+            common.log_utils.log_warning('Exception during %s Auto-Update code retrieve: %s' % (self.name, e))

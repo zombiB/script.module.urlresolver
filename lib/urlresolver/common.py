@@ -16,10 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import hashlib
 from lib import log_utils  # @UnusedImport
 from lib.net import Net, get_ua  # @UnusedImport
 from lib import cache  # @UnusedImport
 from lib import kodi
+from lib import pyaes
 
 addon_path = kodi.get_path()
 plugins_path = os.path.join(addon_path, 'lib', 'urlresolver', 'plugins')
@@ -38,3 +40,39 @@ OPERA_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTM
 IOS_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'
 ANDROID_USER_AGENT = 'Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.114 Mobile Safari/537.36'
 SMU_USER_AGENT = 'URLResolver for Kodi/%s' % (addon_version)
+
+def log_file_hash(path):
+    try:
+        with open(path, 'r') as f:
+            py_data = f.read()
+    except:
+        py_data = ''
+        
+    log_utils.log('%s hash: %s' % (os.path.basename(path), hashlib.md5(py_data).hexdigest()))
+
+def file_length(py_path):
+    try:
+        with open(py_path, 'r') as f:
+            old_py = f.read()
+        old_len = len(old_py)
+    except:
+        old_len = -1
+    return old_len
+
+def decrypt_py(cipher_text, key):
+    if cipher_text:
+        try:
+            scraper_key = hashlib.sha256(key).digest()
+            IV = '\0' * 16
+            decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(scraper_key, IV))
+            plain_text = decrypter.feed(cipher_text)
+            plain_text += decrypter.feed()
+            if 'import' not in plain_text:
+                plain_text = ''
+        except Exception as e:
+            log_utils.log_warning('Exception during OpenLoad Decrypt: %s' % (e))
+            plain_text = ''
+    else:
+        plain_text = ''
+
+    return plain_text
