@@ -50,13 +50,16 @@ def log_file_hash(path):
         
     log_utils.log('%s hash: %s' % (os.path.basename(path), hashlib.md5(py_data).hexdigest()))
 
-def file_length(py_path):
+def file_length(py_path, key=''):
     try:
         with open(py_path, 'r') as f:
             old_py = f.read()
+        if key:
+            old_py = encrypt_py(old_py, key)
         old_len = len(old_py)
     except:
         old_len = -1
+        
     return old_len
 
 def decrypt_py(cipher_text, key):
@@ -70,9 +73,25 @@ def decrypt_py(cipher_text, key):
             if 'import' not in plain_text:
                 plain_text = ''
         except Exception as e:
-            log_utils.log_warning('Exception during OpenLoad Decrypt: %s' % (e))
+            log_utils.log_warning('Exception during Py Decrypt: %s' % (e))
             plain_text = ''
     else:
         plain_text = ''
 
     return plain_text
+
+def encrypt_py(plain_text, key):
+    if plain_text:
+        try:
+            scraper_key = hashlib.sha256(key).digest()
+            IV = '\0' * 16
+            decrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(scraper_key, IV))
+            cipher_text = decrypter.feed(plain_text)
+            cipher_text += decrypter.feed()
+        except Exception as e:
+            log_utils.log_warning('Exception during Py Encrypt: %s' % (e))
+            cipher_text = ''
+    else:
+        cipher_text = ''
+
+    return cipher_text

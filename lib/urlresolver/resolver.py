@@ -175,14 +175,14 @@ class UrlResolver(object):
         return template.format(host=host, media_id=media_id)
 
     @common.cache.cache_method(cache_limit=1)
-    def _auto_update(self, py_source, py_path, key=None):
+    def _auto_update(self, py_source, py_path, key=''):
         try:
             if self.get_setting('auto_update') == 'true' and py_source:
                 headers = self.net.http_HEAD(py_source).get_headers(as_dict=True)
                 common.log_utils.log(headers)
                 old_etag = self.get_setting('etag')
                 new_etag = headers.get('Etag', '')
-                old_len = common.file_length(py_path)
+                old_len = common.file_length(py_path, key)
                 new_len = int(headers.get('Content-Length', 0))
                 py_name = os.path.basename(py_path)
                 
@@ -191,10 +191,10 @@ class UrlResolver(object):
                     self.set_setting('etag', new_etag)
                     new_py = self.net.http_GET(py_source).content
                     if new_py:
-                        if key is not None:
+                        if key:
                             new_py = common.decrypt_py(new_py, key)
                             
-                        if new_py:
+                        if new_py and 'import' in new_py:
                             with open(py_path, 'w') as f:
                                 f.write(new_py)
                             common.kodi.notify('%s Resolver Auto-Updated' % (self.name))
