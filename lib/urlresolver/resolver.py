@@ -174,7 +174,7 @@ class UrlResolver(object):
         host = self._get_host(host)
         return template.format(host=host, media_id=media_id)
 
-    # @common.cache.cache_method(cache_limit=1)
+    @common.cache.cache_method(cache_limit=1)
     def _auto_update(self, py_source, py_path, key=None):
         try:
             if self.get_setting('auto_update') == 'true' and py_source:
