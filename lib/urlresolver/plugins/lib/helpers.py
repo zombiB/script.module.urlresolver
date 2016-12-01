@@ -162,9 +162,7 @@ def get_media_url(url, result_blacklist=None):
 
     result_blacklist = list(set(result_blacklist + ['.smil']))  # smil(not playable) contains potential sources, only blacklist when called from here
     net = common.Net()
-    parsed_url = urlparse(url)
-    headers = {'User-Agent': common.FF_USER_AGENT,
-               'Referer': '%s://%s' % (parsed_url.scheme, parsed_url.hostname)}
+    headers = {'User-Agent': common.FF_USER_AGENT}
 
     response = net.http_GET(url, headers=headers)
     response_headers = response.get_headers(as_dict=True)
