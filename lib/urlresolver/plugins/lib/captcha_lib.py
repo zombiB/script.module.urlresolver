@@ -34,7 +34,7 @@ def get_response(img):
         wdlg = xbmcgui.WindowDialog()
         wdlg.addControl(img)
         wdlg.show()
-        xbmc.sleep(3000)
+        common.kodi.sleep(3000)
         kb = xbmc.Keyboard('', 'Type the letters in the image', False)
         kb.doModal()
         if (kb.isConfirmed()):

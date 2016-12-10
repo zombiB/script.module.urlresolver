@@ -105,7 +105,7 @@ def parse_smil_source_list(smil):
         sources += [(label, '%s playpath=%s' % (base, i.group(1)))]
     return sources
 
-def scrape_sources(html, result_blacklist=None):
+def scrape_sources(html, result_blacklist=None, scheme='http'):
     def __parse_to_list(_html, regex):
         _blacklist = ['.jpg', '.jpeg', '.gif', '.png', '.js', '.css', '.htm', '.html', '.php', '.srt', '.sub', '.xml', '.swf', '.vtt']
         _blacklist = set(_blacklist + result_blacklist)
@@ -116,6 +116,7 @@ def scrape_sources(html, result_blacklist=None):
             stream_url = match['url']
             file_name = urlparse(stream_url).path.split('/')[-1]
             blocked = not file_name or any(item in file_name.lower() for item in _blacklist)
+            if stream_url.startswith('//'): stream_url = scheme + ':' + stream_url
             if '://' not in stream_url or blocked or (stream_url in streams) or any(stream_url == t[1] for t in source_list):
                 continue
     
@@ -155,6 +156,7 @@ def scrape_sources(html, result_blacklist=None):
 
 
 def get_media_url(url, result_blacklist=None):
+    scheme = urlparse(url).scheme
     if result_blacklist is None:
         result_blacklist = []
     elif isinstance(result_blacklist, str):
@@ -172,7 +174,7 @@ def get_media_url(url, result_blacklist=None):
         headers.update({'Cookie': cookie})
     html = response.content
 
-    source_list = scrape_sources(html, result_blacklist)
+    source_list = scrape_sources(html, result_blacklist, scheme)
     source = pick_source(source_list)
     return source + append_headers(headers)
 
