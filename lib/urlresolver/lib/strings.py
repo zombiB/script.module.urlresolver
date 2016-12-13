@@ -34,5 +34,18 @@ STRINGS = {
     'universal_resolvers': 33014,
     'resolvers': 33015,
     'priority': 33016,
-    'enabled': 33017
+    'enabled': 33017,
+    'rd_authorized': 33018,
+    'rd_auth_reset': 33019,
+    'cache_reset': 33020,
+    'cache_reset_failed': 33021,
+    'login': 33022,
+    'username': 33023,
+    'password': 33024,
+    'use_https': 33025,
+    'customer_id': 33026,
+    'pin': 33027,
+    'auto_primary_link': 33028,
+    'auth_my_account': 33029,
+    'reset_my_auth': 33030
 }

@@ -85,3 +85,56 @@ msgctxt "#33017"
 msgid "Enabled"
 msgstr ""
 
+msgctxt "#33018"
+msgid "Real-Debrid Resolver Authorized"
+msgstr ""
+
+msgctxt "#33019"
+msgid "Real-Debrid Authorization Reset"
+msgstr ""
+
+msgctxt "#33020"
+msgid "Cache Reset"
+msgstr ""
+
+msgctxt "#33021"
+msgid "Cache Reset Failed"
+msgstr ""
+
+msgctxt "#33022"
+msgid "login"
+msgstr ""
+
+msgctxt "#33023"
+msgid "Username"
+msgstr ""
+
+msgctxt "#33024"
+msgid "Password"
+msgstr ""
+
+msgctxt "#33025"
+msgid "Use HTTPS"
+msgstr ""
+
+msgctxt "#33026"
+msgid "Customer ID"
+msgstr ""
+
+msgctxt "#33027"
+msgid "PIN"
+msgstr ""
+
+msgctxt "#33028"
+msgid "Choose Primary Link Automatically"
+msgstr ""
+
+msgctxt "#33029"
+msgid "(Re)Authorize My Account"
+msgstr ""
+
+msgctxt "#33030"
+msgid "Reset My Authorization"
+msgstr ""
+
+
