@@ -1,176 +1,175 @@
 # Addon Name: URLResolver
 # Addon id: script.module.urlresolver
 # Addon Provider: TV Addons
+# Translators:
+# Viper2k4, 2016
+# tknorris, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: TV Addons Addons\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Language-Team: English\n"
+"Last-Translator: tknorris, 2016\n"
+"Language-Team: German (https://www.transifex.com/tv-addons/teams/41608/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en\n"
+"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#33000"
 msgid "OpenLoad Stream Authorization"
-msgstr ""
+msgstr "OpenLoad Stream Autorisierung"
 
 msgctxt "#33001"
 msgid "To play this video, authorization is required"
-msgstr ""
-
-msgctxt "#33002"
-msgid "Visit the link below to authorize the devices on your network:"
-msgstr ""
+msgstr "Um dieses Video abzuspielen, ist eine Autorisierung erforderlich"
 
 msgctxt "#33003"
 msgid "[B][COLOR blue]%s[/COLOR][/B] then click 'Pair'"
-msgstr ""
+msgstr "[B][COLOR blue]%s[/COLOR][/B] und klicken dann 'Pair'"
 
 msgctxt "#33004"
 msgid "No OpenLoad Authorization"
-msgstr ""
+msgstr "Keine OpenLoad Autorisierung"
 
 msgctxt "#33005"
 msgid "Automatically update resolver"
-msgstr ""
+msgstr "Resolver automatisch aktualisieren"
 
 msgctxt "#33006"
 msgid "Auto-Update Url"
-msgstr ""
+msgstr "Auto-Update Url"
 
 msgctxt "#33007"
 msgid "Decryption Key"
-msgstr ""
+msgstr "Entschlüsselungsschlüssel"
 
 msgctxt "#33008"
 msgid "TheVideo.me Stream Authorization"
-msgstr ""
+msgstr "TheVideo.me Stream Autorisierung"
 
 msgctxt "#33009"
 msgid "VidUP.me Stream Authorization"
-msgstr ""
+msgstr "VidUP.me Stream Autorisierung"
 
 msgctxt "#33010"
 msgid "Enable Universal Resolvers"
-msgstr ""
+msgstr "Universal-Resolver aktivieren"
 
 msgctxt "#33011"
 msgid "Automatically pick best quality"
-msgstr ""
+msgstr "Automatisch besten Qualität auswählen"
 
 msgctxt "#33012"
 msgid "Use Function Cache"
-msgstr ""
+msgstr "Cache-Funktion benutzen"
 
 msgctxt "#33013"
 msgid "Reset Function Cache"
-msgstr ""
+msgstr "Cache-Funktion zurücksetzen"
 
 msgctxt "#33014"
 msgid "Universal Resolvers"
-msgstr ""
+msgstr "Universelle Resolver"
 
 msgctxt "#33015"
 msgid "Resolvers"
-msgstr ""
+msgstr "Resolver"
 
 msgctxt "#33016"
 msgid "Priority"
-msgstr ""
+msgstr "Priorität"
 
 msgctxt "#33017"
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiviert"
 
 msgctxt "#33018"
 msgid "Real-Debrid Resolver Authorized"
-msgstr ""
+msgstr "Real-Debrid Resolver autorisiert"
 
 msgctxt "#33019"
 msgid "Real-Debrid Authorization Reset"
-msgstr ""
+msgstr "Real-Debrid Autorisierung zurücksetzen"
 
 msgctxt "#33020"
 msgid "Cache Reset"
-msgstr ""
+msgstr "Cache zurücksetzen"
 
 msgctxt "#33021"
 msgid "Cache Reset Failed"
-msgstr ""
+msgstr "Fehler beim Cache zurücksetzen"
 
 msgctxt "#33022"
 msgid "login"
-msgstr ""
+msgstr "Login"
 
 msgctxt "#33023"
 msgid "Username"
-msgstr ""
+msgstr "Benutzername"
 
 msgctxt "#33024"
 msgid "Password"
-msgstr ""
+msgstr "Passwort"
 
 msgctxt "#33025"
 msgid "Use HTTPS"
-msgstr ""
+msgstr "HTTPS benutzen"
 
 msgctxt "#33026"
 msgid "Customer ID"
-msgstr ""
+msgstr "Kundennummer"
 
 msgctxt "#33027"
 msgid "PIN"
-msgstr ""
+msgstr "PIN"
 
 msgctxt "#33028"
 msgid "Choose Primary Link Automatically"
-msgstr ""
+msgstr "Primärlink automatisch wählen"
 
 msgctxt "#33029"
 msgid "(Re)Authorize My Account"
-msgstr ""
+msgstr "(Re)Autorisiere mein Konto"
 
 msgctxt "#33030"
 msgid "Reset My Authorization"
-msgstr ""
+msgstr "Meine Autorisierung zurücksetzen"
 
 msgctxt "#33031"
 msgid "Resolver Auto-Updated"
-msgstr ""
+msgstr "Resolver automatisch aktualisiert"
 
 msgctxt "#33032"
 msgid "Type the letters in the image"
-msgstr ""
+msgstr "Geben Sie die Buchstaben aus dem Bild ein"
 
 msgctxt "#33033"
 msgid "Captcha Error"
-msgstr ""
+msgstr "Captcha-Fehler"
 
 msgctxt "#33034"
 msgid "Choose the link"
-msgstr ""
+msgstr "Wählen Sie einen Link"
 
 msgctxt "#33035"
 msgid "No link selected"
-msgstr ""
+msgstr "Keine Link ausgewählt"
 
 msgctxt "#33036"
 msgid "No Video Link Found"
-msgstr ""
+msgstr "Kein Video Link gefunden"
 
 msgctxt "#33037"
 msgid "Captcha Round: %s [I](2 Rounds is typical)[/I]"
-msgstr ""
+msgstr "Captcha Runde: %s [I](2 Runden sind üblich)[/I]"
 
 msgctxt "#33038"
 msgid "Cancel"
-msgstr ""
+msgstr "Abbrechen"
 
 msgctxt "#33039"
 msgid "OK"
-msgstr ""
-
+msgstr "OK"
 
