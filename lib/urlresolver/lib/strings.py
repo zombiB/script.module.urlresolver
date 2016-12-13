@@ -47,5 +47,6 @@ STRINGS = {
     'pin': 33027,
     'auto_primary_link': 33028,
     'auth_my_account': 33029,
-    'reset_my_auth': 33030
+    'reset_my_auth': 33030,
+    'resolver_updated': 33031
 }

@@ -137,4 +137,8 @@ msgctxt "#33030"
 msgid "Reset My Authorization"
 msgstr ""
 
+msgctxt "#33031"
+msgid "Resolver Auto-Updated"
+msgstr ""
+
 

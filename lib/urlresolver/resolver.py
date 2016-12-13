@@ -197,7 +197,7 @@ class UrlResolver(object):
                         if new_py and 'import' in new_py:
                             with open(py_path, 'w') as f:
                                 f.write(new_py)
-                            common.kodi.notify('%s Resolver Auto-Updated' % (self.name))
+                            common.kodi.notify('%s %s' % (self.name, common.i18n('resolver_updated')))
                 else:
                     common.log_utils.log('Reusing existing %s: |%s|%s|%s|%s|' % (py_name, old_etag, new_etag, old_len, new_len))
         except Exception as e:
