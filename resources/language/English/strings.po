@@ -141,4 +141,12 @@ msgctxt "#33031"
 msgid "Resolver Auto-Updated"
 msgstr ""
 
+msgctxt "#33032"
+msgid "Type the letters in the image"
+msgstr ""
+
+msgctxt "#33033"
+msgid "Captcha Error"
+msgstr ""
+
 

@@ -60,6 +60,16 @@ def get_name():
 def open_settings():
     return addon.openSettings()
 
+def get_keyboard(heading, default=''):
+    keyboard = xbmc.Keyboard()
+    keyboard.setHeading(heading)
+    if default: keyboard.setDefault(default)
+    keyboard.doModal()
+    if keyboard.isConfirmed():
+        return keyboard.getText()
+    else:
+        return None
+
 def i18n(string_id):
     try:
         return addon.getLocalizedString(strings.STRINGS[string_id]).encode('utf-8', 'ignore')

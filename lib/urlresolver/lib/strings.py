@@ -48,5 +48,7 @@ STRINGS = {
     'auto_primary_link': 33028,
     'auth_my_account': 33029,
     'reset_my_auth': 33030,
-    'resolver_updated': 33031
+    'resolver_updated': 33031,
+    'letters_image': 33032,
+    'captcha_error': 33033
 }

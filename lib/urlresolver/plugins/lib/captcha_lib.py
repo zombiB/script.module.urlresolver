@@ -20,7 +20,6 @@
 from urlresolver import common
 import re
 import xbmcgui
-import xbmc
 import os
 import recaptcha_v2
 import helpers
@@ -35,16 +34,9 @@ def get_response(img):
         wdlg.addControl(img)
         wdlg.show()
         common.kodi.sleep(3000)
-        kb = xbmc.Keyboard('', 'Type the letters in the image', False)
-        kb.doModal()
-        if (kb.isConfirmed()):
-            solution = kb.getText()
-            if solution == '':
-                raise Exception('You must enter text in the image to access video')
-            else:
-                return solution
-        else:
-            raise Exception('Captcha Error')
+        solution = common.kodi.get_keyboard(common.i18n('letters_image'))
+        if not solution:
+            raise Exception('captcha_error')
     finally:
         wdlg.close()
 
