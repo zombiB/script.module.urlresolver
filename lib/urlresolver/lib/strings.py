@@ -50,5 +50,11 @@ STRINGS = {
     'reset_my_auth': 33030,
     'resolver_updated': 33031,
     'letters_image': 33032,
-    'captcha_error': 33033
+    'captcha_error': 33033,
+    'choose_the_link': 33034,
+    'no_link_selected': 33035,
+    'no_video_link': 33036,
+    'captcha_round': 33037,
+    'cancel': 33038,
+    'ok': 33039
 }

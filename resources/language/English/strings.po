@@ -149,4 +149,28 @@ msgctxt "#33033"
 msgid "Captcha Error"
 msgstr ""
 
+msgctxt "#33034"
+msgid "Choose the link"
+msgstr ""
+
+msgctxt "#33035"
+msgid "'No link selected"
+msgstr ""
+
+msgctxt "#33036"
+msgid "No Video Link Found"
+msgstr ""
+
+msgctxt "#33037"
+msgid "Captcha Round: %s [I](2 Rounds is typical)[/I]"
+msgstr ""
+
+msgctxt "#33038"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "#33039"
+msgid "OK"
+msgstr ""
+
 
