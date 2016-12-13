@@ -27,6 +27,7 @@ import os
 import re
 import time
 import log_utils
+import strings
 import CustomProgressDialog
 
 addon = xbmcaddon.Addon('script.module.urlresolver')
@@ -59,6 +60,13 @@ def get_name():
 def open_settings():
     return addon.openSettings()
 
+def i18n(string_id):
+    try:
+        return addon.getLocalizedString(strings.STRINGS[string_id]).encode('utf-8', 'ignore')
+    except Exception as e:
+        log_utils.log('Failed String Lookup: %s (%s)' % (string_id, e))
+        return string_id
+ 
 def get_plugin_url(queries):
     try:
         query = urllib.urlencode(queries)

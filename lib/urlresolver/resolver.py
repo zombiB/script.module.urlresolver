@@ -138,8 +138,8 @@ class UrlResolver(object):
             A list containing XML elements that will be valid in settings.xml
         '''
         xml = [
-            '<setting id="%s_priority" type="number" label="Priority" default="100"/>' % (cls.__name__),
-            '<setting id="%s_enabled" ''type="bool" label="Enabled" default="true"/>' % (cls.__name__)
+            '<setting id="%s_priority" type="number" label="%s" default="100"/>' % (cls.__name__, common.i18n('priority')),
+            '<setting id="%s_enabled" ''type="bool" label="%s" default="true"/>' % (cls.__name__, common.i18n('enabled'))
         ]
         return xml
 
