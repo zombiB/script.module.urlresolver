@@ -25,6 +25,12 @@ msgctxt "#33001"
 msgid "To play this video, authorization is required"
 msgstr "Um dieses Video abzuspielen, ist eine Autorisierung erforderlich"
 
+msgctxt "#33002"
+msgid "Visit the link below to authorize the devices on your network:"
+msgstr ""
+"Besuchen Sie den folgenden Link, um die Geräte in Ihrem Netzwerk zu "
+"autorisieren:"
+
 msgctxt "#33003"
 msgid "[B][COLOR blue]%s[/COLOR][/B] then click 'Pair'"
 msgstr "[B][COLOR blue]%s[/COLOR][/B] und klicken dann 'Pair'"
