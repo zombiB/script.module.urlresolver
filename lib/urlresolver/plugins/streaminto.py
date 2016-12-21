@@ -16,9 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import re
-import urllib2
-from urlresolver import common
+from lib import helpers
 from urlresolver.resolver import UrlResolver, ResolverError
 
 class StreamintoResolver(UrlResolver):
@@ -26,30 +24,8 @@ class StreamintoResolver(UrlResolver):
     domains = ["streamin.to"]
     pattern = '(?://|\.)(streamin\.to)/(?:embed-|)?([0-9A-Za-z]+)'
 
-    def __init__(self):
-        self.net = common.Net()
-
     def get_media_url(self, host, media_id):
-        web_url = self.get_url(host, media_id)
-
-        html = self.net.http_GET(web_url).content
-
-        try:
-            stream_url = re.compile("file\s*:\s*[\'|\"](http.+?)[\'|\"]").findall(html)[0]
-            r = urllib2.Request(stream_url, headers={'User-Agent': common.IE_USER_AGENT})
-            r = urllib2.urlopen(r, timeout=15).headers['Content-Length']
-            return stream_url
-        except:
-            pass
-
-        try:
-            streamer = re.search('streamer:\s*"([^"]+)",', html).group(1).replace(':1935', '')
-            playpath = re.search('file:\s*"([^"]+)",', html).group(1).replace('.flv', '')
-            return '%s playpath=%s' % (streamer, playpath)
-        except:
-            pass
-
-        raise ResolverError('File Not Found or removed')
+        return helpers.get_media_url(self.get_url(host, media_id), result_blacklist=None)
 
     def get_url(self, host, media_id):
-        return 'http://streamin.to/embed-%s.html' % media_id
+        return self._default_get_url(host, media_id, template=None)
