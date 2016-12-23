@@ -37,12 +37,12 @@ class AllVidResolver(UrlResolver):
         html = self.net.http_GET(web_url, headers=headers).content
 
         iframe = re.findall('<iframe\s+src\s*=\s*"([^"]+)', html, re.DOTALL)[0]
+        
         if iframe:
-            html = self.net.http_GET(iframe, headers=headers).content
-
-        html = helpers.add_packed_data(html)
-        sources = helpers.scrape_sources(html, result_blacklist=['dl'])
-        return helpers.pick_source(sources) + helpers.append_headers(headers)
+            return helpers.get_media_url(iframe, result_blacklist=['dl', 'm3u8'])
+        
+        else:
+            raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
         return self._default_get_url(host, media_id)
