@@ -40,7 +40,7 @@ class OpenLoadResolver(UrlResolver):
         try:
             self._auto_update(self.get_setting('url'), OL_PATH, self.get_setting('key'))
             reload(ol_gmu)
-            return ol_gmu.get_media_url(self.get_url(host, media_id))
+            return ol_gmu.get_media_url(self.get_url(host, media_id))  # @UndefinedVariable
         except Exception as e:
             common.log_utils.log_debug('Exception during openload resolve parse: %s' % (e))
             try:
