@@ -195,6 +195,8 @@ class UrlResolver(object):
                             new_py = common.decrypt_py(new_py, key)
                             
                         if new_py and 'import' in new_py:
+                            try: os.remove(py_path)
+                            except: pass
                             try: os.remove(re.sub('\.py$', '.pyo', py_path))
                             except: pass
                             with open(py_path, 'w') as f:
