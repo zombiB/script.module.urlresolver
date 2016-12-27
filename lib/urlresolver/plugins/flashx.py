@@ -17,6 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import fx_gmu
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
@@ -35,7 +36,7 @@ class FlashxResolver(UrlResolver):
         try:
             self._auto_update(FX_SOURCE, FX_PATH)
             common.log_file_hash(FX_PATH)
-            import fx_gmu
+            reload(fx_gmu)
             web_url = self.get_url(host, media_id)
             return fx_gmu.get_media_url(web_url)
         except Exception as e:
