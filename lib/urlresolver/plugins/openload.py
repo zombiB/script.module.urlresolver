@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import json
+import ol_gmu
 from urlresolver import common
 from urlresolver.common import i18n
 from urlresolver.resolver import UrlResolver, ResolverError
@@ -38,8 +39,6 @@ class OpenLoadResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         try:
             self._auto_update(self.get_setting('url'), OL_PATH, self.get_setting('key'))
-            common.log_file_hash(OL_PATH)
-            import ol_gmu
             reload(ol_gmu)
             return ol_gmu.get_media_url(self.get_url(host, media_id))
         except Exception as e:
