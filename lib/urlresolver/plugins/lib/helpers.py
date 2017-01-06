@@ -58,6 +58,8 @@ def pick_source(sources, auto_pick=None):
     if len(sources) == 1:
         return sources[0][1]
     elif len(sources) > 1:
+        try: sources = sorted(sources, key=lambda x: x[0])[::-1]
+        except: pass
         if auto_pick:
             return sources[0][1]
         else:
