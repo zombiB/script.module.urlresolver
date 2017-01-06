@@ -35,6 +35,7 @@ import xbmcgui
 import common
 from hmf import HostedMediaFile
 from urlresolver.resolver import UrlResolver
+from urlresolver.plugins.__generic_resolver__ import GenericResolver
 from plugins import *
 
 common.log_utils.log_notice('Initializing URLResolver version: %s' % (common.addon_version))
@@ -71,7 +72,7 @@ def relevant_resolvers(domain=None, include_universal=None, include_external=Fal
     if include_universal is None:
         include_universal = common.get_setting('allow_universal') == "true"
         
-    classes = UrlResolver.__class__.__subclasses__(UrlResolver)
+    classes = UrlResolver.__class__.__subclasses__(UrlResolver) + UrlResolver.__class__.__subclasses__(GenericResolver)
     relevant = []
     for resolver in classes:
         if include_disabled or resolver._is_enabled():

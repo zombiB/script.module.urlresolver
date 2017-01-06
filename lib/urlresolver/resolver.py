@@ -200,5 +200,6 @@ class UrlResolver(object):
                             common.kodi.notify('%s %s' % (self.name, common.i18n('resolver_updated')))
                 else:
                     common.log_utils.log('Reusing existing %s: |%s|%s|%s|%s|' % (py_name, old_etag, new_etag, old_len, new_len))
+                common.log_file_hash(py_path)
         except Exception as e:
             common.log_utils.log_warning('Exception during %s Auto-Update code retrieve: %s' % (self.name, e))

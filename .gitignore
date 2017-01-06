@@ -10,4 +10,3 @@ doc/resources
 .pydevproject
 /.settings
 /.idea
-/lib/urlresolver/plugins/ol_gmu.py

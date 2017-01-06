@@ -15,18 +15,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from __generic_resolver__ import GenericResolver
 
-from lib import helpers
-from urlresolver.resolver import UrlResolver, ResolverError
-
-
-class VodmineResolver(UrlResolver):
+class VodmineResolver(GenericResolver):
     name = 'Vodmine'
     domains = ['vodmine.com']
     pattern = '(?://|\.)(vodmine\.com)/(?:video|embed)/([0-9a-zA-Z]+)'
-
-    def get_media_url(self, host, media_id):
-        return helpers.get_media_url(self.get_url(host, media_id))
 
     def get_url(self, host, media_id):
         return 'http://vodmine.com/embed/%s' % media_id
