@@ -24,8 +24,8 @@ from urlresolver.resolver import UrlResolver, ResolverError
 
 class TrollVidResolver(UrlResolver):
     name = 'trollvid.net'
-    domains = ['trollvid.net', 'mp4edge.com']
-    pattern = '(?://|\.)((?:trollvid\.net|mp4edge\.com))/(?:embed\.php.file=|embed/|stream/)([0-9a-zA-Z]+)'
+    domains = ['trollvid.net', 'trollvid.io', 'mp4edge.com']
+    pattern = '(?://|\.)((?:trollvid(?:\.net|\.io)|mp4edge\.com))/(?:embed\.php.file=|embed/|stream/)([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
