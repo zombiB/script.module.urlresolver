@@ -37,9 +37,6 @@ class MailRuResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
 
-        print host
-        print media_id
-
         response = self.net.http_GET(web_url)
         html = response.content
 
