@@ -21,8 +21,6 @@ from urlresolver import common
 from urlresolver.common import i18n
 from urlresolver.resolver import UrlResolver, ResolverError
 
-INTERVALS = 5
-
 class TheVideoResolver(UrlResolver):
     name = "thevideo"
     domains = ["thevideo.me"]
