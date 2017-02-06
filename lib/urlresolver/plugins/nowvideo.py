@@ -19,7 +19,7 @@
 
 from __generic_resolver__ import GenericResolver
 
-class VidtoResolver(GenericResolver):
+class NowvideoResolver(GenericResolver):
     name = "nowvideo"
     domains = ['nowvideo.eu', 'nowvideo.ch', 'nowvideo.sx', 'nowvideo.co', 'nowvideo.li', 'nowvideo.fo', 'nowvideo.at', 'nowvideo.ec']
     pattern = '(?://|\.)(nowvideo\.(?:eu|ch|sx|co|li|fo|at|ec))/(?:video/|embed\.php\?\S*v=|embed/\?v=)([A-Za-z0-9]+)'
