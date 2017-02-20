@@ -103,14 +103,17 @@ class MegaDebridResolver(UrlResolver):
             common.log_utils.log('Mega-debrid - Logging In')
             username = self.get_setting('username')
             password = self.get_setting('password')
-            url = self.base_url + '?' + urllib.urlencode({'action': 'connectUser', 'login': username, 'password': password})
-            html = self.net.http_GET(url, headers=self.headers).content
-            js_data = json.loads(html)
-            if js_data.get('response_code') == 'ok':
-                self.token = js_data['token']
-                return True
+            if username and password:
+                url = self.base_url + '?' + urllib.urlencode({'action': 'connectUser', 'login': username, 'password': password})
+                html = self.net.http_GET(url, headers=self.headers).content
+                js_data = json.loads(html)
+                if js_data.get('response_code') == 'ok':
+                    self.token = js_data['token']
+                    return True
+                else:
+                    msg = js_data.get('response_text', 'Unknown Error')
             else:
-                msg = js_data.get('response_text', 'Unknown Error')
+                msg = 'No Username/Password'
         except Exception as e:
             msg = str(e)
         
