@@ -25,6 +25,4 @@ class VodLockResolver(GenericResolver):
     name = "vodlock"
     domains = ['vodlock.co']
     pattern = '(?://|\.)(vodlock\.co)/(?:embed-)?([a-zA-Z0-9]+)'
-
-    def get_url(self, host, media_id):
-        return self._default_get_url(host, media_id, 'http://{host}/embed-{media_id}-640x356.html')
+    
