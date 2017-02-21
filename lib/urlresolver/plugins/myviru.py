@@ -39,8 +39,7 @@ class MyviRuResolver(UrlResolver):
         if not match:
             raise ResolverError('File Not Found or removed')
 
-        sources = [i.get('url', '') for i in json.loads(match.group(1))]
-        sources = [i for i in sources if len(i) > 0][0]
+        sources = [i.get('url') for i in json.loads(match.group(1)) if i.get('url')][0]
 
         uuid = self.net.get_cookies().get('.'+host).get('/').get('UniversalUserID').value
 
