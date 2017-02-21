@@ -34,9 +34,7 @@ class MovDivxResolver(UrlResolver):
         headers = {'User-Agent': common.FF_USER_AGENT}
         response = self.net.http_GET(web_url, headers=headers)
         html = response.content
-        # common.log_utils.log(html)
         data = helpers.get_hidden(html)
-        common.log_utils.log(data)
         headers['Cookie'] = response.get_headers(as_dict=True).get('Set-Cookie', '')
         html = self.net.http_POST(web_url, headers=headers, form_data=data).content
         sources = helpers.scrape_sources(html)
