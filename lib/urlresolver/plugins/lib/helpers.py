@@ -26,13 +26,14 @@ from urlresolver.resolver import ResolverError
 def get_hidden(html, form_id=None, index=None, include_submit=True):
     hidden = {}
     if form_id:
-        pattern = '''<form [^>]*id\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>''' % (form_id)
+        pattern = '''<form [^>]*(id|name)\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>''' % (form_id)
     else:
         pattern = '''<form[^>]*>(.*?)</form>'''
     
     html = cleanse_html(html)
         
     for i, form in enumerate(re.finditer(pattern, html, re.DOTALL | re.I)):
+        common.log_utils.log(form.group(1))
         if index is None or i == index:
             for field in re.finditer('''<input [^>]*type=['"]?hidden['"]?[^>]*>''', form.group(1)):
                 match = re.search('''name\s*=\s*['"]([^'"]+)''', field.group(0))
@@ -181,8 +182,8 @@ def get_media_url(url, result_blacklist=None):
     return source + append_headers(headers)
 
 def cleanse_html(html):
-    for match in re.finditer('<!--.*?(..)-->', html, re.DOTALL):
-        if match.group(1) != '//': html = html.replace(match.group(0), '')
+    for match in re.finditer('<!--(.*?)-->', html, re.DOTALL):
+        if match.group(1)[-2:] != '//': html = html.replace(match.group(0), '')
     
     html = re.sub('''<(div|span)[^>]+style=["'](visibility:\s*hidden|display:\s*none);?["']>.*?</\\1>''', '', html, re.I | re.DOTALL)
     return html
