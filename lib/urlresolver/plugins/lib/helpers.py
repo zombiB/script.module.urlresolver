@@ -26,7 +26,7 @@ from urlresolver.resolver import ResolverError
 def get_hidden(html, form_id=None, index=None, include_submit=True):
     hidden = {}
     if form_id:
-        pattern = '''<form [^>]*(id|name)\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>''' % (form_id)
+        pattern = '''<form [^>]*(?:id|name)\s*=\s*['"]?%s['"]?[^>]*>(.*?)</form>''' % (form_id)
     else:
         pattern = '''<form[^>]*>(.*?)</form>'''
     
