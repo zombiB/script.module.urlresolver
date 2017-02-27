@@ -22,7 +22,7 @@ from urlresolver.resolver import UrlResolver, ResolverError
 class TheVidResolver(UrlResolver):
     name = "TheVid"
     domains = ["thevid.net"]
-    pattern = '(?://|\.)(thevid\.net)/(?:video|e)/([A-Za-z0-9]+)'
+    pattern = '(?://|\.)(thevid\.net)/(?:video|e|v)/([A-Za-z0-9]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -34,7 +34,7 @@ class TheVidResolver(UrlResolver):
         self.headers['Referer'] = web_url
         html = self.net.http_GET(web_url, headers=self.headers).content
         html = helpers.add_packed_data(html)
-        match = re.search('vurl\d+="([^"]+)', html)
+        match = re.search('vurl_\d+="([^"]+)', html)
         if match:
             self.headers.update({'Referer': web_url})
             return match.group(1) + helpers.append_headers(self.headers)
