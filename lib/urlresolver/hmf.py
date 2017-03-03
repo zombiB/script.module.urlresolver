@@ -146,7 +146,7 @@ class HostedMediaFile:
         if validated: self.valid_url()
         return self.__resolvers
         
-    def resolve(self, include_universal=True):
+    def resolve(self, include_universal=True, allow_popups=True):
         '''
         Resolves this :class:`HostedMediaFile` to a media URL.
 
@@ -154,6 +154,10 @@ class HostedMediaFile:
 
             stream_url = HostedMediaFile(host='youtube.com', media_id='ABC123XYZ').resolve()
 
+        Args:
+            include_universal: if False, then universal resolvers are not allowed to be resolvers
+            allow_popups: If False, then any function dependent on a pop-up dialog (e.g. captcha, /pair, etc) will fail.
+            
         .. note::
 
             This method currently uses just the highest priority resolver to
@@ -166,6 +170,7 @@ class HostedMediaFile:
             A direct URL to the media file that is playable by XBMC, or False
             if this was not possible.
         '''
+        urlresolver.ALLOW_POPUPS = allow_popups
         for resolver in self.__resolvers:
             try:
                 if include_universal or not resolver.isUniversal():
